@@ -1,3 +1,0 @@
-# Copy to .dev.vars for local Wrangler development (the real file is gitignored).
-# Paste the service-account JSON on ONE line, locally only. Do not commit it or send it in chat.
-FIREBASE_SERVICE_ACCOUNT_JSON={"type":"service_account","project_id":"korasub-eb0b8","client_email":"replace-me@korasub-eb0b8.iam.gserviceaccount.com","private_key":"-----BEGIN PRIVATE KEY-----\nreplace\n-----END PRIVATE KEY-----\n"}

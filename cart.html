@@ -18,7 +18,7 @@
 </main>
 <div id="site-footer"></div>
 <script type="module">
-  import { mountHeader, mountFooter, getCart, setCart, getProduct, productMedia, stockBadge, naira, esc, apiPost, newRequestId, auth, onAuthStateChanged, watchProfile } from './store.js';
+  import { mountHeader, mountFooter, getCart, setCart, getProduct, productMedia, stockBadge, naira, esc, placeOrder, newRequestId, auth, onAuthStateChanged, watchProfile } from './store.js';
   mountHeader('cart.html');
   mountFooter();
   const lines = document.querySelector('#lines');
@@ -125,7 +125,7 @@
     button.disabled = true;
     button.textContent = 'Processing payment…';
     try {
-      const result = await apiPost('/orders', { requestId, items });
+      const result = await placeOrder(requestId, items);
       sessionStorage.removeItem(pendingKey);
       setCart([]);
       location.replace(`orders.html?placed=${encodeURIComponent(result.orderId)}`);
