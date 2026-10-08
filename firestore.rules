@@ -1,13 +1,15 @@
 rules_version = '2';
 
-// KORASUB Firestore security rules.
+// KORASTORE Firestore security rules.
+//
 // Principles:
-//  - Clients can read only their own data.
-//  - Clients can never write balances, ledger entries, or transaction status.
-//  - Wallet mutations and funding approvals are performed by the server
-//    (Render API / Firebase Admin SDK), which bypasses these rules.
-//  - Admin access uses a custom claim `admin: true` set via the Admin SDK.
-//    The ADMIN_EMAIL check in firebase-config.js is UI-only and is NOT a security control.
+//  - Only the admin account (ADMIN_EMAIL + verified email + `admin: true` custom claim) can
+//    create, edit or retire products, change bank payment details, and read everyone's data.
+//  - Anyone can browse active products. Signed-in users can read payment details.
+//  - Customers read only their own profile, orders, transactions and funding requests.
+//  - Customers can edit only their display name and delivery location on their profile.
+//  - Balances, stock, orders, transactions and ledger entries are written only by the
+//    trusted Worker (service account), which bypasses these rules.
 
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -21,54 +23,100 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return signedIn() && request.auth.token.admin == true;
+      return signedIn()
+        && request.auth.token.email == 'beniwealth70@gmail.com'
+        && request.auth.token.email_verified == true
+        && request.auth.token.admin == true;
     }
 
-    // User profile: /users/{uid}
+    function isText(value, max) {
+      return value is string && value.size() > 0 && value.size() <= max;
+    }
+
+    // Customer profile and delivery location: /users/{uid}
     match /users/{uid} {
       allow read: if isOwner(uid) || isAdmin();
 
-      // Client may create its own profile, but cannot set a balance or any other financial field.
+      // A customer may create only their own profile, with no wallet fields.
       allow create: if isOwner(uid)
         && request.resource.data.keys().hasOnly(['name', 'email', 'createdAt'])
         && request.resource.data.email == request.auth.token.email
         && request.resource.data.createdAt is timestamp;
 
-      // Client may only edit display name. Balance and other fields are server-only.
+      // Customers edit their name and delivery location only. balance is server-only.
       allow update: if isOwner(uid)
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name']);
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'name', 'country', 'state', 'lga', 'address', 'updatedAt'
+        ])
+        && (!('country' in request.resource.data) || request.resource.data.country is string)
+        && (!('state' in request.resource.data) || request.resource.data.state is string)
+        && (!('lga' in request.resource.data) || request.resource.data.lga is string)
+        && (!('address' in request.resource.data) || request.resource.data.address is string)
+        && (!('address' in request.resource.data) || request.resource.data.address.size() <= 300);
 
       allow delete: if false;
+
+      // Wallet transactions: /users/{uid}/transactions/{txId} (server-written)
+      match /transactions/{txId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow write: if false;
+      }
     }
 
-    // Transaction history (read-only for clients): /users/{uid}/transactions/{txId}
-    match /users/{uid}/transactions/{txId} {
-      allow read: if isOwner(uid) || isAdmin();
-      allow write: if false;
+    // Products: /products/{productId}
+    // Anyone can browse active products. Only the admin creates, edits or retires them.
+    match /products/{productId} {
+      allow read: if resource.data.active == true || isAdmin();
+      allow create: if isAdmin()
+        && isText(request.resource.data.name, 120)
+        && request.resource.data.price is int
+        && request.resource.data.price > 0
+        && request.resource.data.stock is int
+        && request.resource.data.stock >= 0
+        && request.resource.data.active is bool;
+      allow update: if isAdmin()
+        && request.resource.data.price is int
+        && request.resource.data.price > 0
+        && request.resource.data.stock is int
+        && request.resource.data.stock >= 0;
+      allow delete: if isAdmin();
     }
 
-    // Immutable wallet ledger: /ledger/{entryId}
-    // Written only by the server. Admins may read for audit.
-    match /ledger/{entryId} {
-      allow read: if isAdmin();
+    // Bank payment details for deposits: /settings/payment
+    // Only the admin edits these. Signed-in customers read them to make transfers.
+    match /settings/{docId} {
+      allow read: if signedIn() || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // Orders: /orders/{orderId} (server-written; customers and admin read)
+    match /orders/{orderId} {
+      allow read: if (signedIn() && resource.data.uid == request.auth.uid) || isAdmin();
       allow write: if false;
     }
 
     // Wallet funding requests: /fundingRequests/{requestId}
-    // A customer may submit a request in 'pending' state only.
-    // Approval/rejection is done by the server, so clients cannot change status.
+    // A customer submits a pending request with the transfer reference. Only the server approves.
     match /fundingRequests/{requestId} {
       allow read: if (signedIn() && resource.data.uid == request.auth.uid) || isAdmin();
 
       allow create: if signedIn()
         && request.resource.data.keys().hasOnly(['uid', 'amount', 'reference', 'status', 'createdAt'])
         && request.resource.data.uid == request.auth.uid
-        && request.resource.data.amount is number
-        && request.resource.data.amount > 0
+        && request.resource.data.amount is int
+        && request.resource.data.amount >= 100
+        && request.resource.data.amount <= 5000000
+        && isText(request.resource.data.reference, 120)
         && request.resource.data.status == 'pending'
         && request.resource.data.createdAt is timestamp;
 
       allow update, delete: if false;
+    }
+
+    // Immutable ledger: /ledger/{entryId} (server-written, admin reads for audit)
+    match /ledger/{entryId} {
+      allow read: if isAdmin();
+      allow write: if false;
     }
 
     // Anything not matched above is denied by default.

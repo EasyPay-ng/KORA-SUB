@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Fund wallet — KORASTORE</title>
+  <link rel="stylesheet" href="store.css">
+  <link rel="icon" href="assets/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png"><meta name="theme-color" content="#0b2545">
+</head>
+<body>
+<div id="site-header"></div>
+<main class="wrap page">
+  <div class="page-head"><div><span class="eyebrow">Fund your account</span><h1>Top up your wallet</h1><p>Pay only into the store account shown below. Your wallet is credited once the store confirms your transfer.</p></div></div>
+  <div id="account-tabs"></div>
+  <div id="notice"></div>
+  <div class="grid-2">
+    <div class="stack">
+      <section class="card">
+        <div class="card-head"><div><h2>Pay into this account</h2><small>The only account KORASTORE accepts deposits to</small></div></div>
+        <div id="bank" class="bank-card"><div class="empty">Loading payment details…</div></div>
+      </section>
+      <section class="card">
+        <div class="card-head"><div><h2>Confirm your transfer</h2><small>Enter the amount and the transfer reference from your bank receipt</small></div></div>
+        <form id="fund-form" novalidate>
+          <div class="row" style="margin-bottom:12px" id="presets"></div>
+          <div class="field-row">
+            <label class="field">Amount paid (₦)<input class="input" id="amount" type="number" min="100" step="1" required placeholder="e.g. 10000"></label>
+            <label class="field">Transfer reference<input class="input" id="reference" maxlength="120" required placeholder="From your receipt"></label>
+          </div>
+          <div id="fund-error" class="error-text" role="alert"></div>
+          <button id="fund-submit" class="btn btn-gold btn-lg" type="submit">Submit for confirmation →</button>
+        </form>
+      </section>
+    </div>
+    <div class="stack">
+      <section class="card">
+        <div class="card-head"><div><h2>Wallet balance</h2><small id="goal-note">Fund toward your next purchase</small></div></div>
+        <div class="balance-card" style="min-height:0;padding:22px;box-shadow:none"><div><small>Available</small><br><strong id="balance">₦0</strong></div></div>
+        <div style="margin-top:16px"><div class="goal-bar"><i id="goal-fill" style="width:0%"></i></div><div class="small muted" id="goal-text" style="margin-top:8px"></div></div>
+      </section>
+      <section class="card">
+        <div class="card-head"><div><h2>Your funding requests</h2><small>Status updates appear automatically</small></div></div>
+        <div id="requests" class="feed"><div class="empty">Loading…</div></div>
+      </section>
+    </div>
+  </div>
+</main>
+<div id="site-footer"></div>
+<script type="module">
+  import { mountHeader, mountFooter, mountAccountTabs, requireCustomer, watchProfile, watchPaymentSettings, watchMyFunding, watchProducts, createFundingRequest, naira, esc, formatDateTime, STATUS_LABEL, statusClass } from './store.js';
+  mountHeader('wallet.html');
+  mountFooter();
+  mountAccountTabs('wallet.html');
+  const user = await requireCustomer('wallet.html');
+  const notice = document.querySelector('#notice');
+  const bank = document.querySelector('#bank');
+  let balance = 0;
+  let cheapest = null;
+
+  watchPaymentSettings((settings) => {
+    const ready = settings && settings.accountNumber && settings.bankName && settings.accountName;
+    if (!ready) {
+      bank.innerHTML = '<div class="empty"><b>Bank details not published yet</b>The store admin has not set a deposit account. Please do not transfer money until it appears here.</div>';
+      document.querySelector('#fund-submit').disabled = true;
+      return;
+    }
+    document.querySelector('#fund-submit').disabled = false;
+    const copy = (value) => `<button class="copy-btn" type="button" data-copy="${esc(value)}">Copy</button>`;
+    bank.innerHTML = `<dl>
+      <div><dt>Bank name</dt><dd><span>${esc(settings.bankName)}</span></dd></div>
+      <div><dt>Account name</dt><dd><span>${esc(settings.accountName)}</span>${copy(settings.accountName)}</dd></div>
+      <div><dt>Account number</dt><dd><span class="mono">${esc(settings.accountNumber)}</span>${copy(settings.accountNumber)}</dd></div>
+    </dl>${settings.instructions ? `<p class="small muted" style="margin:16px 0 0">${esc(settings.instructions)}</p>` : ''}`;
+  }, () => {
+    bank.innerHTML = '<div class="empty"><b>Could not load payment details</b>Refresh the page and try again.</div>';
+  });
+  bank.addEventListener('click', async (event) => {
+    const btn = event.target.closest('[data-copy]');
+    if (!btn) return;
+    try { await navigator.clipboard.writeText(btn.dataset.copy); btn.textContent = 'Copied'; setTimeout(() => btn.textContent = 'Copy', 1400); } catch {}
+  });
+
+  document.querySelector('#presets').innerHTML = [5000, 10000, 20000, 50000].map(v => `<button type="button" class="chip" data-amt="${v}">${naira(v)}</button>`).join('');
+  document.querySelector('#presets').addEventListener('click', (event) => {
+    const chip = event.target.closest('[data-amt]');
+    if (chip) document.querySelector('#amount').value = chip.dataset.amt;
+  });
+
+  document.querySelector('#fund-form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const amount = Math.round(Number(document.querySelector('#amount').value));
+    const reference = document.querySelector('#reference').value.trim();
+    const error = document.querySelector('#fund-error');
+    error.textContent = '';
+    if (!Number.isFinite(amount) || amount < 100) { error.textContent = 'Enter an amount of at least ₦100.'; return; }
+    if (amount > 5000000) { error.textContent = 'Single requests are limited to ₦5,000,000.'; return; }
+    if (reference.length < 3) { error.textContent = 'Enter the transfer reference from your receipt.'; return; }
+    const submit = document.querySelector('#fund-submit');
+    submit.disabled = true;
+    submit.textContent = 'Submitting…';
+    try {
+      await createFundingRequest(user.uid, amount, reference);
+      document.querySelector('#fund-form').reset();
+      notice.innerHTML = `<div class="notice ok"><span class="notice-icon">✓</span><div><b>Request received</b>We will credit your wallet once the store confirms the transfer.</div></div>`;
+    } catch (problem) {
+      error.textContent = `Could not submit: ${problem.message || 'check your connection'}`;
+    } finally {
+      submit.disabled = false;
+      submit.textContent = 'Submit for confirmation →';
+    }
+  });
+
+  function paintGoal() {
+    const fill = document.querySelector('#goal-fill');
+    const text = document.querySelector('#goal-text');
+    if (!cheapest) { text.textContent = 'Browse the catalogue to set a purchase goal.'; fill.style.width = '0%'; return; }
+    const pct = Math.min(100, Math.round((balance / cheapest.price) * 100));
+    fill.style.width = `${pct}%`;
+    text.textContent = balance >= cheapest.price
+      ? `You can already afford ${cheapest.name} (${naira(cheapest.price)}).`
+      : `${naira(cheapest.price - balance)} more to afford ${cheapest.name} (${naira(cheapest.price)}).`;
+  }
+
+  watchProfile(user.uid, (profile) => {
+    balance = Number(profile.balance || 0);
+    document.querySelector('#balance').textContent = naira(balance);
+    paintGoal();
+  });
+  watchProducts((rows) => {
+    const inStock = rows.filter(p => Number(p.stock || 0) > 0 && Number(p.price) > 0);
+    cheapest = inStock.sort((a, b) => a.price - b.price)[0] || null;
+    paintGoal();
+  });
+  watchMyFunding(user.uid, (rows) => {
+    document.querySelector('#requests').innerHTML = rows.length ? rows.slice(0, 8).map(r => `
+      <div class="feed-row"><div class="txt"><b>${esc(r.reference)}</b><small>${esc(formatDateTime(r.createdAt))}</small></div>
+      <span class="badge ${statusClass(r.status)}">${esc(STATUS_LABEL[r.status] || r.status)}</span>
+      <span class="amt">${naira(r.amount)}</span></div>`).join('')
+      : '<div class="empty"><b>No requests yet</b>Your transfer confirmations will show here.</div>';
+  });
+</script>
+</body>
+</html>

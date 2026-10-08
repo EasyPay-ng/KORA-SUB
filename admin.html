@@ -1,93 +1,69 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin overview — KORASUB</title>
-  <link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="portal.css"><link rel="icon" href="assets/favicon.ico" sizes="any"><meta name="theme-color" content="#15374c">
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Overview — KORASTORE Admin</title>
+  <link rel="stylesheet" href="store.css">
+  <link rel="icon" href="assets/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png"><meta name="theme-color" content="#0b2545">
 </head>
-<body class="portal-body">
-<div class="portal-shell">
-  <aside id="admin-sidebar" class="portal-sidebar"></aside>
-  <main class="portal-main">
-    <header class="portal-topbar"><span class="top-context">KORASUB · ADMIN WORKSPACE</span><div class="portal-user"><div class="portal-user-copy"><b data-user-name>Checking access…</b><small data-user-email></small></div><span class="portal-avatar" data-user-avatar>KS</span></div></header>
-    <div id="access-message" class="access-card" role="status"></div>
-    <div id="admin-content" class="portal-content" hidden>
-      <section class="page-heading"><div><span class="heading-kicker">ADMINISTRATION</span><h1>Platform overview</h1><p>Live summaries from Firebase records. Empty values mean no matching records are stored.</p></div><span class="live-indicator">Live Firebase data</span></section>
-      <div id="dashboard-data-error" class="inline-notice error-notice" hidden></div>
-      <section class="stats-grid admin-stats" aria-label="Platform metrics">
-        <article class="stat-card"><div class="stat-top"><span class="stat-label">Customer wallet balances</span><span class="stat-glyph">₦</span></div><strong id="total-balances" class="stat-value">Loading…</strong><small class="stat-note">Sum of balances in user profiles</small></article>
-        <article class="stat-card"><div class="stat-top"><span class="stat-label">Registered profiles</span><span class="stat-glyph">◎</span></div><strong id="user-count" class="stat-value">Loading…</strong><small class="stat-note">Profiles currently in Firestore</small></article>
-        <article class="stat-card"><div class="stat-top"><span class="stat-label">Completed service spend today</span><span class="stat-glyph">↘</span></div><strong id="today-spend" class="stat-value">Loading…</strong><small class="stat-note">Successful debit records created today</small></article>
-        <article class="stat-card"><div class="stat-top"><span class="stat-label">Pending funding requests</span><span class="stat-glyph">＋</span></div><strong id="pending-count" class="stat-value">Loading…</strong><small id="pending-total" class="stat-note">From live funding request records</small></article>
-        <article class="stat-card"><div class="stat-top"><span class="stat-label">GSUBZ provider wallet</span><span class="stat-glyph">◉</span></div><strong id="provider-balance" class="stat-value">Checking…</strong><small id="provider-balance-note" class="stat-note">Read securely from GSUBZ</small></article>
-      </section>
-      <div class="portal-grid">
-        <section class="portal-card"><div class="card-heading"><div><h2>Funding requests needing review</h2><small>Latest pending requests in Firestore</small></div><a href="admin-funding.html">Review all →</a></div><div id="pending-requests" class="feed-list"><p class="feed-empty">Waiting for Firebase data…</p></div></section>
-        <section class="portal-card"><div class="card-heading"><div><h2>Quick controls</h2><small>Open each section for its live records</small></div></div><div class="quick-grid">
-          <a class="quick-card" href="admin-ledger.html"><span class="quick-icon">▤</span><b>Wallet ledger</b><small>View immutable server-side wallet entries.</small></a>
-          <a class="quick-card" href="admin-orders.html"><span class="quick-icon">↔</span><b>Orders & refunds</b><small>Review transaction records and statuses.</small></a>
-          <a class="quick-card" href="admin-pricing.html"><span class="quick-icon">%</span><b>Pricing & markup</b><small>Inspect provider plans and returned prices.</small></a>
-          <a class="quick-card" href="admin-services.html"><span class="quick-icon">⚙</span><b>Service settings</b><small>Browse active GSUBZ service groups and IDs.</small></a>
-        </div></section>
-      </div>
-      <section class="portal-card" style="margin-top:17px"><div class="card-heading"><div><h2>Latest transaction records</h2><small>Read from each user’s transaction subcollection</small></div><a href="admin-orders.html">Open transaction review →</a></div><div id="latest-transactions" class="feed-list"><p class="feed-empty">Waiting for Firebase data…</p></div></section>
-      <p class="muted-copy" style="margin-top:13px">Sensitive actions are intentionally server-side only. This console does not write balances, approve funding, or issue refunds from browser code.</p>
+<body>
+<div id="gate" class="gate"><div class="gate-card"><span class="gate-mark">K</span><h2>Checking admin access…</h2><p>Verifying your account before any store data loads.</p></div></div>
+<div class="admin-shell" id="admin-content" hidden>
+  <aside class="admin-side" id="admin-sidebar"></aside>
+  <main class="admin-main">
+    <div class="page-head"><div><span class="eyebrow">Admin console</span><h1>Store overview</h1><p>Live numbers from the store database. Only the administrator can see this page.</p></div><a class="btn btn-gold" href="admin-products.html">+ Add product</a></div>
+    <section class="stats">
+      <div class="stat"><small>Wallet balances</small><strong id="s-balances">₦0</strong><em id="s-customers">0 customers</em></div>
+      <div class="stat"><small>Revenue (not cancelled)</small><strong id="s-revenue">₦0</strong><em id="s-orders">0 orders</em></div>
+      <div class="stat"><small>Awaiting confirmation</small><strong id="s-pending">0</strong><em id="s-pending-sum">₦0 requested</em></div>
+      <div class="stat"><small>Listed products</small><strong id="s-products">0</strong><em id="s-stock">0 units in stock</em></div>
+    </section>
+    <div class="admin-grid">
+      <section class="card"><div class="card-head"><div><h2>Funding to confirm</h2><small>Approve only after the transfer lands in the store account.</small></div><a class="link small" href="admin-funding.html">All →</a></div><div id="pending" class="feed"><div class="empty">Loading…</div></div></section>
+      <section class="card"><div class="card-head"><div><h2>Latest orders</h2><small>Newest purchases</small></div><a class="link small" href="admin-orders.html">All →</a></div><div id="orders" class="feed"><div class="empty">Loading…</div></div></section>
     </div>
   </main>
 </div>
 <script type="module">
-  import { bootAdmin, showDataError, hideDataNotice } from './admin-ui.js';
-  import { apiRequest, watchAdminUsers, watchAdminFundingRequests, watchAdminTransactions } from './firebase-client.js';
-  import { formatMoney, formatDateTime, relativeTime, recordAmount, recordDate, statusTone, personLabel, escapeHTML, numberValue, toDate } from './app-utils.js';
-  const errorBox = document.querySelector('#dashboard-data-error');
-  const state = { users: [], funding: [], transactions: [] };
-  const isPending = item => String(item.status || '').toLowerCase() === 'pending';
-  const userMap = () => new Map(state.users.map(user => [user.id, user]));
+  import { mountAdminSidebar, requireAdmin, watchAllUsers, watchAllOrders, watchAllFunding, watchProducts, reviewFunding, naira, esc, formatDateTime, STATUS_LABEL, statusClass } from './store.js';
+  mountAdminSidebar('admin.html');
+  let users = [], orders = [], funding = [], products = [];
+  const pendingBox = document.querySelector('#pending');
+  const ordersBox = document.querySelector('#orders');
+  const who = (uid) => { const u = users.find(x => x.id === uid); return esc(u?.name || u?.email || String(uid).slice(0, 8)); };
   function render() {
-    const balances = state.users.reduce((sum, user) => sum + Math.max(0, numberValue(user.balance)), 0);
-    const pending = state.funding.filter(isPending);
-    const now = new Date();
-    const today = state.transactions.reduce((sum, item) => {
-      const created = toDate(recordDate(item));
-      const amount = recordAmount(item);
-      const successful = /success|complete|delivered|approved|paid/i.test(String(item.status || ''));
-      if (created && created.toDateString() === now.toDateString() && successful && amount < 0) return sum + Math.abs(amount);
-      return sum;
-    }, 0);
-    document.querySelector('#total-balances').textContent = formatMoney(balances);
-    document.querySelector('#user-count').textContent = state.users.length.toLocaleString('en-NG');
-    document.querySelector('#today-spend').textContent = formatMoney(today);
-    document.querySelector('#pending-count').textContent = pending.length.toLocaleString('en-NG');
-    document.querySelector('#pending-total').textContent = `${formatMoney(pending.reduce((sum, item) => sum + numberValue(item.amount), 0))} requested across pending records`;
-    const users = userMap();
-    const recentPending = [...pending].sort((a, b) => (toDate(recordDate(b))?.getTime() || 0) - (toDate(recordDate(a))?.getTime() || 0)).slice(0, 5);
-    document.querySelector('#pending-requests').innerHTML = recentPending.length ? recentPending.map(item => {
-      const profile = users.get(item.uid);
-      const name = profile ? personLabel(profile) : `UID ${String(item.uid || 'unknown').slice(0, 12)}`;
-      return `<div class="feed-row"><span class="feed-icon">＋</span><div class="feed-copy"><b>${escapeHTML(name)}</b><small>${escapeHTML(item.reference || 'No reference supplied')} · ${escapeHTML(relativeTime(recordDate(item)))}</small></div><span class="feed-amount">${formatMoney(item.amount)}</span></div>`;
-    }).join('') : '<p class="feed-empty">There are no pending funding requests in Firestore.</p>';
-    const recentTx = state.transactions.slice(0, 5);
-    document.querySelector('#latest-transactions').innerHTML = recentTx.length ? recentTx.map(item => {
-      const profile = users.get(item.uid);
-      const status = item.status || 'Status not supplied';
-      const amount = recordAmount(item);
-      return `<div class="feed-row"><span class="feed-icon">${amount < 0 ? '↘' : '＋'}</span><div class="feed-copy"><b>${escapeHTML(item.title || item.description || 'Account activity')}</b><small>${escapeHTML(personLabel(profile))} · ${escapeHTML(formatDateTime(recordDate(item)))} · <span class="status-pill ${statusTone(status)}">${escapeHTML(status)}</span></small></div><span class="feed-amount">${amount < 0 ? '−' : '+'}${formatMoney(amount)}</span></div>`;
-    }).join('') : '<p class="feed-empty">No user transaction records have been stored yet.</p>';
+    const balances = users.reduce((s, u) => s + Number(u.balance || 0), 0);
+    const live = orders.filter(o => o.status !== 'cancelled');
+    const revenue = live.reduce((s, o) => s + Number(o.total || 0), 0);
+    const pending = funding.filter(r => r.status === 'pending');
+    document.querySelector('#s-balances').textContent = naira(balances);
+    document.querySelector('#s-customers').textContent = `${users.length} customer${users.length === 1 ? '' : 's'}`;
+    document.querySelector('#s-revenue').textContent = naira(revenue);
+    document.querySelector('#s-orders').textContent = `${live.length} order${live.length === 1 ? '' : 's'}`;
+    document.querySelector('#s-pending').textContent = pending.length;
+    document.querySelector('#s-pending-sum').textContent = `${naira(pending.reduce((s, r) => s + Number(r.amount || 0), 0))} requested`;
+    document.querySelector('#s-products').textContent = products.length;
+    document.querySelector('#s-stock').textContent = `${products.reduce((s, p) => s + Number(p.stock || 0), 0)} units in stock`;
+    pendingBox.innerHTML = pending.length ? pending.slice(0, 6).map(r => `
+      <div class="feed-row"><div class="txt"><b>${who(r.uid)} · ${naira(r.amount)}</b><small>Ref ${esc(r.reference)} · ${esc(formatDateTime(r.createdAt))}</small></div>
+      <div class="table-actions"><button class="btn btn-sm btn-gold" data-act="approve" data-id="${esc(r.id)}">Approve</button><button class="btn btn-sm btn-danger" data-act="reject" data-id="${esc(r.id)}">Reject</button></div></div>`).join('')
+      : '<div class="empty"><b>All caught up</b>No transfers waiting for confirmation.</div>';
+    ordersBox.innerHTML = orders.slice(0, 6).map(o => `
+      <div class="feed-row"><div class="txt"><b>${esc((o.items || []).map(i => i.name).join(', '))}</b><small>${who(o.uid)} · ${esc(formatDateTime(o.createdAt))}</small></div>
+      <span class="badge ${statusClass(o.status)}">${esc(STATUS_LABEL[o.status] || o.status)}</span><span class="amt">${naira(o.total)}</span></div>`).join('') || '<div class="empty"><b>No orders yet</b></div>';
   }
-  const admin = await bootAdmin('admin.html');
-  if (admin) {
-    watchAdminUsers(rows => { state.users = rows; hideDataNotice(errorBox); render(); }, error => showDataError(errorBox, error));
-    watchAdminFundingRequests(rows => { state.funding = rows; hideDataNotice(errorBox); render(); }, error => showDataError(errorBox, error));
-    watchAdminTransactions(rows => { state.transactions = rows; hideDataNotice(errorBox); render(); }, error => showDataError(errorBox, error));
-    const balanceValue = document.querySelector('#provider-balance');
-    const balanceNote = document.querySelector('#provider-balance-note');
-    try {
-      const provider = await apiRequest('/balance');
-      balanceValue.textContent = formatMoney(provider.balance);
-      balanceNote.textContent = `Checked ${formatDateTime(provider.checkedAt)}`;
-    } catch (problem) {
-      balanceValue.textContent = problem.message?.includes('GSUBZ_API_KEY') ? 'Not configured' : 'Unavailable';
-      balanceNote.textContent = problem.message || 'Provider wallet could not be checked.';
-    }
+  pendingBox.addEventListener('click', async (event) => {
+    const btn = event.target.closest('[data-act]');
+    if (!btn) return;
+    btn.disabled = true;
+    try { await reviewFunding(btn.dataset.id, btn.dataset.act); }
+    catch (problem) { alert(problem.message); btn.disabled = false; }
+  });
+  if (await requireAdmin('admin.html')) {
+    watchAllUsers(rows => { users = rows; render(); });
+    watchAllOrders(rows => { orders = rows; render(); });
+    watchAllFunding(rows => { funding = rows; render(); });
+    watchProducts(rows => { products = rows; render(); }, () => {}, { includeInactive: true });
   }
 </script>
 </body>

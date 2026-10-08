@@ -2,72 +2,78 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Sign in — KORASUB</title><link rel="stylesheet" href="styles.css">
-  <link rel="icon" href="assets/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png"><meta name="theme-color" content="#15374c">
+  <title>Sign in — KORASTORE</title>
+  <link rel="stylesheet" href="store.css">
+  <link rel="icon" href="assets/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png"><meta name="theme-color" content="#0b2545">
 </head>
-<body class="auth-page">
-<div class="auth-shell">
-  <aside class="auth-visual"><div class="auth-visual-inner"><a class="brand" href="index.html"><span class="brand-mark">K</span><span>KORASUB</span></a><h1>Keep everyday<br><em>things moving.</em></h1><p>Sign in to your own wallet, service catalog and transaction history.</p><div class="auth-benefit"><span>✓</span>Your dashboard shows account data tied to your profile.</div></div></aside>
-  <main class="auth-form-wrap"><section class="auth-form"><a class="brand" href="index.html"><span class="brand-mark">K</span><span>KORASUB</span></a><h2>Welcome back</h2><p>Sign in with the account you used to register.</p>
-    <form id="login-form" novalidate>
-      <label class="field">EMAIL ADDRESS<input id="email" name="email" type="email" required autocomplete="email" placeholder="you@example.com"></label>
-      <label class="field">PASSWORD<input id="password" name="password" type="password" required autocomplete="current-password" placeholder="Your password"></label>
-      <div id="error" class="error" role="alert" aria-live="polite"></div>
-      <button id="submit-login" class="btn btn-primary" type="submit">Sign in <span aria-hidden="true">→</span></button>
-    </form>
-    <div class="divider">OR</div>
-    <button id="google-login" class="btn google-btn" type="button">Continue with Google</button>
-    <div class="auth-foot">New to KORASUB? <a href="register.html">Create an account</a></div>
-    <a class="auth-return" href="index.html">← Back to KORASUB</a>
-  </section></main>
+<body>
+<div class="auth">
+  <aside class="auth-side">
+    <a class="brand" href="index.html"><img src="assets/logo.png" alt="" width="44" height="44"><span class="brand-text"><b style="color:#fff">KORASTORE</b><small>Find it. Fund it. Own it.</small></span></a>
+    <div>
+      <h1>Welcome back to <span>your wallet.</span></h1>
+      <p>Sign in to fund your account, check out with one tap and follow every order to your door.</p>
+    </div>
+    <p class="small" style="color:#8ea3c0">Protected by Firebase Authentication.</p>
+  </aside>
+  <main class="auth-form-wrap">
+    <section class="auth-form">
+      <a class="brand" href="index.html"><img src="assets/logo.png" alt="" width="36" height="36"><span class="brand-text"><b>KORASTORE</b></span></a>
+      <h2>Sign in</h2>
+      <p>Use the email you registered with.</p>
+      <form id="login-form" novalidate>
+        <label class="field">Email address<input class="input" id="email" type="email" required autocomplete="email" placeholder="you@example.com"></label>
+        <label class="field">Password<input class="input" id="password" type="password" required autocomplete="current-password" placeholder="Your password"></label>
+        <div id="error" class="error-text" role="alert" aria-live="polite"></div>
+        <button id="submit" class="btn btn-block btn-lg" type="submit">Sign in →</button>
+      </form>
+      <div class="divider">or</div>
+      <button id="google" class="btn btn-ghost btn-block" type="button">Continue with Google</button>
+      <div class="auth-foot">New here? <a class="link" href="register.html">Create an account</a></div>
+    </section>
+  </main>
 </div>
 <script type="module">
-  import { auth, googleProvider, signInWithPopup, signInWithEmailAndPassword, ensureUserProfile } from './firebase-client.js';
-  const errorBox = document.querySelector('#error');
-  const form = document.querySelector('#login-form');
-  const submit = document.querySelector('#submit-login');
-  const allowedDestinations = new Set(['dashboard.html', 'services.html', 'transactions.html', 'fund-wallet.html', 'support.html', 'admin.html', 'admin-funding.html', 'admin-ledger.html', 'admin-orders.html', 'admin-pricing.html', 'admin-services.html']);
+  import { auth, googleProvider, signInWithPopup, signInWithEmailAndPassword, ensureUserProfile } from './store.js';
+  const allowed = new Set(['dashboard.html', 'wallet.html', 'orders.html', 'profile.html', 'cart.html', 'shop.html']);
   const requested = new URLSearchParams(location.search).get('next');
-  const destination = allowedDestinations.has(requested) ? requested : 'dashboard.html';
-  function errorText(error) {
-    const known = {
-      'auth/invalid-credential': 'Email or password is incorrect.',
-      'auth/user-not-found': 'No account was found for this email.',
-      'auth/too-many-requests': 'Too many attempts. Please wait and try again.',
-      'auth/popup-closed-by-user': 'The Google sign-in window was closed before finishing.'
-    };
-    return known[error?.code] || 'Unable to sign in. Check your connection and try again.';
-  }
+  const destination = allowed.has(requested) ? requested : 'dashboard.html';
+  const error = document.querySelector('#error');
+  const submit = document.querySelector('#submit');
+  const messages = {
+    'auth/invalid-credential': 'Email or password is incorrect.',
+    'auth/user-not-found': 'No account was found for this email.',
+    'auth/too-many-requests': 'Too many attempts. Wait a moment and try again.',
+    'auth/popup-closed-by-user': 'The Google window closed before sign-in finished.'
+  };
   async function finish(user) {
     await ensureUserProfile(user);
     location.replace(destination);
   }
-  form.addEventListener('submit', async (event) => {
+  document.querySelector('#login-form').addEventListener('submit', async (event) => {
     event.preventDefault();
-    errorBox.textContent = '';
+    error.textContent = '';
     submit.disabled = true;
     submit.textContent = 'Signing in…';
     try {
-      const result = await signInWithEmailAndPassword(auth, form.elements.email.value.trim(), form.elements.password.value);
+      const result = await signInWithEmailAndPassword(auth, document.querySelector('#email').value.trim(), document.querySelector('#password').value);
       await finish(result.user);
-    } catch (error) {
-      errorBox.textContent = errorText(error);
+    } catch (problem) {
+      error.textContent = messages[problem?.code] || 'Unable to sign in. Check your connection and try again.';
       submit.disabled = false;
-      submit.innerHTML = 'Sign in <span aria-hidden="true">→</span>';
+      submit.textContent = 'Sign in →';
     }
   });
-  document.querySelector('#google-login').addEventListener('click', async (event) => {
+  document.querySelector('#google').addEventListener('click', async (event) => {
     const button = event.currentTarget;
-    errorBox.textContent = '';
+    error.textContent = '';
     button.disabled = true;
-    button.textContent = 'Connecting to Google…';
     try {
       const result = await signInWithPopup(auth, googleProvider);
       await finish(result.user);
-    } catch (error) {
-      errorBox.textContent = errorText(error);
+    } catch (problem) {
+      error.textContent = messages[problem?.code] || 'Google sign-in did not complete.';
       button.disabled = false;
-      button.textContent = 'Continue with Google';
     }
   });
 </script>

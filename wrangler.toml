@@ -7,11 +7,11 @@ workers_dev = true
 FIREBASE_PROJECT_ID = "korasub-eb0b8"
 ADMIN_EMAIL = "beniwealth70@gmail.com"
 # GitHub Pages site origin (path is not part of CORS Origin).
-# Update this to https://korasub.name.ng when the custom domain goes live.
+# Update this to https://korastore.name.ng (or your final domain) when it goes live.
 FRONTEND_ORIGIN = "https://easypay-ng.github.io"
 
-# GSUBZ_API_KEY is intentionally NOT a [vars] entry. Set it with:
-#   npx wrangler secret put GSUBZ_API_KEY
+# Secrets are intentionally NOT [vars] entries. Set them with Wrangler:
+#   npx wrangler secret put FIREBASE_SERVICE_ACCOUNT_JSON   (paste the whole service-account JSON)
 
 # Isolated values for Cloudflare's pull-request Worker Preview builds.
 # These deliberately do not point at the production Firebase project or frontend.

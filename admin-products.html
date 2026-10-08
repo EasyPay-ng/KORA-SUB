@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Products — KORASTORE Admin</title>
+  <link rel="stylesheet" href="store.css">
+  <link rel="icon" href="assets/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png"><meta name="theme-color" content="#0b2545">
+</head>
+<body>
+<div id="gate" class="gate"><div class="gate-card"><span class="gate-mark">K</span><h2>Checking admin access…</h2><p>Verifying your account before any store data loads.</p></div></div>
+<div class="admin-shell" id="admin-content" hidden>
+  <aside class="admin-side" id="admin-sidebar"></aside>
+  <main class="admin-main">
+    <div class="page-head"><div><span class="eyebrow">Catalogue</span><h1>Products</h1><p>Only you can list, price and stock products. Hidden products stay in the database but disappear from the shop.</p></div><button class="btn btn-gold" id="new">+ New product</button></div>
+    <div class="admin-grid">
+      <section class="card">
+        <div class="card-head"><div><h2>All products</h2><small id="count">Loading…</small></div></div>
+        <div class="table-wrap"><table class="table"><thead><tr><th>Product</th><th>Price</th><th>Stock</th><th>Sold</th><th>Status</th><th></th></tr></thead><tbody id="rows"><tr><td colspan="6">Loading…</td></tr></tbody></table></div>
+      </section>
+      <section class="card">
+        <div class="card-head"><div><h2 id="form-title">New product</h2><small>Customers see changes immediately</small></div></div>
+        <form id="form" class="panel-form" novalidate>
+          <input type="hidden" id="id">
+          <label class="field">Name<input class="input" id="name" maxlength="120" required></label>
+          <div class="field-row">
+            <label class="field">Category<input class="input" id="category" maxlength="60" placeholder="e.g. Fashion"></label>
+            <label class="field">Price (₦)<input class="input" id="price" type="number" min="1" step="1" required></label>
+          </div>
+          <div class="field-row">
+            <label class="field">Stock units<input class="input" id="stock" type="number" min="0" step="1" required></label>
+            <label class="field">Image URL <small>https only, optional</small><input class="input" id="imageUrl" placeholder="https://…"></label>
+          </div>
+          <label class="field">Description<textarea class="textarea" id="description" maxlength="2000"></textarea></label>
+          <label class="toggle"><input type="checkbox" id="active" checked> Listed in the shop</label>
+          <div id="error" class="error-text" role="alert" style="margin-top:12px"></div>
+          <div class="row" style="margin-top:12px"><button class="btn btn-gold" type="submit" id="save">Save product</button><button class="btn btn-ghost" type="button" id="reset">Clear</button></div>
+        </form>
+      </section>
+    </div>
+  </main>
+</div>
+<script type="module">
+  import { mountAdminSidebar, requireAdmin, watchProducts, saveProduct, naira, esc } from './store.js';
+  mountAdminSidebar('admin-products.html');
+  const $ = (id) => document.querySelector(id);
+  let products = [];
+  function fill(p) {
+    $('#form-title').textContent = p ? `Edit: ${p.name}` : 'New product';
+    $('#id').value = p?.id || '';
+    $('#name').value = p?.name || '';
+    $('#category').value = p?.category || '';
+    $('#price').value = p?.price ?? '';
+    $('#stock').value = p?.stock ?? '';
+    $('#imageUrl').value = p?.imageUrl || '';
+    $('#description').value = p?.description || '';
+    $('#active').checked = p ? p.active === true : true;
+    $('#error').textContent = '';
+  }
+  function render() {
+    $('#count').textContent = `${products.length} product${products.length === 1 ? '' : 's'} · ${products.filter(p => p.active).length} listed`;
+    $('#rows').innerHTML = products.length ? products.sort((a, b) => a.name.localeCompare(b.name)).map(p => `
+      <tr>
+        <td><b>${esc(p.name)}</b><small>${esc(p.category || 'Store')}</small></td>
+        <td class="mono">${naira(p.price)}</td>
+        <td class="mono">${Number(p.stock || 0)}</td>
+        <td class="mono">${Number(p.sold || 0)}</td>
+        <td><span class="badge ${p.active ? 'ok' : ''}">${p.active ? 'Listed' : 'Hidden'}</span></td>
+        <td><div class="table-actions"><button class="btn btn-sm btn-ghost" data-edit="${esc(p.id)}">Edit</button><button class="btn btn-sm btn-ghost" data-toggle="${esc(p.id)}">${p.active ? 'Hide' : 'List'}</button></div></td>
+      </tr>`).join('') : '<tr><td colspan="6">No products yet. Create your first one.</td></tr>';
+  }
+  $('#rows').addEventListener('click', async (event) => {
+    const edit = event.target.closest('[data-edit]');
+    const toggle = event.target.closest('[data-toggle]');
+    if (edit) fill(products.find(p => p.id === edit.dataset.edit));
+    if (toggle) {
+      const p = products.find(x => x.id === toggle.dataset.toggle);
+      try { await saveProduct(p.id, { active: !p.active }); } catch (problem) { alert(problem.message); }
+    }
+  });
+  $('#new').addEventListener('click', () => fill(null));
+  $('#reset').addEventListener('click', () => fill(null));
+  $('#form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const error = $('#error');
+    error.textContent = '';
+    const price = Math.round(Number($('#price').value));
+    const stock = Math.round(Number($('#stock').value));
+    const name = $('#name').value.trim();
+    const imageUrl = $('#imageUrl').value.trim();
+    if (!name) return error.textContent = 'Enter a product name.';
+    if (!Number.isFinite(price) || price < 1) return error.textContent = 'Price must be at least ₦1.';
+    if (!Number.isFinite(stock) || stock < 0) return error.textContent = 'Stock must be zero or more.';
+    if (imageUrl && !/^https:\/\/\S+$/.test(imageUrl)) return error.textContent = 'Image must be an https:// link.';
+    const data = {
+      name,
+      category: $('#category').value.trim() || 'Store',
+      price,
+      stock,
+      imageUrl,
+      description: $('#description').value.trim(),
+      active: $('#active').checked
+    };
+    const save = $('#save');
+    save.disabled = true;
+    try {
+      await saveProduct($('#id').value || null, data);
+      fill(null);
+    } catch (problem) {
+      error.textContent = problem.message || 'Could not save the product.';
+    } finally {
+      save.disabled = false;
+    }
+  });
+  if (await requireAdmin('admin-products.html')) {
+    watchProducts((rows) => { products = rows; render(); }, (problem) => { $('#rows').innerHTML = `<tr><td colspan="6">${esc(problem.message)}</td></tr>`; }, { includeInactive: true });
+  }
+</script>
+</body>
+</html>
