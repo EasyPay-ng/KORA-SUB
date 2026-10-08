@@ -2,7 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
 import {
   getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword,
-  createUserWithEmailAndPassword, updateProfile, onAuthStateChanged, signOut
+  createUserWithEmailAndPassword, updateProfile, onAuthStateChanged, signOut, sendEmailVerification
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import {
   getFirestore, doc, getDoc, setDoc, updateDoc, addDoc, collection, query, where,
@@ -14,7 +14,7 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const googleProvider = new GoogleAuthProvider();
-export { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, onAuthStateChanged, signOut };
+export { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, onAuthStateChanged, signOut, sendEmailVerification };
 
 const noop = () => {};
 const rows = (snap) => snap.docs.map((item) => ({ ...item.data(), id: item.id }));
@@ -370,7 +370,8 @@ export function requireCustomer(nextPage) {
   });
 }
 
-// Admin gate: only the configured admin email with a fresh `admin` claim gets through.
+// Admin gate: matches firestore.rules — the configured admin email with a verified
+// email address. Security is enforced server-side by the rules; this is the same check.
 export function requireAdmin(activePage, gateSelector = "#gate", contentSelector = "#admin-content") {
   return new Promise((resolve) => {
     const gate = document.querySelector(gateSelector);
@@ -386,10 +387,9 @@ export function requireAdmin(activePage, gateSelector = "#gate", contentSelector
         resolve(null);
         return;
       }
-      let claims;
-      try { claims = (await user.getIdTokenResult(true)).claims; } catch { claims = {}; }
-      if (claims.admin !== true) {
-        deny("Admin access not enabled yet", "The administrator needs the admin custom claim from the trusted setup, then a fresh sign-in.");
+      try { await user.reload(); } catch { /* fall back to cached profile */ }
+      if (!user.emailVerified) {
+        deny("Verify your email first", "The admin account must have a verified email address. Check your inbox for the verification link, then sign in again.");
         resolve(null);
         return;
       }
