@@ -5,4 +5,9 @@ workers_dev = true
 
 [vars]
 FIREBASE_PROJECT_ID = "korasub-eb0b8"
+ADMIN_EMAIL = "beniwealth70@gmail.com"
+# Keep * for local preview only. Set the exact deployed frontend origin in production.
 FRONTEND_ORIGIN = "*"
+
+# GSUBZ_API_KEY is intentionally NOT a [vars] entry. Set it with:
+#   npx wrangler secret put GSUBZ_API_KEY

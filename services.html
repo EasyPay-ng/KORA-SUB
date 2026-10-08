@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Service catalog — KORASUB</title>
+  <link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="portal.css"><link rel="icon" href="assets/favicon.ico" sizes="any">
+</head>
+<body class="portal-body">
+<div class="portal-shell">
+  <aside class="portal-sidebar"><a class="brand side-brand" href="index.html"><span class="brand-mark">K</span><span>KORASUB</span></a><div class="side-label">YOUR ACCOUNT</div><nav class="side-nav" aria-label="Account navigation">
+    <a class="side-link" data-page="dashboard.html" href="dashboard.html"><span class="side-icon">⌂</span><span>Overview</span></a><a class="side-link" data-page="services.html" href="services.html"><span class="side-icon">✦</span><span>Service catalog</span></a><a class="side-link" data-page="transactions.html" href="transactions.html"><span class="side-icon">↕</span><span>Transactions</span></a><a class="side-link" data-page="fund-wallet.html" href="fund-wallet.html"><span class="side-icon">＋</span><span>Fund wallet</span></a><a class="side-link" data-page="support.html" href="support.html"><span class="side-icon">?</span><span>Support</span></a>
+  </nav><div class="side-bottom"><button class="side-link side-signout" type="button" data-signout><span class="side-icon">⇥</span><span>Sign out</span></button></div></aside>
+  <main class="portal-main"><header class="portal-topbar"><span class="top-context" data-current-date></span><div class="portal-user"><div class="portal-user-copy"><b data-user-name>Loading account…</b><small>Personal workspace</small></div><span class="portal-avatar" data-user-avatar>KS</span></div></header>
+    <div class="portal-content"><section class="page-heading"><div><span class="heading-kicker">PROVIDER CATALOG</span><h1>Explore services</h1><p>Service IDs and group names come from GSUBZ's live List All Services endpoint. Plan names and prices are fetched live for services that use plan catalogues.</p></div><span class="live-indicator">GSUBZ services live</span></section>
+      <div id="catalog-error" class="inline-notice error-notice" hidden></div>
+      <div class="portal-grid equal">
+        <section class="portal-card"><div class="card-heading"><div><h2>Active services</h2><small id="category-summary">Loading GSUBZ service IDs…</small></div></div><div id="category-list" class="catalog-grid"><p class="feed-empty">Connecting to catalog…</p></div></section>
+        <section class="portal-card"><div class="card-heading"><div><h2 id="plans-title">Available plans</h2><small id="plans-summary">Choose a category to load current plans.</small></div></div><div id="plan-list" class="plan-list"><p class="feed-empty">No category selected.</p></div><div class="notice-box" style="margin-top:15px"><span class="notice-icon">i</span><p>These are GSUBZ list prices, not a final KORASUB quote. Checkout remains unavailable until customer pricing and a secure server-side purchase and wallet workflow are enabled.</p></div></section>
+      </div>
+    </div>
+  </main>
+</div>
+<script type="module">
+  import { bootApp } from './app-shell.js';
+  import { apiRequest } from './firebase-client.js';
+  import { normalizeRecords, normalizeServices, recordField, priceValue, parsePrice } from './catalog-data.js';
+  import { escapeHTML, formatMoney } from './app-utils.js';
+  const catalogError = document.querySelector('#catalog-error');
+  const categoryList = document.querySelector('#category-list');
+  const planList = document.querySelector('#plan-list');
+  const categorySummary = document.querySelector('#category-summary');
+  const plansSummary = document.querySelector('#plans-summary');
+  const plansTitle = document.querySelector('#plans-title');
+  const symbols = ['⌁', '◉', 'ϟ', '▤', '▣', '✦'];
+  let categories = [];
+  const queryCategory = new URLSearchParams(location.search).get('category');
+  function report(error) {
+    catalogError.hidden = false;
+    catalogError.textContent = `Live catalog unavailable: ${error?.message || 'check that the API proxy is connected'}`;
+  }
+  async function loadPlans(category) {
+    plansTitle.textContent = category._displayName;
+    if (category.pricingMode !== 'plans') {
+      const mode = category.pricingMode === 'amount' ? 'Amount-based service' : 'Customer verification and an amount are required';
+      plansSummary.textContent = mode;
+      planList.innerHTML = `<p class="feed-empty">${escapeHTML(mode)}. GSUBZ does not provide a plan list for this service type. Checkout is not enabled yet.</p>`;
+      return;
+    }
+    plansSummary.textContent = 'Loading current plans from the provider…';
+    planList.innerHTML = '<p class="feed-empty">Loading plans…</p>';
+    try {
+      const payload = await apiRequest(`/plans?service=${encodeURIComponent(category._recordId)}`);
+      const plans = normalizeRecords(payload, 'plan');
+      if (!plans.length) {
+        plansSummary.textContent = 'The provider returned no plans for this category.';
+        planList.innerHTML = '<p class="feed-empty">No plans were returned for this category.</p>';
+        return;
+      }
+      plansSummary.textContent = `${plans.length} plan${plans.length === 1 ? '' : 's'} returned by the provider.`;
+      planList.innerHTML = plans.map(plan => {
+        const rawPrice = priceValue(plan);
+        const amount = parsePrice(rawPrice);
+        const detail = recordField(plan, ['validity', 'duration', 'description', 'size', 'volume', 'planType']);
+        return `<div class="plan-row"><div><b>${escapeHTML(plan._displayName)}</b><small>${escapeHTML(detail || 'Details supplied by provider')}</small></div><strong>${amount === null ? 'Price not supplied' : formatMoney(amount)}</strong></div>`;
+      }).join('');
+    } catch (error) {
+      plansSummary.textContent = 'Plan request failed.';
+      planList.innerHTML = `<p class="feed-empty">${escapeHTML(error.message || 'Unable to load plans.')}</p>`;
+      report(error);
+    }
+  }
+  function renderCategories() {
+    categorySummary.textContent = `${categories.length} active GSUBZ service ID${categories.length === 1 ? '' : 's'}.`;
+    categoryList.innerHTML = categories.map((category, index) => `<article class="catalog-card"><span class="catalog-icon">${symbols[index % symbols.length]}</span><h3>${escapeHTML(category._displayName)}</h3><p>${escapeHTML(recordField(category, ['description', 'details']) || `${category.category || 'Service'} · ${category.pricingMode === 'plans' ? 'plan catalogue' : category.pricingMode === 'amount' ? 'amount-based' : 'meter + amount'} · ID ${category._recordId}`)}</p><button type="button" data-service-id="${escapeHTML(category._recordId)}">${category.pricingMode === 'plans' ? 'View plans →' : 'Service details →'}</button></article>`).join('');
+    categoryList.querySelectorAll('[data-service-id]').forEach(button => {
+      button.addEventListener('click', () => {
+        const category = categories.find(item => item._recordId === button.dataset.serviceId);
+        if (category) loadPlans(category);
+      });
+    });
+  }
+  document.addEventListener('korasub:authenticated', async () => {
+    try {
+      const payload = await apiRequest('/categories');
+      categories = normalizeServices(payload);
+      if (!categories.length) throw new Error('GSUBZ returned no active service IDs.');
+      catalogError.hidden = true;
+      renderCategories();
+      const requested = categories.find(item => item._recordId === queryCategory || item._displayName.toLowerCase().includes(String(queryCategory || '').toLowerCase()));
+      if (requested) loadPlans(requested);
+    } catch (error) {
+      categorySummary.textContent = 'Catalog connection unavailable.';
+      categoryList.innerHTML = '<p class="feed-empty">No live categories could be loaded.</p>';
+      report(error);
+    }
+  });
+  bootApp('services.html');
+</script>
+</body>
+</html>

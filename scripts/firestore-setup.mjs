@@ -62,20 +62,8 @@ async function seedWallet(address, balanceArg, nameFlagArgs) {
     { merge: true }
   );
 
-  // Sample transaction history so the dashboard has something to show.
-  const sample = [
-    { title: "MTN 10GB Data", amount: -2400, status: "Successful", daysAgo: 0 },
-    { title: "Wallet funding", amount: 10000, status: "Approved", daysAgo: 1 },
-    { title: "Electricity token", amount: -5000, status: "Successful", daysAgo: 3 }
-  ];
-  const batch = db.batch();
-  for (const tx of sample) {
-    const ref = db.collection("users").doc(user.uid).collection("transactions").doc();
-    const createdAt = new Date(Date.now() - tx.daysAgo * 86400000);
-    batch.set(ref, { title: tx.title, amount: tx.amount, status: tx.status, createdAt });
-  }
-  await batch.commit();
-  console.log(`Seeded wallet for ${address} (uid ${user.uid}): balance ${balance}, ${sample.length} transactions.`);
+  // Do not create sample history: transaction rows must come from real server activity.
+  console.log(`Updated wallet balance for ${address} (uid ${user.uid}) to ${balance}. No transaction history was fabricated.`);
 }
 
 try {

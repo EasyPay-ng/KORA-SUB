@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pricing & markup — KORASUB Admin</title><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="portal.css"><link rel="icon" href="assets/favicon.ico" sizes="any"></head>
+<body class="portal-body"><div class="portal-shell"><aside id="admin-sidebar" class="portal-sidebar"></aside><main class="portal-main">
+<header class="portal-topbar"><span class="top-context">KORASUB · ADMIN WORKSPACE</span><div class="portal-user"><div class="portal-user-copy"><b data-user-name>Checking access…</b><small data-user-email></small></div><span class="portal-avatar" data-user-avatar>KS</span></div></header>
+<div id="access-message" class="access-card" role="status"></div><div id="admin-content" class="portal-content" hidden>
+  <section class="page-heading"><div><span class="heading-kicker">CATALOG & PRICING</span><h1>Pricing & markup</h1><p>Inspect current plans and the pricing fields returned by the service provider.</p></div><span class="live-indicator">Plan prices fetched live</span></section>
+  <div id="page-error" class="inline-notice error-notice" hidden></div>
+  <div class="notice-box" style="margin-bottom:16px"><span class="notice-icon">%</span><p><b>Price controls are read-only.</b><br>GSUBZ returns a list price, an API price and (sometimes) a provider discount. KORASUB customer markup is not configured in this frontend; connect a secured admin pricing API before changing customer prices.</p></div>
+  <section class="portal-card"><div class="card-heading"><div><h2>Provider plan prices</h2><small id="pricing-summary">Loading plan-based service IDs…</small></div></div>
+    <div class="filter-row"><label for="service-select">GSUBZ service ID</label><select id="service-select" class="control-select" disabled><option>Loading…</option></select><button type="button" id="reload-plans" class="action-button" disabled>Load plans</button></div>
+    <div class="table-wrap"><table class="data-table"><thead><tr><th>Plan</th><th>Plan value</th><th>List price</th><th>GSUBZ API price</th><th>Provider discount</th><th>KORASUB markup</th></tr></thead><tbody id="price-rows"><tr><td colspan="6">Choose a service ID to inspect current plans.</td></tr></tbody></table></div>
+  </section>
+</div></main></div>
+<script type="module">
+  import { bootAdmin, showDataError } from './admin-ui.js';
+  import { apiRequest } from './firebase-client.js';
+  import { normalizeRecords, normalizeServices, priceValue, apiPriceValue, markupValue, parsePrice } from './catalog-data.js';
+  import { escapeHTML, formatMoney } from './app-utils.js';
+  const error = document.querySelector('#page-error');
+  const summary = document.querySelector('#pricing-summary');
+  const select = document.querySelector('#service-select');
+  const reload = document.querySelector('#reload-plans');
+  const body = document.querySelector('#price-rows');
+  let categories = [];
+  function displayPrice(value) {
+    if (value === '' || value === undefined || value === null) return 'Not supplied';
+    const amount = parsePrice(value);
+    return amount === null ? escapeHTML(value) : formatMoney(amount);
+  }
+  async function loadPlans() {
+    const selected = categories[Number(select.value)];
+    if (!selected) return;
+    reload.disabled = true;
+    summary.textContent = `Loading plans for ${selected._displayName}…`;
+    body.innerHTML = '<tr><td colspan="6">Loading live provider prices…</td></tr>';
+    try {
+      const payload = await apiRequest(`/plans?service=${encodeURIComponent(selected._recordId)}`);
+      const plans = normalizeRecords(payload, 'plan');
+      const providerService = payload?.service || selected._displayName;
+      const providerDiscount = payload?.discount || 'Not supplied';
+      summary.textContent = `${plans.length} provider plan${plans.length === 1 ? '' : 's'} for ${providerService}.`;
+      body.innerHTML = plans.length ? plans.map(plan => {
+        const markup = markupValue(plan);
+        return `<tr><td><span class="table-primary">${escapeHTML(plan._displayName)}</span></td><td>${escapeHTML(plan._recordId)}</td><td><strong>${displayPrice(priceValue(plan))}</strong></td><td><strong>${displayPrice(apiPriceValue(plan))}</strong></td><td>${escapeHTML(providerDiscount)}</td><td>${markup === '' ? 'Not configured' : escapeHTML(markup)}</td></tr>`;
+      }).join('') : '<tr><td colspan="6">The provider returned no plans for this service.</td></tr>';
+      error.hidden = true;
+    } catch (problem) {
+      summary.textContent = 'Plan data could not be loaded.';
+      body.innerHTML = `<tr><td colspan="6">${escapeHTML(problem.message || 'Provider request failed.')}</td></tr>`;
+      showDataError(error, problem, 'Provider API');
+    } finally { reload.disabled = false; }
+  }
+  reload.addEventListener('click', loadPlans);
+  select.addEventListener('change', loadPlans);
+  if (await bootAdmin('admin-pricing.html')) {
+    try {
+      const payload = await apiRequest('/categories');
+      categories = normalizeServices(payload).filter(item => item.pricingMode === 'plans');
+      if (!categories.length) throw new Error('GSUBZ returned no plan-based active services.');
+      select.innerHTML = categories.map((item, index) => `<option value="${index}">${escapeHTML(item._displayName)}</option>`).join('');
+      select.disabled = false; reload.disabled = false;
+      summary.textContent = `${categories.length} plan-based GSUBZ service ID${categories.length === 1 ? '' : 's'}.`;
+      const defaultService = categories.findIndex(item => item._recordId === 'mtn_sme');
+      if (defaultService >= 0) select.value = String(defaultService);
+      loadPlans();
+    } catch (problem) {
+      select.innerHTML = '<option value="">Catalog unavailable</option>';
+      summary.textContent = 'Provider catalog is not available.';
+      body.innerHTML = '<tr><td colspan="6">No live pricing data could be loaded.</td></tr>';
+      showDataError(error, problem, 'Provider API');
+    }
+  }
+</script></body></html>
