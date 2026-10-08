@@ -70,7 +70,7 @@ npm run deploy:worker
 
 ### Connect the frontend
 
-By default, `API_BASE` in `firebase-config.js` is `/api`, which expects a same-origin rewrite/proxy from the frontend host to this Worker. If the Worker is hosted on its own `workers.dev` origin, set `API_BASE` to the Worker URL ending in `/api` (the URL printed by `wrangler deploy`). Also replace `FRONTEND_ORIGIN = "*"` in `wrangler.toml` with the exact deployed frontend origin before production deployment. The Worker enforces that origin for browser requests.
+The current GitHub Pages site is `https://easypay-ng.github.io/KORA-SUB/`. `API_BASE` in `firebase-config.js` points directly to `https://kora-sub.owanaomubo80.workers.dev/api`, and `FRONTEND_ORIGIN` in `wrangler.toml` is set to the site origin `https://easypay-ng.github.io` (CORS origins do not include the `/KORA-SUB/` path). When the site moves to `https://korasub.name.ng`, update `FRONTEND_ORIGIN` to `https://korasub.name.ng` and redeploy the Worker. The Worker URL and `API_BASE` only need to change if the Worker URL changes.
 
 The Worker needs `FIREBASE_PROJECT_ID` and `ADMIN_EMAIL` in its non-secret vars; these are already present in `wrangler.toml`. It verifies Firebase ID token signatures against Google's public Firebase signing keys and fails closed if verification does not pass.
 

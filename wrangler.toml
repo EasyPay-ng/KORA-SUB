@@ -1,4 +1,4 @@
-name = "korasub-api"
+name = "kora-sub"
 main = "worker/index.js"
 compatibility_date = "2026-10-08"
 workers_dev = true
@@ -6,8 +6,9 @@ workers_dev = true
 [vars]
 FIREBASE_PROJECT_ID = "korasub-eb0b8"
 ADMIN_EMAIL = "beniwealth70@gmail.com"
-# Keep * for local preview only. Set the exact deployed frontend origin in production.
-FRONTEND_ORIGIN = "*"
+# GitHub Pages site origin (path is not part of CORS Origin).
+# Update this to https://korasub.name.ng when the custom domain goes live.
+FRONTEND_ORIGIN = "https://easypay-ng.github.io"
 
 # GSUBZ_API_KEY is intentionally NOT a [vars] entry. Set it with:
 #   npx wrangler secret put GSUBZ_API_KEY

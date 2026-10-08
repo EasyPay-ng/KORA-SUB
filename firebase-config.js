@@ -12,4 +12,4 @@ export const firebaseConfig = {
 export const ADMIN_EMAIL = "beniwealth70@gmail.com";
 // Use a same-origin /api proxy, or set this to your deployed Worker URL ending in /api.
 // This is a public API origin only; never put the GSUBZ secret here.
-export const API_BASE = "/api";
+export const API_BASE = "https://kora-sub.owanaomubo80.workers.dev/api";
