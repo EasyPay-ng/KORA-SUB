@@ -1,4 +1,4 @@
-// Firebase web configuration is safe to ship in the browser. Never put the service-account key here.
+// Firebase web configuration is safe to ship in the browser. Security comes from firestore.rules.
 export const firebaseConfig = {
   apiKey: "AIzaSyCQL4NP-pj0wLmF_9IuesZiQQZTj26QBSY",
   authDomain: "korasub-eb0b8.firebaseapp.com",
@@ -10,6 +10,3 @@ export const firebaseConfig = {
 };
 
 export const ADMIN_EMAIL = "beniwealth70@gmail.com";
-// Deployed Worker URL ending in /api (or a same-origin /api proxy).
-// Public Worker origin only. Secrets live in Wrangler secrets, never in browser code.
-export const API_BASE = "https://kora-sub.owanaomubo80.workers.dev/api";
