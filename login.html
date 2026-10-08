@@ -1,5 +1,75 @@
-<!doctype html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sign in — KORASUB</title><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="styles.css"><style>.auth{min-height:100vh;display:grid;grid-template-columns:1fr 1fr}.auth-visual{background:linear-gradient(145deg,#edf6ff,#f4efff);display:flex;align-items:center;justify-content:center;padding:40px}.auth-visual h1{font:700 54px/1.1 'Plus Jakarta Sans';letter-spacing:-.07em;color:#15264d}.auth-visual em{font-style:normal;color:#246bdb}.auth-form{max-width:390px;width:100%;margin:auto;padding:35px}.auth-form h2{font:700 30px 'Plus Jakarta Sans';letter-spacing:-.05em;margin:42px 0 8px}.auth-form p{color:#8792a4;font-size:14px;margin-top:0}.field{display:block;margin:21px 0 0;color:#536073;font-size:12px;font-weight:700}.field input{display:block;width:100%;padding:14px 13px;margin-top:8px;border:1px solid #dfe5ee;border-radius:9px;font:inherit;outline:none}.field input:focus{border-color:#246bdb;box-shadow:0 0 0 3px #246bdb14}.auth-form .btn{width:100%;margin-top:25px;cursor:pointer;border:0}.google-btn{background:#fff!important;color:#263449!important;border:1px solid #dfe5ee!important;box-shadow:none!important}.divider{display:flex;align-items:center;gap:10px;color:#a0a8b5;font-size:11px;margin:20px 0}.divider:before,.divider:after{content:'';height:1px;background:#e9edf3;flex:1}.error{color:#c84747;font-size:12px;min-height:16px;margin-top:12px}.auth-foot{text-align:center;font-size:13px;color:#8b95a4;margin-top:25px}.auth-foot a{color:#246bdb;font-weight:700}@media(max-width:700px){.auth{grid-template-columns:1fr}.auth-visual{display:none}}</style><link rel="icon" href="assets/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png"><link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png"><meta name="theme-color" content="#246bdb">
-</head><body><div class="auth"><div class="auth-visual"><div><a class="brand" href="index.html"><span class="brand-mark">K</span><span>KORASUB</span></a><h1>Simple services.<br><em>Better days.</em></h1><p class="muted">Your everyday digital services, all in one trusted wallet.</p></div></div><main class="auth-form"><a class="brand" href="index.html"><span class="brand-mark">K</span><span>KORASUB</span></a><h2>Welcome back</h2><p>Sign in to continue to your dashboard.</p><form id="login-form"><label class="field">EMAIL ADDRESS<input id="email" type="email" required autocomplete="email" placeholder="you@example.com"></label><label class="field">PASSWORD<input id="password" type="password" required autocomplete="current-password" placeholder="Your password"></label><div id="error" class="error" role="alert"></div><button class="btn btn-primary" type="submit">Sign in <span>→</span></button></form><div class="divider">OR</div><button id="google-login" class="btn google-btn" type="button">Continue with Google</button><div class="auth-foot">New to KORASUB? <a href="register.html">Create an account</a></div></main></div><script type="module">import {auth,googleProvider,signInWithPopup,signInWithEmailAndPassword,ensureUserProfile} from './firebase-client.js';
-const error=document.querySelector('#error'); const showError=e=>{error.textContent=e.code==='auth/invalid-credential'?'Email or password is incorrect.':(e.message||'Unable to sign in.')};
-document.querySelector('#login-form').addEventListener('submit',async e=>{e.preventDefault();error.textContent='';try{await signInWithEmailAndPassword(auth,email.value,password.value);location.href='dashboard.html'}catch(err){showError(err)}});
-document.querySelector('#google-login').addEventListener('click',async()=>{error.textContent='';try{const result=await signInWithPopup(auth,googleProvider);await ensureUserProfile(result.user);location.href='dashboard.html'}catch(err){showError(err)}});</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Sign in — KORASUB</title><link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="assets/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png"><meta name="theme-color" content="#15374c">
+</head>
+<body class="auth-page">
+<div class="auth-shell">
+  <aside class="auth-visual"><div class="auth-visual-inner"><a class="brand" href="index.html"><span class="brand-mark">K</span><span>KORASUB</span></a><h1>Keep everyday<br><em>things moving.</em></h1><p>Sign in to your own wallet, service catalog and transaction history.</p><div class="auth-benefit"><span>✓</span>Your dashboard shows account data tied to your profile.</div></div></aside>
+  <main class="auth-form-wrap"><section class="auth-form"><a class="brand" href="index.html"><span class="brand-mark">K</span><span>KORASUB</span></a><h2>Welcome back</h2><p>Sign in with the account you used to register.</p>
+    <form id="login-form" novalidate>
+      <label class="field">EMAIL ADDRESS<input id="email" name="email" type="email" required autocomplete="email" placeholder="you@example.com"></label>
+      <label class="field">PASSWORD<input id="password" name="password" type="password" required autocomplete="current-password" placeholder="Your password"></label>
+      <div id="error" class="error" role="alert" aria-live="polite"></div>
+      <button id="submit-login" class="btn btn-primary" type="submit">Sign in <span aria-hidden="true">→</span></button>
+    </form>
+    <div class="divider">OR</div>
+    <button id="google-login" class="btn google-btn" type="button">Continue with Google</button>
+    <div class="auth-foot">New to KORASUB? <a href="register.html">Create an account</a></div>
+    <a class="auth-return" href="index.html">← Back to KORASUB</a>
+  </section></main>
+</div>
+<script type="module">
+  import { auth, googleProvider, signInWithPopup, signInWithEmailAndPassword, ensureUserProfile } from './firebase-client.js';
+  const errorBox = document.querySelector('#error');
+  const form = document.querySelector('#login-form');
+  const submit = document.querySelector('#submit-login');
+  const allowedDestinations = new Set(['dashboard.html', 'services.html', 'transactions.html', 'fund-wallet.html', 'support.html', 'admin.html', 'admin-funding.html', 'admin-ledger.html', 'admin-orders.html', 'admin-pricing.html', 'admin-services.html']);
+  const requested = new URLSearchParams(location.search).get('next');
+  const destination = allowedDestinations.has(requested) ? requested : 'dashboard.html';
+  function errorText(error) {
+    const known = {
+      'auth/invalid-credential': 'Email or password is incorrect.',
+      'auth/user-not-found': 'No account was found for this email.',
+      'auth/too-many-requests': 'Too many attempts. Please wait and try again.',
+      'auth/popup-closed-by-user': 'The Google sign-in window was closed before finishing.'
+    };
+    return known[error?.code] || 'Unable to sign in. Check your connection and try again.';
+  }
+  async function finish(user) {
+    await ensureUserProfile(user);
+    location.replace(destination);
+  }
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    errorBox.textContent = '';
+    submit.disabled = true;
+    submit.textContent = 'Signing in…';
+    try {
+      const result = await signInWithEmailAndPassword(auth, form.elements.email.value.trim(), form.elements.password.value);
+      await finish(result.user);
+    } catch (error) {
+      errorBox.textContent = errorText(error);
+      submit.disabled = false;
+      submit.innerHTML = 'Sign in <span aria-hidden="true">→</span>';
+    }
+  });
+  document.querySelector('#google-login').addEventListener('click', async (event) => {
+    const button = event.currentTarget;
+    errorBox.textContent = '';
+    button.disabled = true;
+    button.textContent = 'Connecting to Google…';
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      await finish(result.user);
+    } catch (error) {
+      errorBox.textContent = errorText(error);
+      button.disabled = false;
+      button.textContent = 'Continue with Google';
+    }
+  });
+</script>
+</body>
+</html>

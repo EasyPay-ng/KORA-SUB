@@ -1,5 +1,75 @@
-<!doctype html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Create account — KORASUB</title><link rel="stylesheet" href="styles.css"><style>.box{max-width:460px;margin:70px auto;padding:20px}.box h1{font:700 32px 'Plus Jakarta Sans';letter-spacing:-.06em;margin-top:55px}.field{display:block;margin:18px 0;color:#536073;font-size:12px;font-weight:700}.field input{display:block;width:100%;padding:14px;margin-top:7px;border:1px solid #dfe5ee;border-radius:9px;font:inherit}.box .btn{width:100%;margin-top:12px;cursor:pointer;border:0}.google-btn{background:#fff!important;color:#263449!important;border:1px solid #dfe5ee!important;box-shadow:none!important}.divider{display:flex;align-items:center;gap:10px;color:#a0a8b5;font-size:11px;margin:20px 0}.divider:before,.divider:after{content:'';height:1px;background:#e9edf3;flex:1}.error{color:#c84747;font-size:12px;min-height:16px;margin-top:12px}.center{text-align:center;font-size:13px;color:#8792a4;margin-top:23px}.center a{color:#246bdb;font-weight:700}</style><link rel="icon" href="assets/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png"><link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png"><meta name="theme-color" content="#246bdb">
-</head><body><main class="box"><a class="brand" href="index.html"><span class="brand-mark">K</span><span>KORASUB</span></a><h1>Create your account</h1><p class="muted">Get started with KORASUB today.</p><form id="register-form"><label class="field">FULL NAME<input id="name" required autocomplete="name" placeholder="Your full name"></label><label class="field">EMAIL ADDRESS<input id="email" type="email" required autocomplete="email" placeholder="you@example.com"></label><label class="field">PASSWORD<input id="password" type="password" minlength="8" required autocomplete="new-password" placeholder="At least 8 characters"></label><div id="error" class="error" role="alert"></div><button class="btn btn-primary" type="submit">Create account →</button></form><div class="divider">OR</div><button id="google-register" class="btn google-btn" type="button">Continue with Google</button><div class="center">Already have an account? <a href="login.html">Sign in</a></div></main><script type="module">import {auth,googleProvider,signInWithPopup,createUserWithEmailAndPassword,updateProfile,ensureUserProfile} from './firebase-client.js';
-const error=document.querySelector('#error'); const showError=e=>{error.textContent=e.code==='auth/email-already-in-use'?'An account already exists for this email.':(e.message||'Unable to create account.')};
-document.querySelector('#register-form').addEventListener('submit',async e=>{e.preventDefault();error.textContent='';try{const result=await createUserWithEmailAndPassword(auth,email.value,password.value);await updateProfile(result.user,{displayName:name.value});await ensureUserProfile(result.user,name.value);location.href='dashboard.html'}catch(err){showError(err)}});
-document.querySelector('#google-register').addEventListener('click',async()=>{error.textContent='';try{const result=await signInWithPopup(auth,googleProvider);await ensureUserProfile(result.user);location.href='dashboard.html'}catch(err){showError(err)}});</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Create account — KORASUB</title><link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="assets/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png"><meta name="theme-color" content="#15374c">
+</head>
+<body class="auth-page">
+<div class="auth-shell">
+  <aside class="auth-visual"><div class="auth-visual-inner"><a class="brand" href="index.html"><span class="brand-mark">K</span><span>KORASUB</span></a><h1>One account.<br><em>Your own view.</em></h1><p>Create your KORASUB profile to view your wallet, request funding and keep track of your real account activity.</p><div class="auth-benefit"><span>✓</span>Only your signed-in profile data appears in your dashboard.</div></div></aside>
+  <main class="auth-form-wrap"><section class="auth-form"><a class="brand" href="index.html"><span class="brand-mark">K</span><span>KORASUB</span></a><h2>Create your account</h2><p>Use your details to get started.</p>
+    <form id="register-form" novalidate>
+      <label class="field">FULL NAME<input id="name" name="name" required autocomplete="name" placeholder="Your full name"></label>
+      <label class="field">EMAIL ADDRESS<input id="email" name="email" type="email" required autocomplete="email" placeholder="you@example.com"></label>
+      <label class="field">PASSWORD<input id="password" name="password" type="password" minlength="8" required autocomplete="new-password" placeholder="At least 8 characters"></label>
+      <div id="error" class="error" role="alert" aria-live="polite"></div>
+      <button id="submit-register" class="btn btn-primary" type="submit">Create account <span aria-hidden="true">→</span></button>
+    </form>
+    <div class="divider">OR</div>
+    <button id="google-register" class="btn google-btn" type="button">Continue with Google</button>
+    <div class="auth-foot">Already have an account? <a href="login.html">Sign in</a></div>
+    <a class="auth-return" href="index.html">← Back to KORASUB</a>
+  </section></main>
+</div>
+<script type="module">
+  import { auth, googleProvider, signInWithPopup, createUserWithEmailAndPassword, updateProfile, ensureUserProfile } from './firebase-client.js';
+  const errorBox = document.querySelector('#error');
+  const form = document.querySelector('#register-form');
+  const submit = document.querySelector('#submit-register');
+  function errorText(error) {
+    const known = {
+      'auth/email-already-in-use': 'An account already exists for this email. Sign in instead.',
+      'auth/weak-password': 'Choose a stronger password with at least 8 characters.',
+      'auth/invalid-email': 'Enter a valid email address.',
+      'auth/popup-closed-by-user': 'The Google sign-in window was closed before finishing.'
+    };
+    return known[error?.code] || 'Unable to create the account. Check your connection and try again.';
+  }
+  async function finish(user, name = '') {
+    if (name) await updateProfile(user, { displayName: name });
+    await ensureUserProfile(user, name);
+    location.replace('dashboard.html');
+  }
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    errorBox.textContent = '';
+    submit.disabled = true;
+    submit.textContent = 'Creating account…';
+    try {
+      const name = form.elements.name.value.trim();
+      const result = await createUserWithEmailAndPassword(auth, form.elements.email.value.trim(), form.elements.password.value);
+      await finish(result.user, name);
+    } catch (error) {
+      errorBox.textContent = errorText(error);
+      submit.disabled = false;
+      submit.innerHTML = 'Create account <span aria-hidden="true">→</span>';
+    }
+  });
+  document.querySelector('#google-register').addEventListener('click', async (event) => {
+    const button = event.currentTarget;
+    errorBox.textContent = '';
+    button.disabled = true;
+    button.textContent = 'Connecting to Google…';
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      await finish(result.user);
+    } catch (error) {
+      errorBox.textContent = errorText(error);
+      button.disabled = false;
+      button.textContent = 'Continue with Google';
+    }
+  });
+</script>
+</body>
+</html>

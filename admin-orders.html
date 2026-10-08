@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Orders & refunds — KORASUB Admin</title><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="portal.css"><link rel="icon" href="assets/favicon.ico" sizes="any"></head>
+<body class="portal-body"><div class="portal-shell"><aside id="admin-sidebar" class="portal-sidebar"></aside><main class="portal-main">
+<header class="portal-topbar"><span class="top-context">KORASUB · ADMIN WORKSPACE</span><div class="portal-user"><div class="portal-user-copy"><b data-user-name>Checking access…</b><small data-user-email></small></div><span class="portal-avatar" data-user-avatar>KS</span></div></header>
+<div id="access-message" class="access-card" role="status"></div><div id="admin-content" class="portal-content" hidden>
+  <section class="page-heading"><div><span class="heading-kicker">ORDER OPERATIONS</span><h1>Orders & refunds</h1><p>Transaction records from user account subcollections. No sample or mock orders are shown.</p></div><span class="live-indicator">Live Firebase data</span></section>
+  <div id="page-error" class="inline-notice error-notice" hidden></div>
+  <div class="notice-box" style="margin-bottom:16px"><span class="notice-icon">!</span><p><b>Refunds are not issued from this page.</b><br>Refund approvals and wallet changes must go through a trusted server endpoint; the browser console is read-only.</p></div>
+  <section class="portal-card"><div class="card-heading"><div><h2>Transaction records</h2><small id="record-count">Loading records across customer accounts…</small></div></div>
+    <div class="filter-row"><label for="status-filter">Status</label><select id="status-filter" class="control-select"><option value="all">All statuses</option><option value="successful">Successful</option><option value="pending">Pending</option><option value="failed">Failed / refund</option></select><input id="search" class="control-input" type="search" aria-label="Search transaction records" placeholder="Search account, service, or reference"></div>
+    <div class="table-wrap"><table class="data-table"><thead><tr><th>Transaction</th><th>Customer</th><th>Reference</th><th>Date</th><th>Status</th><th>Amount</th></tr></thead><tbody id="order-rows"><tr><td colspan="6">Loading live transaction records…</td></tr></tbody></table></div>
+  </section>
+</div></main></div>
+<script type="module">
+  import { bootAdmin, showDataError } from './admin-ui.js';
+  import { watchAdminTransactions, watchAdminUsers } from './firebase-client.js';
+  import { escapeHTML, formatMoney, formatDateTime, recordAmount, statusTone, personLabel, toDate } from './app-utils.js';
+  const body = document.querySelector('#order-rows');
+  const count = document.querySelector('#record-count');
+  const error = document.querySelector('#page-error');
+  const filter = document.querySelector('#status-filter');
+  const search = document.querySelector('#search');
+  let transactions = [], users = [];
+  function statusMatches(status, mode) {
+    const value = String(status || '').toLowerCase();
+    if (mode === 'successful') return /success|complete|delivered|approved|paid/.test(value);
+    if (mode === 'pending') return /pending|processing|queued|review/.test(value);
+    if (mode === 'failed') return /fail|reject|refund|cancel|declin|error/.test(value);
+    return true;
+  }
+  function render() {
+    const userMap = new Map(users.map(user => [user.id, user]));
+    const needle = search.value.trim().toLowerCase();
+    const rows = transactions.filter(item => {
+      const profile = userMap.get(item.uid);
+      const text = `${item.title || ''} ${item.description || ''} ${item.reference || ''} ${item.service || ''} ${item.uid || ''} ${profile?.name || ''} ${profile?.email || ''}`.toLowerCase();
+      return statusMatches(item.status, filter.value) && text.includes(needle);
+    }).sort((a, b) => (toDate(b.createdAt)?.getTime() || 0) - (toDate(a.createdAt)?.getTime() || 0));
+    count.textContent = `${rows.length} of ${transactions.length} transaction record${transactions.length === 1 ? '' : 's'} across user accounts`;
+    body.innerHTML = rows.length ? rows.map(item => {
+      const profile = userMap.get(item.uid);
+      const who = profile ? personLabel(profile) : `UID ${String(item.uid || 'unknown').slice(0, 12)}`;
+      const amount = recordAmount(item);
+      return `<tr><td><span class="table-primary">${escapeHTML(item.title || item.description || item.service || 'Account activity')}</span><span class="table-secondary">${escapeHTML(item.type || item.serviceName || 'Transaction')}</span></td><td><span class="table-primary">${escapeHTML(who)}</span><span class="table-secondary">${escapeHTML(profile?.email || item.uid || '')}</span></td><td>${escapeHTML(item.reference || item.requestID || '—')}</td><td>${escapeHTML(formatDateTime(item.createdAt))}</td><td><span class="status-pill ${statusTone(item.status)}">${escapeHTML(item.status || 'Status not supplied')}</span></td><td><strong>${amount < 0 ? '−' : '+'}${formatMoney(amount)}</strong></td></tr>`;
+    }).join('') : `<tr><td colspan="6">${transactions.length ? 'No transaction records match these filters.' : 'No transaction records have been stored for customer accounts yet.'}</td></tr>`;
+  }
+  filter.addEventListener('change', render); search.addEventListener('input', render);
+  if (await bootAdmin('admin-orders.html')) {
+    watchAdminTransactions(rows => { transactions = rows; error.hidden = true; render(); }, problem => showDataError(error, problem));
+    watchAdminUsers(rows => { users = rows; render(); }, problem => showDataError(error, problem));
+  }
+</script></body></html>

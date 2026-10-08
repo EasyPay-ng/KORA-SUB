@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Service settings — KORASUB Admin</title><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="portal.css"><link rel="icon" href="assets/favicon.ico" sizes="any"></head>
+<body class="portal-body"><div class="portal-shell"><aside id="admin-sidebar" class="portal-sidebar"></aside><main class="portal-main">
+<header class="portal-topbar"><span class="top-context">KORASUB · ADMIN WORKSPACE</span><div class="portal-user"><div class="portal-user-copy"><b data-user-name>Checking access…</b><small data-user-email></small></div><span class="portal-avatar" data-user-avatar>KS</span></div></header>
+<div id="access-message" class="access-card" role="status"></div><div id="admin-content" class="portal-content" hidden>
+  <section class="page-heading"><div><span class="heading-kicker">SERVICE CATALOG</span><h1>Service settings</h1><p>Active GSUBZ categories and service IDs returned by its public List All Services endpoint.</p></div><span class="live-indicator">GSUBZ live service list</span></section>
+  <div id="page-error" class="inline-notice error-notice" hidden></div>
+  <div class="notice-box" style="margin-bottom:16px"><span class="notice-icon">⚙</span><p><b>Live service directory, read-only settings.</b><br>GSUBZ returns the active categories and service IDs directly. No enable/disable status is invented when the provider omits it. Changes require a secured server-side settings endpoint.</p></div>
+  <section class="portal-card"><div class="card-heading"><div><h2>Connected service categories</h2><small id="category-summary">Loading live catalog…</small></div><button type="button" id="refresh-catalog" class="action-button">Refresh catalog</button></div>
+    <div class="table-wrap"><table class="data-table"><thead><tr><th>Service</th><th>Pricing flow</th><th>Availability field</th><th>Provider ID</th><th>Service group</th></tr></thead><tbody id="service-rows"><tr><td colspan="5">Loading active GSUBZ services…</td></tr></tbody></table></div>
+  </section>
+</div></main></div>
+<script type="module">
+  import { bootAdmin, showDataError } from './admin-ui.js';
+  import { apiRequest } from './firebase-client.js';
+  import { normalizeServices, serviceStatus } from './catalog-data.js';
+  import { escapeHTML, statusTone } from './app-utils.js';
+  const error = document.querySelector('#page-error');
+  const summary = document.querySelector('#category-summary');
+  const body = document.querySelector('#service-rows');
+  const refresh = document.querySelector('#refresh-catalog');
+  async function loadCatalog() {
+    refresh.disabled = true;
+    summary.textContent = 'Refreshing provider catalog…';
+    try {
+      const payload = await apiRequest('/categories');
+      const categories = normalizeServices(payload);
+      if (!categories.length) throw new Error('The provider returned no service categories.');
+      summary.textContent = `${categories.length} active GSUBZ service ID${categories.length === 1 ? '' : 's'}.`;
+      body.innerHTML = categories.map(category => {
+        const status = serviceStatus(category);
+        const tone = status === 'Enabled' ? 'success' : status === 'Paused' ? 'warning' : 'neutral';
+        const pricingMode = category.pricingMode === 'plans' ? 'Plan list' : category.pricingMode === 'amount' ? 'Amount-based' : 'Verify customer + amount';
+        return `<tr><td><span class="table-primary">${escapeHTML(category._displayName)}</span></td><td>${escapeHTML(pricingMode)}</td><td><span class="status-pill ${tone}">${escapeHTML(status)}</span></td><td>${escapeHTML(category._recordId)}</td><td>${escapeHTML(category.category || 'Not supplied')}</td></tr>`;
+      }).join('');
+      error.hidden = true;
+    } catch (problem) {
+      summary.textContent = 'Live service list unavailable.';
+      body.innerHTML = '<tr><td colspan="5">Could not load GSUBZ’s active service list.</td></tr>';
+      showDataError(error, problem, 'Provider API');
+    } finally { refresh.disabled = false; }
+  }
+  refresh.addEventListener('click', loadCatalog);
+  if (await bootAdmin('admin-services.html')) loadCatalog();
+</script></body></html>

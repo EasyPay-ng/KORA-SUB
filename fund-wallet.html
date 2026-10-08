@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fund wallet — KORASUB</title>
+  <link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="portal.css"><link rel="icon" href="assets/favicon.ico" sizes="any">
+</head>
+<body class="portal-body">
+<div class="portal-shell">
+  <aside class="portal-sidebar"><a class="brand side-brand" href="index.html"><span class="brand-mark">K</span><span>KORASUB</span></a><div class="side-label">YOUR ACCOUNT</div><nav class="side-nav" aria-label="Account navigation">
+    <a class="side-link" data-page="dashboard.html" href="dashboard.html"><span class="side-icon">⌂</span><span>Overview</span></a><a class="side-link" data-page="services.html" href="services.html"><span class="side-icon">✦</span><span>Service catalog</span></a><a class="side-link" data-page="transactions.html" href="transactions.html"><span class="side-icon">↕</span><span>Transactions</span></a><a class="side-link" data-page="fund-wallet.html" href="fund-wallet.html"><span class="side-icon">＋</span><span>Fund wallet</span></a><a class="side-link" data-page="support.html" href="support.html"><span class="side-icon">?</span><span>Support</span></a>
+  </nav><div class="side-bottom"><button class="side-link side-signout" type="button" data-signout><span class="side-icon">⇥</span><span>Sign out</span></button></div></aside>
+  <main class="portal-main"><header class="portal-topbar"><span class="top-context" data-current-date></span><div class="portal-user"><div class="portal-user-copy"><b data-user-name>Loading account…</b><small>Personal workspace</small></div><span class="portal-avatar" data-user-avatar>KS</span></div></header>
+    <div class="portal-content"><section class="page-heading"><div><span class="heading-kicker">WALLET</span><h1>Request wallet funding</h1><p>Send a request for a transfer you have already made. Requests remain pending until verified.</p></div><span class="live-indicator">Account-linked requests</span></section>
+      <div id="funding-error" class="inline-notice error-notice" hidden></div><div id="funding-success" class="inline-notice info-notice" hidden></div>
+      <section class="user-layout">
+        <div class="portal-card"><div class="card-heading"><h2>Submit a transfer reference</h2></div>
+          <div class="notice-box" style="margin-bottom:17px"><span class="notice-icon">!</span><p><b>Do not send money to unverified account details.</b><br>Use only funding instructions confirmed by KORASUB support. Submitting this form records a request; it does not add money to your balance.</p></div>
+          <form id="funding-form" class="form-stack">
+            <label class="form-label">TRANSFER AMOUNT (NGN)<input class="control-input" name="amount" type="number" min="1" step="1" required placeholder="e.g. 5000"></label>
+            <label class="form-label">TRANSFER REFERENCE<input class="control-input" name="reference" maxlength="120" required placeholder="Reference from your transfer receipt"><span class="form-hint">Enter the transaction reference so the payment can be reviewed.</span></label>
+            <button class="action-button" id="submit-funding" type="submit">Submit funding request <span aria-hidden="true">→</span></button>
+          </form>
+          <p class="muted-copy" style="margin:15px 0 0">Need verified payment instructions? <a href="support.html" style="color:#3578dd;font-weight:700">Contact support</a>.</p>
+        </div>
+        <div>
+          <div class="funding-summary"><div><small>Current wallet balance</small><strong id="wallet-balance">Loading…</strong></div><span aria-hidden="true" style="font-size:22px">◉</span></div>
+          <section class="portal-card" style="margin-top:14px"><div class="card-heading"><h2>Your recent requests</h2></div><div id="funding-requests" class="feed-list"><p class="feed-empty">Loading funding requests…</p></div></section>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+<script type="module">
+  import { bootApp } from './app-shell.js';
+  import { watchWallet, watchFundingRequests, createFundingRequest } from './firebase-client.js';
+  import { escapeHTML, formatMoney, formatDateTime, recordDate, statusTone } from './app-utils.js';
+  const form = document.querySelector('#funding-form');
+  const submit = document.querySelector('#submit-funding');
+  const error = document.querySelector('#funding-error');
+  const success = document.querySelector('#funding-success');
+  let accountUser = null;
+  function showError(message) { error.textContent = message; error.hidden = false; success.hidden = true; }
+  function showSuccess(message) { success.textContent = message; success.hidden = false; error.hidden = true; }
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+    const amount = Number(form.elements.amount.value);
+    const reference = form.elements.reference.value.trim();
+    if (!Number.isFinite(amount) || amount <= 0 || !reference) return showError('Enter a valid amount and transfer reference.');
+    const user = accountUser;
+    if (!user) return showError('Your account is still loading. Please try again.');
+    submit.disabled = true;
+    submit.textContent = 'Submitting request…';
+    try {
+      await createFundingRequest(user.uid, amount, reference);
+      form.reset();
+      showSuccess('Funding request submitted. Your wallet will change only after an authorized review.');
+    } catch (problem) {
+      showError(`The funding request could not be submitted: ${problem?.message || 'check your connection and try again'}`);
+    } finally {
+      submit.disabled = false;
+      submit.innerHTML = 'Submit funding request <span aria-hidden="true">→</span>';
+    }
+  });
+  document.addEventListener('korasub:authenticated', event => {
+    const user = event.detail.user;
+    accountUser = user;
+    watchWallet(user.uid, value => { document.querySelector('#wallet-balance').textContent = formatMoney(value); }, problem => showError(`Wallet balance unavailable: ${problem?.message || 'check account access'}`));
+    watchFundingRequests(user.uid, rows => {
+      document.querySelector('#funding-requests').innerHTML = rows.length ? rows.slice(0, 5).map(item => `<div class="feed-row"><span class="feed-icon">＋</span><div class="feed-copy"><b>${escapeHTML(item.reference || 'Wallet funding request')}</b><small>${escapeHTML(formatDateTime(recordDate(item)))}</small></div><span class="status-pill ${statusTone(item.status)}">${escapeHTML(item.status || 'Status not supplied')}</span><span class="feed-amount">${formatMoney(item.amount)}</span></div>`).join('') : '<p class="feed-empty">You have not submitted any funding requests yet.</p>';
+    }, problem => showError(`Funding requests unavailable: ${problem?.message || 'check account access'}`));
+  });
+  bootApp('fund-wallet.html');
+</script>
+</body>
+</html>

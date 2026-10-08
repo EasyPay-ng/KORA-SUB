@@ -1,20 +1,75 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dashboard — KORASUB</title><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="styles.css"><style>body{background:#f7f9fc}.app{display:flex;min-height:100vh}.sidebar{width:245px;background:#fff;border-right:1px solid #e9edf3;padding:26px 18px}.side-label{font-size:10px;color:#a0a8b5;font-weight:700;letter-spacing:.12em;margin:42px 12px 12px}.side-link{display:flex;gap:12px;padding:12px;border-radius:10px;color:#697588;font-size:13px;margin:3px 0}.side-link.active,.side-link:hover{color:#246bdb;background:#edf4ff;font-weight:700}.main{flex:1;padding:28px 42px;max-width:1400px}.dash-top{display:flex;justify-content:space-between;align-items:center}.dash-top h1{font:700 27px 'Plus Jakarta Sans';letter-spacing:-.05em;margin:0}.muted{color:#8792a4;font-size:13px}.avatar{width:38px;height:38px;border-radius:50%;background:#dae8ff;color:#246bdb;display:grid;place-items:center;font-weight:700}.balance-card{margin-top:35px;background:linear-gradient(115deg,#1d66d2,#5a43d5);color:#fff;border-radius:18px;padding:25px 28px;max-width:600px;position:relative;overflow:hidden}.balance-card:after{content:'';position:absolute;width:230px;height:230px;border:35px solid #ffffff15;border-radius:50%;right:-70px;top:-120px}.balance-card small{color:#c6d9ff}.balance-card strong{display:block;font:700 35px 'Plus Jakarta Sans';margin:12px 0 19px;letter-spacing:-.06em}.balance-actions{display:flex;gap:9px}.balance-actions a{padding:9px 12px;border-radius:8px;background:#ffffff20;font-size:12px}.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:29px 0}.quick a{padding:18px;border:1px solid #e9edf3;background:white;border-radius:13px;font-size:12px}.quick i{display:grid;place-items:center;width:32px;height:32px;border-radius:10px;background:#edf4ff;color:#246bdb;font-style:normal;font-size:17px;margin-bottom:13px}.quick b{display:block}.quick small{color:#95a0b0;display:block;margin-top:4px}.panel{background:#fff;border:1px solid #e9edf3;border-radius:15px;padding:22px}.panel-head{display:flex;justify-content:space-between;margin-bottom:14px}.panel h3{font-size:15px;margin:0}.panel a{color:#246bdb;font-size:12px;font-weight:700}.tx{display:flex;align-items:center;padding:13px 0;border-top:1px solid #eff1f5;font-size:12px}.tx-icon{width:34px;height:34px;border-radius:10px;background:#eef6ff;color:#246bdb;display:grid;place-items:center;margin-right:11px}.tx small{display:block;color:#98a2b1;margin-top:4px}.tx strong{margin-left:auto}.positive{color:#1ca670}.bottom-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:18px}@media(max-width:800px){.sidebar{display:none}.main{padding:20px}.quick{grid-template-columns:1fr 1fr}.bottom-grid{grid-template-columns:1fr}}
-</style><link rel="icon" href="assets/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png"><link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png"><meta name="theme-color" content="#246bdb">
-</head><body><div class="app"><aside class="sidebar"><a class="brand" href="index.html"><span class="brand-mark">K</span><span>KORASUB</span></a><div class="side-label">MENU</div><a class="side-link active" href="dashboard.html">⌂ &nbsp;Overview</a><a class="side-link" href="#services">✦ &nbsp;Buy a service</a><a class="side-link" href="#transactions">↕ &nbsp;Transactions</a><a class="side-link" href="#wallet">＋ &nbsp;Fund wallet</a><div class="side-label">ACCOUNT</div><a class="side-link" href="#support">? &nbsp;Support</a><a class="side-link" href="index.html">↪ &nbsp;Sign out</a></aside><main class="main"><div class="dash-top"><div><p class="muted">Tuesday, 6 October 2026</p><h1 id="greeting">Hello 👋</h1></div><div class="avatar">BW</div></div><section class="balance-card"><small>Available wallet balance</small><strong id="balance">₦0.00</strong><div class="balance-actions"><a href="#wallet">＋ Add funds</a><a href="#transactions">View history →</a></div></section><div class="quick" id="services"><a href="#"><i>⌁</i><b>Airtime</b><small>Top up any network</small></a><a href="#"><i>⌁</i><b>Data</b><small>Browse data plans</small></a><a href="#"><i>ϟ</i><b>Electricity</b><small>Pay your bill</small></a><a href="#"><i>▤</i><b>Exam pins</b><small>Get a result pin</small></a></div><div class="bottom-grid"><section class="panel" id="transactions"><div class="panel-head"><h3>Recent transactions</h3><a href="#">View all</a></div><div id="tx-list"></div></section><section class="panel" id="wallet"><div class="panel-head"><h3>Need help?</h3></div><p class="muted" style="line-height:1.7">Our support team is available to help with orders, wallet funding and refunds.</p><a class="btn btn-primary" href="mailto:beniwealth70@gmail.com">Contact support</a></section></div></main></div><script type="module">
-import {auth,onAuthStateChanged,watchWallet,watchTransactions} from './firebase-client.js';
-const money=n=>'₦'+Number(n||0).toLocaleString('en-NG',{minimumFractionDigits:2,maximumFractionDigits:2});
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let stopWallet=null,stopTx=null;
-onAuthStateChanged(auth,user=>{
-  if(!user){location.replace('login.html');return;}
-  document.getElementById('greeting').textContent=`Hello, ${user.displayName||'there'} 👋`;
-  stopWallet?.(); stopTx?.();
-  stopWallet=watchWallet(user.uid,b=>{document.getElementById('balance').textContent=money(b)});
-  stopTx=watchTransactions(user.uid,list=>{
-    document.getElementById('tx-list').innerHTML=list.length?list.map(t=>{
-      const amt=Number(t.amount||0);
-      return `<div class="tx"><span class="tx-icon">${amt<0?'⌁':'＋'}</span><div><b>${esc(t.title)}</b><small>${esc(t.status)}</small></div><strong class="${amt>=0?'positive':''}">${amt<0?'−':'+'}${money(Math.abs(amt))}</strong></div>`;
-    }).join(''):'<p class="muted">No transactions yet.</p>';
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dashboard — KORASUB</title>
+  <link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="portal.css">
+  <link rel="icon" href="assets/favicon.ico" sizes="any"><meta name="theme-color" content="#15374c">
+</head>
+<body class="portal-body">
+<div class="portal-shell">
+  <aside class="portal-sidebar">
+    <a class="brand side-brand" href="index.html"><span class="brand-mark">K</span><span>KORASUB</span></a>
+    <div class="side-label">YOUR ACCOUNT</div>
+    <nav class="side-nav" aria-label="Account navigation">
+      <a class="side-link" data-page="dashboard.html" href="dashboard.html"><span class="side-icon" aria-hidden="true">⌂</span><span>Overview</span></a>
+      <a class="side-link" data-page="services.html" href="services.html"><span class="side-icon" aria-hidden="true">✦</span><span>Service catalog</span></a>
+      <a class="side-link" data-page="transactions.html" href="transactions.html"><span class="side-icon" aria-hidden="true">↕</span><span>Transactions</span></a>
+      <a class="side-link" data-page="fund-wallet.html" href="fund-wallet.html"><span class="side-icon" aria-hidden="true">＋</span><span>Fund wallet</span></a>
+      <a class="side-link" data-page="support.html" href="support.html"><span class="side-icon" aria-hidden="true">?</span><span>Support</span></a>
+    </nav>
+    <div class="side-bottom"><button class="side-link side-signout" type="button" data-signout><span class="side-icon" aria-hidden="true">⇥</span><span>Sign out</span></button></div>
+  </aside>
+  <main class="portal-main">
+    <header class="portal-topbar"><span class="top-context" data-current-date></span><div class="portal-user"><div class="portal-user-copy"><b data-user-name>Loading account…</b><small>Personal workspace</small></div><span class="portal-avatar" data-user-avatar>KS</span></div></header>
+    <div class="portal-content">
+      <section class="page-heading"><div><span class="heading-kicker">YOUR KORASUB ACCOUNT</span><h1 id="greeting">Welcome back</h1><p>Your wallet and account activity, straight from your live profile.</p></div><span class="live-indicator">Live account data</span></section>
+      <div id="dashboard-error" class="inline-notice error-notice" hidden></div>
+      <section class="user-layout">
+        <div>
+          <section class="balance-panel"><small>Available wallet balance</small><strong id="balance">Loading…</strong><div class="balance-links"><a href="fund-wallet.html">＋ Request funding</a><a href="transactions.html">View activity →</a></div></section>
+          <div class="quick-grid" style="margin-top:15px">
+            <a class="quick-card" href="services.html"><span class="quick-icon">✦</span><b>Browse services</b><small>See plans returned by the live provider catalog.</small></a>
+            <a class="quick-card" href="fund-wallet.html"><span class="quick-icon">＋</span><b>Request wallet funding</b><small id="funding-summary">Submit a transfer reference for review.</small></a>
+            <a class="quick-card" href="transactions.html"><span class="quick-icon">↕</span><b>Transaction history</b><small>Review activity recorded on your account.</small></a>
+            <a class="quick-card" href="support.html"><span class="quick-icon">?</span><b>Get support</b><small>Contact KORASUB about an account issue.</small></a>
+          </div>
+        </div>
+        <section class="portal-card"><div class="card-heading"><h2>Recent transactions</h2><a href="transactions.html">View all →</a></div><div id="recent-transactions" class="feed-list"><p class="feed-empty">Loading transactions from your account…</p></div></section>
+      </section>
+      <section class="portal-card" style="margin-top:17px"><div class="card-heading"><h2>Wallet funding requests</h2><a href="fund-wallet.html">Open wallet →</a></div><div id="recent-funding" class="feed-list"><p class="feed-empty">Loading your funding requests…</p></div></section>
+    </div>
+  </main>
+</div>
+<script type="module">
+  import { bootApp } from './app-shell.js';
+  import { watchWallet, watchTransactions, watchFundingRequests } from './firebase-client.js';
+  import { escapeHTML, formatMoney, formatDateTime, relativeTime, recordAmount, recordDate, statusTone, transactionStatus } from './app-utils.js';
+  const errorBox = document.querySelector('#dashboard-error');
+  const transactionList = document.querySelector('#recent-transactions');
+  const fundingList = document.querySelector('#recent-funding');
+  const money = value => formatMoney(value, 2);
+  function errorHandler(error) { errorBox.hidden = false; errorBox.textContent = `Some live account data could not be loaded: ${error?.message || 'check your connection and account access'}`; }
+  function renderTransactions(rows) {
+    transactionList.innerHTML = rows.length ? rows.slice(0, 5).map((item) => {
+      const amount = recordAmount(item);
+      const status = transactionStatus(item.status);
+      return `<div class="feed-row"><span class="feed-icon" aria-hidden="true">${amount < 0 ? '↘' : '＋'}</span><div class="feed-copy"><b>${escapeHTML(item.title || item.description || item.service || 'Account activity')}</b><small>${escapeHTML(relativeTime(recordDate(item)))} · <span class="status-pill ${statusTone(status)}">${escapeHTML(status)}</span></small></div><span class="feed-amount">${amount < 0 ? '−' : '+'}${money(amount)}</span></div>`;
+    }).join('') : '<p class="feed-empty">No transactions have been recorded on this account yet.</p>';
+  }
+  function renderFunding(rows) {
+    const pending = rows.filter(item => String(item.status || '').toLowerCase() === 'pending').length;
+    document.querySelector('#funding-summary').textContent = pending ? `${pending} request${pending === 1 ? '' : 's'} awaiting review.` : 'No funding requests are awaiting review.';
+    fundingList.innerHTML = rows.length ? rows.slice(0, 3).map(item => `<div class="feed-row"><span class="feed-icon" aria-hidden="true">＋</span><div class="feed-copy"><b>${escapeHTML(item.reference || 'Wallet funding request')}</b><small>${escapeHTML(formatDateTime(recordDate(item)))}</small></div><span class="status-pill ${statusTone(item.status)}">${escapeHTML(item.status || 'Status not supplied')}</span><span class="feed-amount">${money(item.amount)}</span></div>`).join('') : '<p class="feed-empty">No funding requests have been submitted yet.</p>';
+  }
+  document.addEventListener('korasub:authenticated', (event) => {
+    const user = event.detail.user;
+    const firstName = user.displayName?.trim().split(/\s+/)[0] || user.email?.split('@')[0] || 'there';
+    document.querySelector('#greeting').textContent = `Welcome, ${firstName}`;
+    watchWallet(user.uid, value => { document.querySelector('#balance').textContent = money(value); }, errorHandler);
+    watchTransactions(user.uid, renderTransactions, 10, errorHandler);
+    watchFundingRequests(user.uid, renderFunding, errorHandler);
   });
-});
-</script></body></html>
+  bootApp('dashboard.html');
+</script>
+</body>
+</html>

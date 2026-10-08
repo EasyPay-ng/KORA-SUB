@@ -1,3 +1,94 @@
-<!doctype html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin — KORASUB</title><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="styles.css"><style>body{background:#f7f9fc}.admin{max-width:1200px;margin:auto;padding:28px}.admin-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:35px}.admin-head h1{font:700 27px 'Plus Jakarta Sans';letter-spacing:-.06em}.admin-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.stat,.admin-panel{background:#fff;border:1px solid #e7ebf2;border-radius:14px;padding:20px}.stat small{color:#8994a5;font-size:12px}.stat strong{display:block;font:700 25px 'Plus Jakarta Sans';margin-top:13px}.stat em{font-style:normal;color:#1ca670;font-size:11px}.admin-panel{margin-top:18px}.admin-panel h3{font-size:15px;margin:0 0 17px}.request{display:flex;align-items:center;gap:13px;border-top:1px solid #edf0f4;padding:14px 0;font-size:13px}.request:first-of-type{border-top:0}.request small{display:block;color:#929cab;margin-top:4px}.request .actions{margin-left:auto;display:flex;gap:7px}.approve,.reject{border:0;border-radius:7px;padding:8px 10px;font-weight:700;font-size:11px}.approve{background:#e6f8ef;color:#159465}.reject{background:#fff0ef;color:#da5b58}@media(max-width:750px){.admin-grid{grid-template-columns:1fr 1fr}}
-</style><link rel="icon" href="assets/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png"><link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png"><meta name="theme-color" content="#246bdb">
-</head><body><main class="admin"><div class="admin-head"><div><a class="brand" href="index.html"><span class="brand-mark">K</span><span>KORASUB</span></a><h1>Admin overview</h1><p class="muted">Manage your platform from one place.</p></div><div class="avatar">BW</div></div><div class="admin-grid"><div class="stat"><small>Wallet balance</small><strong>₦184,250</strong><em>GSUBZ wallet</em></div><div class="stat"><small>Today’s revenue</small><strong>₦42,800</strong><em>↑ 12.4% this week</em></div><div class="stat"><small>Active users</small><strong>1,248</strong><em>↑ 8.2% this month</em></div><div class="stat"><small>Pending actions</small><strong>7</strong><em style="color:#e69729">Needs review</em></div></div><section class="admin-panel"><h3>Pending wallet funding requests</h3><div class="request"><span class="avatar">AO</span><div><b>Amaka Okafor</b><small>₦15,000 · Transfer ref KSB-1042 · 12 min ago</small></div><div class="actions"><button class="approve">Approve</button><button class="reject">Reject</button></div></div><div class="request"><span class="avatar">TM</span><div><b>Tunde Michael</b><small>₦5,000 · Transfer ref KSB-1041 · 38 min ago</small></div><div class="actions"><button class="approve">Approve</button><button class="reject">Reject</button></div></div></section><section class="admin-panel"><h3>Quick controls</h3><div class="quick"><a href="#"><i>₦</i><b>Wallet ledger</b><small>Credit or debit users</small></a><a href="#"><i>↔</i><b>Orders & refunds</b><small>Review failed orders</small></a><a href="#"><i>%</i><b>Pricing & markup</b><small>Current markup: 10%</small></a><a href="#"><i>⚙</i><b>Service settings</b><small>Enable or pause services</small></a></div></section></main><script type="module">import {auth,onAuthStateChanged} from './firebase-client.js';import {ADMIN_EMAIL} from './firebase-config.js';onAuthStateChanged(auth,user=>{if(!user) location.replace('login.html');else if(user.email!==ADMIN_EMAIL){alert('Admin access is restricted.');location.replace('dashboard.html');}});</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin overview — KORASUB</title>
+  <link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="portal.css"><link rel="icon" href="assets/favicon.ico" sizes="any"><meta name="theme-color" content="#15374c">
+</head>
+<body class="portal-body">
+<div class="portal-shell">
+  <aside id="admin-sidebar" class="portal-sidebar"></aside>
+  <main class="portal-main">
+    <header class="portal-topbar"><span class="top-context">KORASUB · ADMIN WORKSPACE</span><div class="portal-user"><div class="portal-user-copy"><b data-user-name>Checking access…</b><small data-user-email></small></div><span class="portal-avatar" data-user-avatar>KS</span></div></header>
+    <div id="access-message" class="access-card" role="status"></div>
+    <div id="admin-content" class="portal-content" hidden>
+      <section class="page-heading"><div><span class="heading-kicker">ADMINISTRATION</span><h1>Platform overview</h1><p>Live summaries from Firebase records. Empty values mean no matching records are stored.</p></div><span class="live-indicator">Live Firebase data</span></section>
+      <div id="dashboard-data-error" class="inline-notice error-notice" hidden></div>
+      <section class="stats-grid admin-stats" aria-label="Platform metrics">
+        <article class="stat-card"><div class="stat-top"><span class="stat-label">Customer wallet balances</span><span class="stat-glyph">₦</span></div><strong id="total-balances" class="stat-value">Loading…</strong><small class="stat-note">Sum of balances in user profiles</small></article>
+        <article class="stat-card"><div class="stat-top"><span class="stat-label">Registered profiles</span><span class="stat-glyph">◎</span></div><strong id="user-count" class="stat-value">Loading…</strong><small class="stat-note">Profiles currently in Firestore</small></article>
+        <article class="stat-card"><div class="stat-top"><span class="stat-label">Completed service spend today</span><span class="stat-glyph">↘</span></div><strong id="today-spend" class="stat-value">Loading…</strong><small class="stat-note">Successful debit records created today</small></article>
+        <article class="stat-card"><div class="stat-top"><span class="stat-label">Pending funding requests</span><span class="stat-glyph">＋</span></div><strong id="pending-count" class="stat-value">Loading…</strong><small id="pending-total" class="stat-note">From live funding request records</small></article>
+        <article class="stat-card"><div class="stat-top"><span class="stat-label">GSUBZ provider wallet</span><span class="stat-glyph">◉</span></div><strong id="provider-balance" class="stat-value">Checking…</strong><small id="provider-balance-note" class="stat-note">Read securely from GSUBZ</small></article>
+      </section>
+      <div class="portal-grid">
+        <section class="portal-card"><div class="card-heading"><div><h2>Funding requests needing review</h2><small>Latest pending requests in Firestore</small></div><a href="admin-funding.html">Review all →</a></div><div id="pending-requests" class="feed-list"><p class="feed-empty">Waiting for Firebase data…</p></div></section>
+        <section class="portal-card"><div class="card-heading"><div><h2>Quick controls</h2><small>Open each section for its live records</small></div></div><div class="quick-grid">
+          <a class="quick-card" href="admin-ledger.html"><span class="quick-icon">▤</span><b>Wallet ledger</b><small>View immutable server-side wallet entries.</small></a>
+          <a class="quick-card" href="admin-orders.html"><span class="quick-icon">↔</span><b>Orders & refunds</b><small>Review transaction records and statuses.</small></a>
+          <a class="quick-card" href="admin-pricing.html"><span class="quick-icon">%</span><b>Pricing & markup</b><small>Inspect provider plans and returned prices.</small></a>
+          <a class="quick-card" href="admin-services.html"><span class="quick-icon">⚙</span><b>Service settings</b><small>Browse active GSUBZ service groups and IDs.</small></a>
+        </div></section>
+      </div>
+      <section class="portal-card" style="margin-top:17px"><div class="card-heading"><div><h2>Latest transaction records</h2><small>Read from each user’s transaction subcollection</small></div><a href="admin-orders.html">Open transaction review →</a></div><div id="latest-transactions" class="feed-list"><p class="feed-empty">Waiting for Firebase data…</p></div></section>
+      <p class="muted-copy" style="margin-top:13px">Sensitive actions are intentionally server-side only. This console does not write balances, approve funding, or issue refunds from browser code.</p>
+    </div>
+  </main>
+</div>
+<script type="module">
+  import { bootAdmin, showDataError, hideDataNotice } from './admin-ui.js';
+  import { apiRequest, watchAdminUsers, watchAdminFundingRequests, watchAdminTransactions } from './firebase-client.js';
+  import { formatMoney, formatDateTime, relativeTime, recordAmount, recordDate, statusTone, personLabel, escapeHTML, numberValue, toDate } from './app-utils.js';
+  const errorBox = document.querySelector('#dashboard-data-error');
+  const state = { users: [], funding: [], transactions: [] };
+  const isPending = item => String(item.status || '').toLowerCase() === 'pending';
+  const userMap = () => new Map(state.users.map(user => [user.id, user]));
+  function render() {
+    const balances = state.users.reduce((sum, user) => sum + Math.max(0, numberValue(user.balance)), 0);
+    const pending = state.funding.filter(isPending);
+    const now = new Date();
+    const today = state.transactions.reduce((sum, item) => {
+      const created = toDate(recordDate(item));
+      const amount = recordAmount(item);
+      const successful = /success|complete|delivered|approved|paid/i.test(String(item.status || ''));
+      if (created && created.toDateString() === now.toDateString() && successful && amount < 0) return sum + Math.abs(amount);
+      return sum;
+    }, 0);
+    document.querySelector('#total-balances').textContent = formatMoney(balances);
+    document.querySelector('#user-count').textContent = state.users.length.toLocaleString('en-NG');
+    document.querySelector('#today-spend').textContent = formatMoney(today);
+    document.querySelector('#pending-count').textContent = pending.length.toLocaleString('en-NG');
+    document.querySelector('#pending-total').textContent = `${formatMoney(pending.reduce((sum, item) => sum + numberValue(item.amount), 0))} requested across pending records`;
+    const users = userMap();
+    const recentPending = [...pending].sort((a, b) => (toDate(recordDate(b))?.getTime() || 0) - (toDate(recordDate(a))?.getTime() || 0)).slice(0, 5);
+    document.querySelector('#pending-requests').innerHTML = recentPending.length ? recentPending.map(item => {
+      const profile = users.get(item.uid);
+      const name = profile ? personLabel(profile) : `UID ${String(item.uid || 'unknown').slice(0, 12)}`;
+      return `<div class="feed-row"><span class="feed-icon">＋</span><div class="feed-copy"><b>${escapeHTML(name)}</b><small>${escapeHTML(item.reference || 'No reference supplied')} · ${escapeHTML(relativeTime(recordDate(item)))}</small></div><span class="feed-amount">${formatMoney(item.amount)}</span></div>`;
+    }).join('') : '<p class="feed-empty">There are no pending funding requests in Firestore.</p>';
+    const recentTx = state.transactions.slice(0, 5);
+    document.querySelector('#latest-transactions').innerHTML = recentTx.length ? recentTx.map(item => {
+      const profile = users.get(item.uid);
+      const status = item.status || 'Status not supplied';
+      const amount = recordAmount(item);
+      return `<div class="feed-row"><span class="feed-icon">${amount < 0 ? '↘' : '＋'}</span><div class="feed-copy"><b>${escapeHTML(item.title || item.description || 'Account activity')}</b><small>${escapeHTML(personLabel(profile))} · ${escapeHTML(formatDateTime(recordDate(item)))} · <span class="status-pill ${statusTone(status)}">${escapeHTML(status)}</span></small></div><span class="feed-amount">${amount < 0 ? '−' : '+'}${formatMoney(amount)}</span></div>`;
+    }).join('') : '<p class="feed-empty">No user transaction records have been stored yet.</p>';
+  }
+  const admin = await bootAdmin('admin.html');
+  if (admin) {
+    watchAdminUsers(rows => { state.users = rows; hideDataNotice(errorBox); render(); }, error => showDataError(errorBox, error));
+    watchAdminFundingRequests(rows => { state.funding = rows; hideDataNotice(errorBox); render(); }, error => showDataError(errorBox, error));
+    watchAdminTransactions(rows => { state.transactions = rows; hideDataNotice(errorBox); render(); }, error => showDataError(errorBox, error));
+    const balanceValue = document.querySelector('#provider-balance');
+    const balanceNote = document.querySelector('#provider-balance-note');
+    try {
+      const provider = await apiRequest('/balance');
+      balanceValue.textContent = formatMoney(provider.balance);
+      balanceNote.textContent = `Checked ${formatDateTime(provider.checkedAt)}`;
+    } catch (problem) {
+      balanceValue.textContent = problem.message?.includes('GSUBZ_API_KEY') ? 'Not configured' : 'Unavailable';
+      balanceNote.textContent = problem.message || 'Provider wallet could not be checked.';
+    }
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Wallet ledger — KORASUB Admin</title><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="portal.css"><link rel="icon" href="assets/favicon.ico" sizes="any"></head>
+<body class="portal-body"><div class="portal-shell"><aside id="admin-sidebar" class="portal-sidebar"></aside><main class="portal-main">
+<header class="portal-topbar"><span class="top-context">KORASUB · ADMIN WORKSPACE</span><div class="portal-user"><div class="portal-user-copy"><b data-user-name>Checking access…</b><small data-user-email></small></div><span class="portal-avatar" data-user-avatar>KS</span></div></header>
+<div id="access-message" class="access-card" role="status"></div><div id="admin-content" class="portal-content" hidden>
+  <section class="page-heading"><div><span class="heading-kicker">FINANCIAL AUDIT</span><h1>Wallet ledger</h1><p>Immutable financial entries recorded by the trusted server.</p></div><span class="live-indicator">Live Firebase data</span></section>
+  <div id="page-error" class="inline-notice error-notice" hidden></div>
+  <div class="notice-box" style="margin-bottom:16px"><span class="notice-icon">▤</span><p><b>Read-only audit view.</b><br>Ledger writes are denied to browser clients by Firestore rules. Any credit or debit must be created by the trusted wallet backend.</p></div>
+  <section class="portal-card"><div class="card-heading"><div><h2>Ledger entries</h2><small id="entry-count">Loading ledger records…</small></div></div><div class="filter-row"><input id="search" class="control-input" type="search" aria-label="Search ledger entries" placeholder="Search account, reference, or entry type"></div>
+    <div class="table-wrap"><table class="data-table"><thead><tr><th>Date</th><th>Entry</th><th>Customer</th><th>Reference</th><th>Amount</th><th>Balance after</th></tr></thead><tbody id="ledger-rows"><tr><td colspan="6">Loading ledger records…</td></tr></tbody></table></div>
+  </section>
+</div></main></div>
+<script type="module">
+  import { bootAdmin, showDataError } from './admin-ui.js';
+  import { watchAdminLedger, watchAdminUsers } from './firebase-client.js';
+  import { escapeHTML, formatMoney, formatDateTime, recordAmount, statusTone, personLabel, toDate } from './app-utils.js';
+  let entries = [], users = [];
+  const body = document.querySelector('#ledger-rows');
+  const count = document.querySelector('#entry-count');
+  const error = document.querySelector('#page-error');
+  const search = document.querySelector('#search');
+  function render() {
+    const map = new Map(users.map(user => [user.id, user]));
+    const needle = search.value.trim().toLowerCase();
+    const list = entries.filter(item => {
+      const profile = map.get(item.uid || item.userId);
+      return `${profile?.name || ''} ${profile?.email || ''} ${item.reference || ''} ${item.type || ''} ${item.entryType || ''} ${item.description || ''} ${item.id || ''}`.toLowerCase().includes(needle);
+    }).sort((a, b) => (toDate(b.createdAt || b.timestamp)?.getTime() || 0) - (toDate(a.createdAt || a.timestamp)?.getTime() || 0));
+    count.textContent = `${list.length} ledger entr${list.length === 1 ? 'y' : 'ies'}${entries.length ? '' : ' · no entries recorded'}`;
+    body.innerHTML = list.length ? list.map(item => {
+      const uid = item.uid || item.userId;
+      const profile = map.get(uid);
+      const who = profile ? personLabel(profile) : (uid ? `UID ${String(uid).slice(0, 12)}` : 'Account not supplied');
+      const amount = recordAmount(item);
+      const type = item.type || item.entryType || item.description || 'Ledger entry';
+      const balanceAfter = item.balanceAfter ?? item.afterBalance;
+      return `<tr><td>${escapeHTML(formatDateTime(item.createdAt || item.timestamp))}</td><td><span class="table-primary">${escapeHTML(type)}</span><span class="table-secondary"><span class="status-pill ${statusTone(item.status)}">${escapeHTML(item.status || item.direction || 'Recorded')}</span></span></td><td><span class="table-primary">${escapeHTML(who)}</span><span class="table-secondary">${escapeHTML(profile?.email || uid || '')}</span></td><td>${escapeHTML(item.reference || item.requestID || '—')}</td><td><strong>${amount < 0 ? '−' : '+'}${formatMoney(amount)}</strong></td><td>${balanceAfter === undefined ? '—' : formatMoney(balanceAfter)}</td></tr>`;
+    }).join('') : `<tr><td colspan="6">${entries.length ? 'No ledger entries match this search.' : 'No ledger entries have been recorded yet.'}</td></tr>`;
+  }
+  search.addEventListener('input', render);
+  if (await bootAdmin('admin-ledger.html')) {
+    watchAdminLedger(rows => { entries = rows; error.hidden = true; render(); }, problem => showDataError(error, problem));
+    watchAdminUsers(rows => { users = rows; render(); }, problem => showDataError(error, problem));
+  }
+</script></body></html>

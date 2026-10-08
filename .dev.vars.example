@@ -1,0 +1,3 @@
+# Copy to .dev.vars for local Wrangler development (the real file is gitignored).
+# Paste your private key locally only; do not commit it or send it in chat.
+GSUBZ_API_KEY=ap_replace_this_locally
