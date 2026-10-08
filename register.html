@@ -35,7 +35,7 @@
   </main>
 </div>
 <script type="module">
-  import { auth, googleProvider, signInWithPopup, createUserWithEmailAndPassword, updateProfile, ensureUserProfile } from './store.js';
+  import { auth, googleProvider, signInWithPopup, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, ensureUserProfile } from './store.js';
   const error = document.querySelector('#error');
   const submit = document.querySelector('#submit');
   const messages = {
@@ -54,6 +54,9 @@
       const result = await createUserWithEmailAndPassword(auth, document.querySelector('#email').value.trim(), document.querySelector('#password').value);
       await updateProfile(result.user, { displayName: name });
       await ensureUserProfile(result.user, name);
+      try { await sendEmailVerification(result.user); }
+      catch { /* account is created either; the profile page offers a resend link */ }
+      sessionStorage.setItem('verify-email-sent', result.user.email || '');
       location.replace('profile.html');
     } catch (problem) {
       error.textContent = messages[problem?.code] || 'Unable to create the account. Check your connection and try again.';
