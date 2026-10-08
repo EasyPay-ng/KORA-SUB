@@ -1,75 +1,68 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dashboard — KORASUB</title>
-  <link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="portal.css">
-  <link rel="icon" href="assets/favicon.ico" sizes="any"><meta name="theme-color" content="#15374c">
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>My account — KORASTORE</title>
+  <link rel="stylesheet" href="store.css">
+  <link rel="icon" href="assets/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png"><meta name="theme-color" content="#0b2545">
 </head>
-<body class="portal-body">
-<div class="portal-shell">
-  <aside class="portal-sidebar">
-    <a class="brand side-brand" href="index.html"><span class="brand-mark">K</span><span>KORASUB</span></a>
-    <div class="side-label">YOUR ACCOUNT</div>
-    <nav class="side-nav" aria-label="Account navigation">
-      <a class="side-link" data-page="dashboard.html" href="dashboard.html"><span class="side-icon" aria-hidden="true">⌂</span><span>Overview</span></a>
-      <a class="side-link" data-page="services.html" href="services.html"><span class="side-icon" aria-hidden="true">✦</span><span>Service catalog</span></a>
-      <a class="side-link" data-page="transactions.html" href="transactions.html"><span class="side-icon" aria-hidden="true">↕</span><span>Transactions</span></a>
-      <a class="side-link" data-page="fund-wallet.html" href="fund-wallet.html"><span class="side-icon" aria-hidden="true">＋</span><span>Fund wallet</span></a>
-      <a class="side-link" data-page="support.html" href="support.html"><span class="side-icon" aria-hidden="true">?</span><span>Support</span></a>
-    </nav>
-    <div class="side-bottom"><button class="side-link side-signout" type="button" data-signout><span class="side-icon" aria-hidden="true">⇥</span><span>Sign out</span></button></div>
-  </aside>
-  <main class="portal-main">
-    <header class="portal-topbar"><span class="top-context" data-current-date></span><div class="portal-user"><div class="portal-user-copy"><b data-user-name>Loading account…</b><small>Personal workspace</small></div><span class="portal-avatar" data-user-avatar>KS</span></div></header>
-    <div class="portal-content">
-      <section class="page-heading"><div><span class="heading-kicker">YOUR KORASUB ACCOUNT</span><h1 id="greeting">Welcome back</h1><p>Your wallet and account activity, straight from your live profile.</p></div><span class="live-indicator">Live account data</span></section>
-      <div id="dashboard-error" class="inline-notice error-notice" hidden></div>
-      <section class="user-layout">
-        <div>
-          <section class="balance-panel"><small>Available wallet balance</small><strong id="balance">Loading…</strong><div class="balance-links"><a href="fund-wallet.html">＋ Request funding</a><a href="transactions.html">View activity →</a></div></section>
-          <div class="quick-grid" style="margin-top:15px">
-            <a class="quick-card" href="services.html"><span class="quick-icon">✦</span><b>Browse services</b><small>See plans returned by the live provider catalog.</small></a>
-            <a class="quick-card" href="fund-wallet.html"><span class="quick-icon">＋</span><b>Request wallet funding</b><small id="funding-summary">Submit a transfer reference for review.</small></a>
-            <a class="quick-card" href="transactions.html"><span class="quick-icon">↕</span><b>Transaction history</b><small>Review activity recorded on your account.</small></a>
-            <a class="quick-card" href="support.html"><span class="quick-icon">?</span><b>Get support</b><small>Contact KORASUB about an account issue.</small></a>
-          </div>
-        </div>
-        <section class="portal-card"><div class="card-heading"><h2>Recent transactions</h2><a href="transactions.html">View all →</a></div><div id="recent-transactions" class="feed-list"><p class="feed-empty">Loading transactions from your account…</p></div></section>
+<body>
+<div id="site-header"></div>
+<main class="wrap page">
+  <div class="page-head">
+    <div><span class="eyebrow">Your account</span><h1 id="greeting">Welcome</h1><p>Your wallet, delivery location and recent activity in one place.</p></div>
+  </div>
+  <div id="account-tabs"></div>
+  <div class="grid-2">
+    <div class="stack">
+      <section class="balance-card">
+        <span class="chip-art" aria-hidden="true"></span>
+        <div><small>Wallet balance</small><br><strong id="balance">₦0</strong></div>
+        <div class="row"><a class="btn btn-gold btn-sm" href="wallet.html">+ Fund wallet</a><a class="btn btn-sm btn-ghost" href="shop.html" style="background:transparent;color:#fff;border-color:rgba(255,255,255,.3)">Shop now →</a></div>
       </section>
-      <section class="portal-card" style="margin-top:17px"><div class="card-heading"><h2>Wallet funding requests</h2><a href="fund-wallet.html">Open wallet →</a></div><div id="recent-funding" class="feed-list"><p class="feed-empty">Loading your funding requests…</p></div></section>
+      <div class="quick">
+        <a href="shop.html"><span class="ico">▣</span><b>Browse catalogue</b><small>See every product KORASTORE sells.</small></a>
+        <a href="wallet.html"><span class="ico">＋</span><b>Fund your account</b><small>Pay the store account, then confirm.</small></a>
+        <a href="orders.html"><span class="ico">▤</span><b>Track orders</b><small>Follow each order to delivery.</small></a>
+        <a href="profile.html"><span class="ico">⌖</span><b>Delivery location</b><small id="loc-short">Set your country, state and LGA.</small></a>
+      </div>
     </div>
-  </main>
-</div>
+    <section class="card">
+      <div class="card-head"><div><h2>Recent activity</h2><small>Funding, purchases and refunds</small></div><a class="link small" href="wallet.html">Wallet →</a></div>
+      <div id="activity" class="feed"><div class="empty">Loading…</div></div>
+    </section>
+  </div>
+  <section class="card" style="margin-top:20px">
+    <div class="card-head"><div><h2>Latest orders</h2><small>Your three most recent purchases</small></div><a class="link small" href="orders.html">All orders →</a></div>
+    <div id="recent-orders" class="feed"><div class="empty">Loading…</div></div>
+  </section>
+</main>
+<div id="site-footer"></div>
 <script type="module">
-  import { bootApp } from './app-shell.js';
-  import { watchWallet, watchTransactions, watchFundingRequests } from './firebase-client.js';
-  import { escapeHTML, formatMoney, formatDateTime, relativeTime, recordAmount, recordDate, statusTone, transactionStatus } from './app-utils.js';
-  const errorBox = document.querySelector('#dashboard-error');
-  const transactionList = document.querySelector('#recent-transactions');
-  const fundingList = document.querySelector('#recent-funding');
-  const money = value => formatMoney(value, 2);
-  function errorHandler(error) { errorBox.hidden = false; errorBox.textContent = `Some live account data could not be loaded: ${error?.message || 'check your connection and account access'}`; }
-  function renderTransactions(rows) {
-    transactionList.innerHTML = rows.length ? rows.slice(0, 5).map((item) => {
-      const amount = recordAmount(item);
-      const status = transactionStatus(item.status);
-      return `<div class="feed-row"><span class="feed-icon" aria-hidden="true">${amount < 0 ? '↘' : '＋'}</span><div class="feed-copy"><b>${escapeHTML(item.title || item.description || item.service || 'Account activity')}</b><small>${escapeHTML(relativeTime(recordDate(item)))} · <span class="status-pill ${statusTone(status)}">${escapeHTML(status)}</span></small></div><span class="feed-amount">${amount < 0 ? '−' : '+'}${money(amount)}</span></div>`;
-    }).join('') : '<p class="feed-empty">No transactions have been recorded on this account yet.</p>';
-  }
-  function renderFunding(rows) {
-    const pending = rows.filter(item => String(item.status || '').toLowerCase() === 'pending').length;
-    document.querySelector('#funding-summary').textContent = pending ? `${pending} request${pending === 1 ? '' : 's'} awaiting review.` : 'No funding requests are awaiting review.';
-    fundingList.innerHTML = rows.length ? rows.slice(0, 3).map(item => `<div class="feed-row"><span class="feed-icon" aria-hidden="true">＋</span><div class="feed-copy"><b>${escapeHTML(item.reference || 'Wallet funding request')}</b><small>${escapeHTML(formatDateTime(recordDate(item)))}</small></div><span class="status-pill ${statusTone(item.status)}">${escapeHTML(item.status || 'Status not supplied')}</span><span class="feed-amount">${money(item.amount)}</span></div>`).join('') : '<p class="feed-empty">No funding requests have been submitted yet.</p>';
-  }
-  document.addEventListener('korasub:authenticated', (event) => {
-    const user = event.detail.user;
-    const firstName = user.displayName?.trim().split(/\s+/)[0] || user.email?.split('@')[0] || 'there';
-    document.querySelector('#greeting').textContent = `Welcome, ${firstName}`;
-    watchWallet(user.uid, value => { document.querySelector('#balance').textContent = money(value); }, errorHandler);
-    watchTransactions(user.uid, renderTransactions, 10, errorHandler);
-    watchFundingRequests(user.uid, renderFunding, errorHandler);
+  import { mountHeader, mountFooter, mountAccountTabs, requireCustomer, watchProfile, watchMyOrders, watchMyTransactions, naira, esc, formatDate, formatDateTime, STATUS_LABEL, statusClass } from './store.js';
+  mountHeader('dashboard.html');
+  mountFooter();
+  mountAccountTabs('dashboard.html');
+  const user = await requireCustomer('dashboard.html');
+  const first = (user.displayName || user.email || '').split(/[\s@]/)[0] || 'there';
+  document.querySelector('#greeting').textContent = `Hi, ${first}`;
+  watchProfile(user.uid, (profile) => {
+    document.querySelector('#balance').textContent = naira(profile.balance || 0);
+    const parts = [profile.lga, profile.state, profile.country].filter(Boolean);
+    document.querySelector('#loc-short').textContent = parts.length ? parts.join(' · ') : 'Set your country, state and LGA.';
   });
-  bootApp('dashboard.html');
+  watchMyTransactions(user.uid, (rows) => {
+    document.querySelector('#activity').innerHTML = rows.length ? rows.slice(0, 6).map(t => `
+      <div class="feed-row"><div class="txt"><b>${esc(t.title)}</b><small>${esc(formatDateTime(t.createdAt))} · <span class="badge ${statusClass(t.status)}">${esc(STATUS_LABEL[t.status] || t.status)}</span></small></div>
+      <span class="amt ${t.amount >= 0 ? 'pos' : 'neg'}">${t.amount >= 0 ? '+' : '−'}${naira(Math.abs(t.amount))}</span></div>`).join('')
+      : '<div class="empty"><b>No activity yet</b>Fund your wallet to get started.</div>';
+  });
+  watchMyOrders(user.uid, (rows) => {
+    document.querySelector('#recent-orders').innerHTML = rows.length ? rows.slice(0, 3).map(o => `
+      <div class="feed-row"><div class="txt"><b>${esc((o.items || []).map(i => i.name).join(', ') || 'Order')}</b><small>${esc(formatDate(o.createdAt))} · <span class="badge ${statusClass(o.status)}">${esc(STATUS_LABEL[o.status] || o.status)}</span></small></div>
+      <span class="amt">${naira(o.total)}</span></div>`).join('')
+      : '<div class="empty"><b>No orders yet</b>Your purchases appear here.<br><a class="btn btn-gold btn-sm" href="shop.html" style="margin-top:12px">Shop the catalogue</a></div>';
+  });
 </script>
 </body>
 </html>

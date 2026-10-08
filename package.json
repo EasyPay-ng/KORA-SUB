@@ -1,9 +1,10 @@
 {
-  "name": "korasub",
+  "name": "korastore",
   "private": true,
   "scripts": {
     "dev:worker": "wrangler dev",
-    "deploy:worker": "wrangler deploy"
+    "deploy:worker": "wrangler deploy",
+    "test": "node --test tests/worker.test.mjs"
   },
   "devDependencies": {
     "firebase-admin": "^13.10.0",

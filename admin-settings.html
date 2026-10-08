@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Bank details — KORASTORE Admin</title>
+  <link rel="stylesheet" href="store.css">
+  <link rel="icon" href="assets/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png"><meta name="theme-color" content="#0b2545">
+</head>
+<body>
+<div id="gate" class="gate"><div class="gate-card"><span class="gate-mark">K</span><h2>Checking admin access…</h2><p>Verifying your account before any store data loads.</p></div></div>
+<div class="admin-shell" id="admin-content" hidden>
+  <aside class="admin-side" id="admin-sidebar"></aside>
+  <main class="admin-main">
+    <div class="page-head"><div><span class="eyebrow">Payments</span><h1>Deposit bank details</h1><p>This is the only account customers may pay into. Customers see these details on their wallet page.</p></div></div>
+    <div class="admin-grid">
+      <section class="card">
+        <form id="form" class="panel-form" novalidate>
+          <label class="field">Bank name<input class="input" id="bankName" maxlength="80" required placeholder="e.g. Zenith Bank"></label>
+          <label class="field">Account name<input class="input" id="accountName" maxlength="120" required placeholder="Account holder name"></label>
+          <label class="field">Account number<input class="input" id="accountNumber" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" required placeholder="10-digit NUBAN"></label>
+          <label class="field">Instructions for customers <small>optional</small><textarea class="textarea" id="instructions" maxlength="400" placeholder="e.g. Use your email as the transfer narration."></textarea></label>
+          <div id="error" class="error-text" role="alert"></div>
+          <div class="row"><button class="btn btn-gold" type="submit" id="save">Publish bank details</button></div>
+        </form>
+      </section>
+      <aside class="card">
+        <div class="card-head"><div><h2>Current published details</h2><small>What customers see right now</small></div></div>
+        <div id="preview" class="bank-card"><div class="empty">Loading…</div></div>
+      </aside>
+    </div>
+  </main>
+</div>
+<script type="module">
+  import { mountAdminSidebar, requireAdmin, watchPaymentSettings, savePaymentSettings, esc } from './store.js';
+  mountAdminSidebar('admin-settings.html');
+  const $ = (id) => document.querySelector(id);
+  let loaded = false;
+  const onSettings = (data) => {
+    if (!data) {
+      $('#preview').innerHTML = '<div class="empty"><b>Not published</b>Customers cannot fund their wallet until you save details.</div>';
+    } else {
+      $('#preview').innerHTML = `<dl><div><dt>Bank</dt><dd>${esc(data.bankName)}</dd></div><div><dt>Account name</dt><dd>${esc(data.accountName)}</dd></div><div><dt>Account number</dt><dd class="mono">${esc(data.accountNumber)}</dd></div></dl>`;
+    }
+    if (!loaded && data) {
+      loaded = true;
+      $('#bankName').value = data.bankName || '';
+      $('#accountName').value = data.accountName || '';
+      $('#accountNumber').value = data.accountNumber || '';
+      $('#instructions').value = data.instructions || '';
+    }
+  };
+  $('#form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const error = $('#error');
+    error.textContent = '';
+    const data = {
+      bankName: $('#bankName').value.trim(),
+      accountName: $('#accountName').value.trim(),
+      accountNumber: $('#accountNumber').value.trim(),
+      instructions: $('#instructions').value.trim()
+    };
+    if (!/^\d{10}$/.test(data.accountNumber)) return error.textContent = 'The account number must be 10 digits.';
+    if (!data.bankName || !data.accountName) return error.textContent = 'Bank name and account name are required.';
+    const save = $('#save');
+    save.disabled = true;
+    try {
+      await savePaymentSettings(data);
+      error.className = 'error-text';
+      error.style.color = 'var(--ok)';
+      error.textContent = 'Published. Customers now see these details.';
+    } catch (problem) {
+      error.style.color = '';
+      error.textContent = problem.message || 'Could not publish the details.';
+    } finally {
+      save.disabled = false;
+    }
+  });
+  if (await requireAdmin('admin-settings.html')) {
+    watchPaymentSettings(onSettings);
+  }
+</script>
+</body>
+</html>

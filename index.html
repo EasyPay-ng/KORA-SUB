@@ -1,84 +1,62 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KORASUB — Everyday digital services</title>
-  <meta name="description" content="Manage everyday digital services with one KORASUB account, wallet and transaction history.">
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>KORASTORE — Find it. Fund it. Own it.</title>
+  <meta name="description" content="KORASTORE: a curated catalogue sold by the store admin. Fund your wallet by bank transfer and buy in one tap.">
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="styles.css" rel="stylesheet">
-  <link rel="icon" href="assets/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png"><link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png"><meta name="theme-color" content="#15374c">
+  <link rel="stylesheet" href="store.css">
+  <link rel="icon" href="assets/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png"><link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png"><meta name="theme-color" content="#0b2545">
 </head>
-<body class="marketing">
-<header class="marketing-nav container">
-  <a class="brand" href="index.html"><span class="brand-mark">K</span><span>KORASUB</span></a>
-  <nav aria-label="Main navigation"><a href="#services">Services</a><a href="#how">How it works</a><a href="login.html" class="btn btn-soft">Sign in</a><a href="register.html" class="btn btn-primary">Create account <span aria-hidden="true">→</span></a></nav>
-</header>
+<body>
+<div id="site-header"></div>
 <main>
-  <section class="hero container">
-    <div class="hero-copy">
-      <div class="hero-kicker"><span class="kicker-dot"></span> A calmer way to handle everyday services</div>
-      <h1>Your daily essentials,<br><em>all in one place.</em></h1>
-      <p>Bring airtime, data, bills and other digital services together with a wallet and clear transaction history. Sign in to see your own live account data.</p>
-      <div class="hero-actions"><a href="register.html" class="btn btn-primary btn-lg">Create your account <span aria-hidden="true">→</span></a><a href="#services" class="hero-link">Explore supported services <span aria-hidden="true">↓</span></a></div>
-      <div class="hero-facts"><span>Personal wallet view</span><span>Transaction history</span><span>Funding requests reviewed securely</span></div>
-    </div>
-    <div class="catalog-showcase" aria-label="GSUBZ service directory preview">
-      <div class="showcase-panel">
-        <div class="showcase-head"><div class="showcase-title"><span class="brand-mark">K</span><span>Service catalog</span></div><span id="catalog-state" class="catalog-state">Connecting</span></div>
-        <div id="hero-catalog" class="hero-catalog-list"><div class="service-loading">Loading services from GSUBZ…</div></div>
-        <p class="catalog-footnote">Service groups and IDs come from GSUBZ's live List All Services endpoint. Plan names and prices are fetched when you open a service.</p>
+  <section class="hero">
+    <div class="wrap hero-inner">
+      <div>
+        <span class="eyebrow">Curated by the store admin</span>
+        <h1>Find it. <span>Fund it.</span><br>Own it.</h1>
+        <p>Browse the KORASTORE catalogue, top up your wallet with a bank transfer, and check out in one tap. Every product is listed and priced by our admin.</p>
+        <div class="hero-cta">
+          <a class="btn btn-gold btn-lg" href="shop.html">Shop the catalogue →</a>
+          <a class="btn btn-ghost btn-lg" href="wallet.html">Fund your wallet</a>
+        </div>
+        <div class="trust"><span>Bank-transfer funding</span><span>Wallet checkout</span><span>Delivery to your LGA</span></div>
       </div>
+      <aside class="goal-card" aria-label="How KORASTORE works">
+        <h3>Your path to ownership</h3>
+        <div class="goal-steps">
+          <div class="goal-step"><span class="goal-num">1</span><div><b>Fund your wallet</b><small>Transfer to the store account, then submit your reference.</small></div></div>
+          <div class="goal-step"><span class="goal-num">2</span><div><b>Shop the catalogue</b><small>Add what you need. Prices and stock are live.</small></div></div>
+          <div class="goal-step"><span class="goal-num">3</span><div><b>Check out and own it</b><small>Pay from your wallet. Track delivery to your location.</small></div></div>
+        </div>
+      </aside>
     </div>
   </section>
-  <section id="services" class="section container">
-    <div class="section-heading"><div><span class="section-eyebrow">GSUBZ SERVICES</span><h2>Choose a service to explore.</h2></div><p>Service groups and IDs load live from GSUBZ. Sign in to load current plan names and prices for each plan-based service.</p></div>
-    <div id="service-catalog" class="service-grid"><div class="service-loading">Loading active service groups…</div></div>
-  </section>
-  <section id="how" class="steps-band">
-    <div class="container">
-      <div class="section-heading"><div><span class="section-eyebrow">A STRAIGHTFORWARD WORKFLOW</span><h2>Accountable from start to finish.</h2></div></div>
-      <div class="steps">
-        <article><span>01</span><b>Create an account</b><p>Use your email or Google account to open a personal KORASUB dashboard.</p></article>
-        <article><span>02</span><b>Request wallet funding</b><p>Submit a funding request with its transfer reference. A request is not a wallet credit until it is reviewed.</p></article>
-        <article><span>03</span><b>Track your activity</b><p>See your wallet balance and transaction history from your own signed-in account.</p></article>
-      </div>
+
+  <section class="wrap page">
+    <div class="page-head">
+      <div><span class="eyebrow">Featured</span><h1>New in the catalogue</h1><p>Fresh listings from the store admin. Sign in to buy.</p></div>
+      <a class="btn btn-ghost" href="shop.html">View everything →</a>
     </div>
+    <div id="featured" class="products"><div class="empty"><b>Loading the catalogue…</b></div></div>
   </section>
 </main>
-<footer class="footer container"><a class="brand" href="index.html"><span class="brand-mark">K</span><span>KORASUB</span></a><span>© 2026 KORASUB</span><a href="mailto:beniwealth70@gmail.com">Contact support</a></footer>
+<div id="site-footer"></div>
 <script type="module">
-  import { normalizeServices } from './catalog-data.js';
-  import { escapeHTML } from './app-utils.js';
-  import { API_BASE } from './firebase-config.js';
-  const endpoint = `${String(API_BASE || '/api').replace(/\/$/, '')}/categories`;
-  const symbols = ['⌁', '◉', 'ϟ', '▤', '▣', '✦'];
-  const state = document.querySelector('#catalog-state');
-  const hero = document.querySelector('#hero-catalog');
-  const catalog = document.querySelector('#service-catalog');
-  function unavailable(message) {
-    state.textContent = 'Unavailable';
-    hero.innerHTML = `<div class="service-loading">${escapeHTML(message)}</div>`;
-    catalog.innerHTML = `<div class="service-loading">${escapeHTML(message)} Check the configured API_BASE and deployed Worker.</div>`;
-  }
-  try {
-    const response = await fetch(endpoint, { headers: { Accept: 'application/json' }, cache: 'no-store' });
-    if (!response.ok) throw new Error(`Service directory request returned ${response.status}.`);
-    const payload = await response.json();
-    const services = normalizeServices(payload);
-    if (!services.length) throw new Error('GSUBZ returned no active service IDs.');
-    const groups = [...new Map(services.map(service => [service.category || 'Other', service.category || 'Other'])).values()];
-    state.textContent = `${services.length} active services`;
-    hero.innerHTML = groups.slice(0, 4).map((group, index) => {
-      const count = services.filter(service => (service.category || 'Other') === group).length;
-      return `<div class="hero-catalog-item"><span class="hero-catalog-icon">${symbols[index % symbols.length]}</span><div><b>${escapeHTML(group)}</b><small>${count} live service ID${count === 1 ? '' : 's'}</small></div></div>`;
-    }).join('');
-    catalog.innerHTML = groups.map((group, index) => {
-      const count = services.filter(service => (service.category || 'Other') === group).length;
-      return `<a class="service-tile" href="login.html"><span class="tile-icon">${symbols[index % symbols.length]}</span><b>${escapeHTML(group)}</b><small>${count} active service ID${count === 1 ? '' : 's'} · open plans after sign in</small><span class="tile-arrow" aria-hidden="true">↗</span></a>`;
-    }).join('');
-  } catch (error) {
-    unavailable(error.message || 'GSUBZ service directory is unavailable right now.');
-  }
+  import { mountHeader, mountFooter, watchProducts, productCard, bindAddToCart, esc } from './store.js';
+  mountHeader('index.html');
+  mountFooter();
+  const host = document.querySelector('#featured');
+  bindAddToCart(host);
+  watchProducts((items) => {
+    const list = items.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)).slice(0, 8);
+    host.innerHTML = list.length
+      ? list.map(productCard).join('')
+      : '<div class="empty"><b>The shelves are being stocked</b>Check back soon — new products appear here as the admin lists them.</div>';
+  }, (error) => {
+    host.innerHTML = `<div class="empty"><b>Catalogue unavailable</b>${esc(error.message)}</div>`;
+  });
 </script>
 </body>
 </html>

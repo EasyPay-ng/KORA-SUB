@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Product — KORASTORE</title>
+  <link rel="stylesheet" href="store.css">
+  <link rel="icon" href="assets/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png"><meta name="theme-color" content="#0b2545">
+</head>
+<body>
+<div id="site-header"></div>
+<main class="wrap page">
+  <a class="link small" href="shop.html">← Back to shop</a>
+  <div id="detail" style="margin-top:18px"><div class="empty"><b>Loading product…</b></div></div>
+</main>
+<div id="site-footer"></div>
+<script type="module">
+  import { mountHeader, mountFooter, getProduct, productMedia, stockBadge, addToCart, naira, esc, readParam, onAuthStateChanged, auth } from './store.js';
+  mountHeader('shop.html');
+  mountFooter();
+  const host = document.querySelector('#detail');
+  const id = readParam('id');
+  let quantity = 1;
+  let product = null;
+  function paint() {
+    if (!product) return;
+    const stock = Number(product.stock || 0);
+    const out = stock <= 0 || product.active !== true;
+    quantity = Math.min(quantity, Math.max(1, stock));
+    host.innerHTML = `
+      <div class="detail">
+        ${productMedia(product, 'detail-media')}
+        <div>
+          <span class="product-cat">${esc(product.category || 'Store')}</span>
+          <h1>${esc(product.name)}</h1>
+          <div class="row">${stockBadge(product)}<span class="badge gold">Sold ${Number(product.sold || 0)}</span></div>
+          <div class="price" style="margin-top:14px">${naira(product.price)}</div>
+          <p class="desc">${esc(product.description || 'Details will be shared by the store admin.')}</p>
+          <div class="buy-box">
+            <div class="row"><span class="small muted">Quantity</span>
+              <div class="qty"><button type="button" data-q="-1" aria-label="Decrease" ${out ? 'disabled' : ''}>−</button><span>${quantity}</span><button type="button" data-q="1" aria-label="Increase" ${out ? 'disabled' : ''}>+</button></div>
+            </div>
+            <div class="row">
+              <button class="btn btn-gold btn-lg" id="add" ${out ? 'disabled' : ''}>${out ? 'Currently unavailable' : 'Add to cart'}</button>
+              <a class="btn btn-ghost btn-lg" href="cart.html">View cart</a>
+            </div>
+            <p class="small muted" style="margin:0">Pay from your KORASTORE wallet at checkout. Fund it first by bank transfer if your balance is low.</p>
+          </div>
+        </div>
+      </div>`;
+    host.querySelectorAll('[data-q]').forEach(btn => btn.addEventListener('click', () => {
+      quantity = Math.max(1, Math.min(Math.max(1, stock), quantity + Number(btn.dataset.q)));
+      paint();
+    }));
+    host.querySelector('#add')?.addEventListener('click', (event) => {
+      addToCart(product.id, quantity);
+      event.currentTarget.textContent = 'Added to cart ✓';
+    });
+  }
+  if (!id) {
+    host.innerHTML = '<div class="empty"><b>No product selected</b>Open a product from the shop.</div>';
+  } else {
+    getProduct(id).then((data) => {
+      if (!data || data.active !== true) {
+        host.innerHTML = '<div class="empty"><b>This product is no longer listed</b><a class="btn btn-ghost" href="shop.html" style="margin-top:12px">Browse the shop</a></div>';
+        return;
+      }
+      product = data;
+      document.title = `${data.name} — KORASTORE`;
+      paint();
+    }).catch((error) => {
+      host.innerHTML = `<div class="empty"><b>Product unavailable</b>${esc(error.message)}</div>`;
+    });
+  }
+</script>
+</body>
+</html>

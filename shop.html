@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Shop — KORASTORE</title>
+  <link rel="stylesheet" href="store.css">
+  <link rel="icon" href="assets/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png"><meta name="theme-color" content="#0b2545">
+</head>
+<body>
+<div id="site-header"></div>
+<main class="wrap page">
+  <div class="page-head">
+    <div><span class="eyebrow">The catalogue</span><h1>Shop KORASTORE</h1><p>Everything listed here is sold by KORASTORE. Browse freely; sign in to fund your wallet and buy.</p></div>
+  </div>
+  <div class="toolbar">
+    <input id="search" class="input" type="search" placeholder="Search products" aria-label="Search products">
+    <select id="sort" class="select" aria-label="Sort products">
+      <option value="new">Newest</option>
+      <option value="low">Price: low to high</option>
+      <option value="high">Price: high to low</option>
+      <option value="name">Name A–Z</option>
+    </select>
+  </div>
+  <div id="chips" class="chips"></div>
+  <div id="grid" class="products"><div class="empty"><b>Loading the catalogue…</b></div></div>
+</main>
+<div id="site-footer"></div>
+<script type="module">
+  import { mountHeader, mountFooter, watchProducts, productCard, bindAddToCart, esc } from './store.js';
+  mountHeader('shop.html');
+  mountFooter();
+  const grid = document.querySelector('#grid');
+  const chips = document.querySelector('#chips');
+  const search = document.querySelector('#search');
+  const sort = document.querySelector('#sort');
+  let products = [];
+  let category = 'All';
+  bindAddToCart(grid);
+  function render() {
+    const term = search.value.trim().toLowerCase();
+    const categories = ['All', ...new Set(products.map(p => p.category || 'Store'))];
+    chips.innerHTML = categories.map(c => `<button class="chip ${c === category ? 'on' : ''}" data-cat="${esc(c)}">${esc(c)}</button>`).join('');
+    let list = products.filter(p => (category === 'All' || (p.category || 'Store') === category)
+      && `${p.name} ${p.category} ${p.description || ''}`.toLowerCase().includes(term));
+    const order = {
+      new: (a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0),
+      low: (a, b) => a.price - b.price,
+      high: (a, b) => b.price - a.price,
+      name: (a, b) => a.name.localeCompare(b.name)
+    }[sort.value];
+    list = list.sort(order);
+    grid.innerHTML = list.length ? list.map(productCard).join('')
+      : '<div class="empty"><b>No products match</b>Try another search or category.</div>';
+  }
+  chips.addEventListener('click', (event) => {
+    const chip = event.target.closest('[data-cat]');
+    if (!chip) return;
+    category = chip.dataset.cat;
+    render();
+  });
+  search.addEventListener('input', render);
+  sort.addEventListener('change', render);
+  watchProducts((rows) => { products = rows; render(); }, (error) => {
+    grid.innerHTML = `<div class="empty"><b>Catalogue unavailable</b>${esc(error.message)}</div>`;
+  });
+</script>
+</body>
+</html>

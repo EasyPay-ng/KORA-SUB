@@ -1,51 +1,59 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Funding requests — KORASUB Admin</title><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="portal.css"><link rel="icon" href="assets/favicon.ico" sizes="any"></head>
-<body class="portal-body"><div class="portal-shell"><aside id="admin-sidebar" class="portal-sidebar"></aside><main class="portal-main">
-  <header class="portal-topbar"><span class="top-context">KORASUB · ADMIN WORKSPACE</span><div class="portal-user"><div class="portal-user-copy"><b data-user-name>Checking access…</b><small data-user-email></small></div><span class="portal-avatar" data-user-avatar>KS</span></div></header>
-  <div id="access-message" class="access-card" role="status"></div>
-  <div id="admin-content" class="portal-content" hidden>
-    <section class="page-heading"><div><span class="heading-kicker">WALLET OPERATIONS</span><h1>Funding requests</h1><p>Customer-submitted requests, read live from Firestore.</p></div><span class="live-indicator">Live Firebase data</span></section>
-    <div id="page-error" class="inline-notice error-notice" hidden></div>
-    <div class="notice-box" style="margin-bottom:16px"><span class="notice-icon">!</span><p><b>Review actions are server-side only.</b><br>This deployment has no secured approval endpoint connected. This screen will not credit a wallet or change a request status in browser code.</p></div>
-    <section class="portal-card"><div class="card-heading"><div><h2>All funding requests</h2><small id="result-count">Loading live request records…</small></div></div>
-      <div class="filter-row"><label for="status-filter">Status</label><select id="status-filter" class="control-select"><option value="all">All statuses</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select><input id="search" class="control-input" type="search" aria-label="Search funding requests" placeholder="Search email, reference, or ID"></div>
-      <div class="table-wrap"><table class="data-table"><thead><tr><th>Customer</th><th>Reference</th><th>Submitted</th><th>Status</th><th>Amount</th><th>Request ID</th></tr></thead><tbody id="request-rows"><tr><td colspan="6">Loading live funding requests…</td></tr></tbody></table></div>
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Funding — KORASTORE Admin</title>
+  <link rel="stylesheet" href="store.css">
+  <link rel="icon" href="assets/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png"><meta name="theme-color" content="#0b2545">
+</head>
+<body>
+<div id="gate" class="gate"><div class="gate-card"><span class="gate-mark">K</span><h2>Checking admin access…</h2><p>Verifying your account before any store data loads.</p></div></div>
+<div class="admin-shell" id="admin-content" hidden>
+  <aside class="admin-side" id="admin-sidebar"></aside>
+  <main class="admin-main">
+    <div class="page-head"><div><span class="eyebrow">Deposits</span><h1>Funding requests</h1><p>Confirm a request only after the matching transfer appears in the store account. Approving credits the customer's wallet once.</p></div></div>
+    <section class="card">
+      <div class="spread" style="margin-bottom:16px">
+        <div class="row"><select id="filter" class="select" style="max-width:200px"><option value="pending">Pending</option><option value="all">All</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select></div>
+        <small id="count" class="muted">Loading…</small>
+      </div>
+      <div class="table-wrap"><table class="table"><thead><tr><th>Customer</th><th>Reference</th><th>Submitted</th><th>Amount</th><th>Status</th><th></th></tr></thead><tbody id="rows"><tr><td colspan="6">Loading…</td></tr></tbody></table></div>
     </section>
-  </div>
-</main></div>
+  </main>
+</div>
 <script type="module">
-  import { bootAdmin, showDataError } from './admin-ui.js';
-  import { watchAdminFundingRequests, watchAdminUsers } from './firebase-client.js';
-  import { escapeHTML, formatMoney, formatDateTime, statusTone, personLabel, toDate } from './app-utils.js';
-  const body = document.querySelector('#request-rows');
-  const count = document.querySelector('#result-count');
-  const error = document.querySelector('#page-error');
-  const filter = document.querySelector('#status-filter');
-  const search = document.querySelector('#search');
-  let requests = [];
-  let users = [];
-  const userMap = () => new Map(users.map(user => [user.id, user]));
+  import { mountAdminSidebar, requireAdmin, watchAllFunding, watchAllUsers, reviewFunding, naira, esc, formatDateTime, STATUS_LABEL, statusClass } from './store.js';
+  mountAdminSidebar('admin-funding.html');
+  let requests = [], users = [];
+  const filter = document.querySelector('#filter');
   function render() {
-    const map = userMap();
-    const term = search.value.trim().toLowerCase();
-    const list = requests.filter(item => {
-      const profile = map.get(item.uid);
-      const status = String(item.status || 'unknown').toLowerCase();
-      const text = `${profile?.name || ''} ${profile?.email || ''} ${item.reference || ''} ${item.id || ''} ${item.uid || ''}`.toLowerCase();
-      return (filter.value === 'all' || status === filter.value) && text.includes(term);
-    }).sort((a, b) => (toDate(b.createdAt)?.getTime() || 0) - (toDate(a.createdAt)?.getTime() || 0));
-    count.textContent = `${list.length} of ${requests.length} live request${requests.length === 1 ? '' : 's'}`;
-    body.innerHTML = list.length ? list.map(item => {
-      const profile = map.get(item.uid);
-      const who = profile ? personLabel(profile) : `UID ${String(item.uid || 'unknown').slice(0, 12)}`;
-      return `<tr><td><span class="table-primary">${escapeHTML(who)}</span><span class="table-secondary">${escapeHTML(profile?.email || item.uid || 'Profile details unavailable')}</span></td><td>${escapeHTML(item.reference || '—')}</td><td>${escapeHTML(formatDateTime(item.createdAt))}</td><td><span class="status-pill ${statusTone(item.status)}">${escapeHTML(item.status || 'Status not supplied')}</span></td><td><strong>${formatMoney(item.amount)}</strong></td><td>${escapeHTML(item.id)}</td></tr>`;
-    }).join('') : `<tr><td colspan="6">${requests.length ? 'No funding requests match these filters.' : 'No funding requests have been recorded in Firestore.'}</td></tr>`;
+    const list = requests.filter(r => filter.value === 'all' || r.status === filter.value);
+    document.querySelector('#count').textContent = `${list.length} request${list.length === 1 ? '' : 's'}`;
+    document.querySelector('#rows').innerHTML = list.length ? list.map(r => {
+      const u = users.find(x => x.id === r.uid);
+      return `<tr>
+        <td><b>${esc(u?.name || 'Customer')}</b><small>${esc(u?.email || r.uid)}</small></td>
+        <td class="mono">${esc(r.reference)}</td>
+        <td>${esc(formatDateTime(r.createdAt))}</td>
+        <td class="mono"><b>${naira(r.amount)}</b></td>
+        <td><span class="badge ${statusClass(r.status)}">${esc(STATUS_LABEL[r.status] || r.status)}</span></td>
+        <td>${r.status === 'pending' ? `<div class="table-actions"><button class="btn btn-sm btn-gold" data-act="approve" data-id="${esc(r.id)}">Approve</button><button class="btn btn-sm btn-danger" data-act="reject" data-id="${esc(r.id)}">Reject</button></div>` : `<small class="muted">${r.reviewedBy ? 'By ' + esc(r.reviewedBy) : ''}</small>`}</td>
+      </tr>`;
+    }).join('') : '<tr><td colspan="6">Nothing to show for this filter.</td></tr>';
   }
-  filter.addEventListener('change', render); search.addEventListener('input', render);
-  if (await bootAdmin('admin-funding.html')) {
-    watchAdminFundingRequests(rows => { requests = rows; error.hidden = true; render(); }, problem => showDataError(error, problem));
-    watchAdminUsers(rows => { users = rows; render(); }, problem => showDataError(error, problem));
+  filter.addEventListener('change', render);
+  document.querySelector('#rows').addEventListener('click', async (event) => {
+    const btn = event.target.closest('[data-act]');
+    if (!btn) return;
+    if (btn.dataset.act === 'reject' && !confirm('Reject this funding request? The customer will not be credited.')) return;
+    btn.disabled = true;
+    try { await reviewFunding(btn.dataset.id, btn.dataset.act); }
+    catch (problem) { alert(problem.message); btn.disabled = false; }
+  });
+  if (await requireAdmin('admin-funding.html')) {
+    watchAllFunding(rows => { requests = rows; render(); });
+    watchAllUsers(rows => { users = rows; render(); });
   }
 </script>
-</body></html>
+</body>
+</html>

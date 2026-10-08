@@ -1,79 +1,88 @@
-# KORASUB
+# KORASTORE
 
-KORASUB is a VTU frontend for airtime, data, bills, exam pins, social services, eSIM and related digital services.
+**Find it. Fund it. Own it.**
 
-## Frontend pages
+KORASTORE is an online store. The administrator lists and prices every product. Customers browse the catalogue, fund a wallet by bank transfer, and buy from that wallet. Orders are delivered to a location the customer sets (country, state, local government area, address).
 
-- `index.html` — public overview; loads active GSUBZ service groups and IDs without demo account figures.
-- `dashboard.html` — the signed-in user's Firebase wallet balance, transactions and funding requests.
-- `services.html` — GSUBZ's live service directory and live plans. Checkout stays unavailable until the secure purchase workflow is deployed.
-- `transactions.html`, `fund-wallet.html`, and `support.html` — customer activity, funding requests and account help.
-- `admin.html` — live profile, wallet-balance, pending-request and transaction summaries.
-- `admin-funding.html`, `admin-ledger.html`, `admin-orders.html`, `admin-pricing.html`, and `admin-services.html` — the destinations linked from the admin quick controls.
+## Roles
 
-The UI does not seed or display fabricated account statistics, balances, transaction rows or funding requests. Empty Firestore collections are shown as empty. Admin pages are read-only in the browser; wallet adjustments, funding approvals and refunds must be performed by trusted server-side code.
+- **Administrator**: only `beniwealth70@gmail.com`, with a verified email and the `admin: true` custom claim. The admin lists, prices, stocks and hides products; publishes the deposit bank account; confirms funding; and moves orders through packing, shipping and delivery.
+- **Customers**: anyone who registers. They browse, add to cart, fund their wallet, check out, set delivery location and track orders. They cannot list products or change balances.
+- **Visitors**: can browse the shop without an account. Checkout and funding require sign-in.
 
-## Firebase and admin access
+## Money flow
 
-Firebase web configuration is public by design. Never put the GSUBZ API key or a service-account key in browser code.
+1. **Fund** (`wallet.html`): the customer pays into the bank account the admin published (bank name, account name, account number), then submits the amount and transfer reference. The request is `pending`.
+2. **Confirm** (`admin-funding.html`): the admin approves once the transfer lands. The Worker credits the wallet, writes a transaction and a ledger entry, and marks the request `approved`. It runs in a Firestore transaction, so approval happens once.
+3. **Buy** (`cart.html` → `POST /api/orders`): the Worker re-prices the cart from the database, checks stock and the delivery location, debits the wallet, decrements stock, and creates the order. A `requestId` makes retries safe, so a lost response can't double-charge.
+4. **Track and refund** (`admin-orders.html`, `orders.html`): paid → processing → shipped → delivered. Cancelling refunds the full total to the wallet and restocks the items.
 
-Admin data access requires both the configured admin email in `firebase-config.js` and a Firebase custom claim `admin: true`. Grant the claim from a trusted machine with the Firebase Admin SDK:
+No card or payment gateway is integrated. All deposits are manual bank transfers confirmed by the admin.
+
+## Pages
+
+- Storefront: `index.html` (home), `shop.html` (catalogue with search, categories and sorting), `product.html`, `cart.html`
+- Accounts: `login.html`, `register.html`
+- Customer: `dashboard.html` (overview), `wallet.html` (fund), `orders.html`, `profile.html` (delivery location)
+- Admin: `admin.html` (overview), `admin-products.html`, `admin-funding.html`, `admin-orders.html`, `admin-settings.html` (bank details)
+
+Shared client code is in `store.js`, styles in `store.css`. Nigerian states and LGAs are in `data/ng-locations.json` (from the MIT-licensed `nigeria-state-lga-data` package, 37 entries, 777 LGAs). Non-Nigerian addresses use free text for state and area.
+
+## Data model (Firestore)
+
+| Path | Written by | Read by |
+|---|---|---|
+| `users/{uid}` | customer (name, location); Worker (`balance`) | owner, admin |
+| `users/{uid}/transactions/{id}` | Worker | owner, admin |
+| `products/{id}` | admin | anyone (active only); admin (all) |
+| `settings/payment` | admin | signed-in users |
+| `fundingRequests/{id}` | customer (create); Worker (review) | owner, admin |
+| `orders/{uid}_{requestId}` | Worker | owner, admin |
+| `ledger/{id}` | Worker | admin |
+
+Money is stored as whole naira (integers). The Worker is the only writer of balances, stock, orders, transactions and ledger entries.
+
+## Worker API (`worker/index.js`)
+
+The Cloudflare Worker is the trusted server. It holds the Google service-account credential and does every balance, stock and order change inside Firestore transactions. It verifies Firebase ID tokens (signature, project, expiry) on every mutating call.
+
+- `GET /health`: configuration status. It returns no secrets.
+- `POST /api/orders`: a signed-in customer buys from their wallet. Body: `{ requestId, items: [{ productId, quantity }] }`.
+- `POST /api/admin/funding/review`: admin only. Body: `{ requestId, decision: "approve" | "reject" }`.
+- `POST /api/admin/orders/status`: admin only. Body: `{ orderId, status: "processing" | "shipped" | "delivered" | "cancelled" }`.
+
+## Setup and deployment
+
+1. **Firebase console** (project `korasub-eb0b8`): enable Email/Password and Google sign-in, and create the Firestore database.
+2. **Admin claim.** Create the admin's account by registering with `beniwealth70@gmail.com` and verifying the email. Then, on a trusted machine:
+   ```sh
+   export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
+   node scripts/firestore-setup.mjs set-admin beniwealth70@gmail.com
+   ```
+   The admin signs out and back in afterwards.
+3. **Firestore rules.** Deploy `firestore.rules` (for example with `npx firebase-tools deploy --only firestore:rules`).
+4. **Service account.** Create a service account with the **Cloud Datastore User** role (`roles/datastore.user`) and save its JSON key locally. Never commit it.
+5. **Worker secret and deploy.**
+   ```sh
+   npm ci
+   npx wrangler secret put FIREBASE_SERVICE_ACCOUNT_JSON   # paste the full JSON key
+   npm run deploy:worker
+   ```
+   For local development, copy `.dev.vars.example` to `.dev.vars` (gitignored) and paste the key on one line.
+6. **Publish deposit details.** Sign in as the admin, open **Bank details**, and save the bank name, account name and 10-digit account number. Customers can't fund until these are published.
+7. **Frontend.** Serve the static files (GitHub Pages or any static host). `API_BASE` in `firebase-config.js` must point to the deployed Worker's `/api` URL, and `FRONTEND_ORIGIN` in `wrangler.toml` must be the exact site origin.
+
+## Tests
 
 ```sh
-export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
-node scripts/firestore-setup.mjs set-admin beniwealth70@gmail.com
+npm test
 ```
 
-The admin must sign out and sign back in after the claim is set. Firestore rules—not the UI email check—protect admin reads. Customer profile and transaction data remains scoped to the signed-in user; wallet balances, transaction records, ledger entries and request approvals cannot be written from the browser.
+The Worker test suite signs real RS256 tokens and runs the purchase, funding, refund, idempotency and authorisation paths against an in-memory fake of the Firestore REST API. It does not contact Google or Firebase.
 
-The `seed-wallet` setup command updates only the selected profile's balance. It deliberately does not insert synthetic transaction history.
+## Limitations
 
-## Live data collections
-
-- `users/{uid}` — profile and server-managed wallet balance.
-- `users/{uid}/transactions/{transactionId}` — actual transaction activity written by a trusted server.
-- `fundingRequests/{requestId}` — customer requests with amount, transfer reference, status and timestamp. Customers can submit pending requests; only a trusted backend may approve or reject them.
-- `ledger/{entryId}` — immutable server-written financial audit entries.
-
-Admin summaries are derived from these records. The platform does not currently have a separate orders/refunds store or browser-accessible admin mutation endpoint; the admin transaction page reads the existing transaction subcollections and clearly keeps review actions read-only until a secured backend is connected.
-
-## GSUBZ API configuration
-
-The Cloudflare Worker in `worker/index.js` is the only code that calls GSUBZ. The browser never receives the provider secret.
-
-Configure the key locally (the real `.dev.vars` file is gitignored):
-
-```sh
-cp .dev.vars.example .dev.vars
-# Edit .dev.vars locally and replace the placeholder with the key from your GSUBZ dashboard.
-npm ci
-npm run dev:worker
-```
-
-For the deployed Worker, set the secret through Wrangler—do not add it to `wrangler.toml`, `firebase-config.js`, HTML, Git, or chat:
-
-```sh
-npx wrangler secret put GSUBZ_API_KEY
-npm run deploy:worker
-```
-
-`wrangler secret put` prompts for the value in your terminal. The key should remain in that prompt/local secret store. `GET /health` reports whether the Worker has a key without returning it.
-
-### Worker endpoints
-
-- `GET /api/categories` proxies GSUBZ's public `GET /api/category/` (List All Services) endpoint and returns its live nested service groups.
-- `GET /api/plans?service=mtn_sme` fetches current plans directly from GSUBZ. This endpoint is public and does not use the secret. It returns the plan's `value`, list `price`, `api_price` and provider discount where available.
-- The Worker checks both HTTP status and GSUBZ's response-body `status`; application-level failures are returned as errors even when GSUBZ responds with HTTP 200.
-- `GET /api/esim/countries`, `/api/esim/packages`, `/api/games/list` and `/api/games/products` proxy the documented public catalog endpoints. They are available for future eSIM/game screens.
-- `GET /api/balance` calls GSUBZ's authenticated wallet endpoint. The Worker sends `GSUBZ_API_KEY` as both the Bearer token and the required `api` form field. It only allows a verified Firebase ID token for the configured admin email with the `admin: true` custom claim.
-- `POST /api/purchase` remains disabled. Do not enable provider purchases until KORASUB implements customer-wallet authorization/debit, request-ID idempotency, transaction verification and immutable ledger writes on the trusted server.
-
-### Connect the frontend
-
-The current GitHub Pages site is `https://easypay-ng.github.io/KORA-SUB/`. `API_BASE` in `firebase-config.js` points directly to `https://kora-sub.owanaomubo80.workers.dev/api`, and `FRONTEND_ORIGIN` in `wrangler.toml` is set to the site origin `https://easypay-ng.github.io` (CORS origins do not include the `/KORA-SUB/` path). When the site moves to `https://korasub.name.ng`, update `FRONTEND_ORIGIN` to `https://korasub.name.ng` and redeploy the Worker. The Worker URL and `API_BASE` only need to change if the Worker URL changes.
-
-The Worker needs `FIREBASE_PROJECT_ID` and `ADMIN_EMAIL` in its non-secret vars; these are already present in `wrangler.toml`. It verifies Firebase ID token signatures against Google's public Firebase signing keys and fails closed if verification does not pass.
-
-## Development
-
-The pages are static HTML modules. Serve them through an HTTP server (not `file://`) so Firebase and ES modules load correctly. Configure the frontend host's `/api/*` rewrite to the Worker to use the live GSUBZ integration. Configure Firebase Auth, Firestore, rules and admin claims to load account and admin records. Catalog groups, service IDs and plans are fetched from the GSUBZ public catalog endpoints.
+- Product images are links you paste in (https only). There is no upload.
+- No delivery fees, tax, coupons, email notifications or payment-gateway integration.
+- The admin can't edit a funding request after review, and a rejected request can't be reopened.
+- Product stock is only decremented by the Worker. The admin's manual stock edits are not atomic with purchases.

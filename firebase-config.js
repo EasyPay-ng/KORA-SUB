@@ -1,4 +1,4 @@
-// Firebase web configuration is safe to ship in the browser. Never put GSUBZ_API_KEY here.
+// Firebase web configuration is safe to ship in the browser. Never put the service-account key here.
 export const firebaseConfig = {
   apiKey: "AIzaSyCQL4NP-pj0wLmF_9IuesZiQQZTj26QBSY",
   authDomain: "korasub-eb0b8.firebaseapp.com",
@@ -10,6 +10,6 @@ export const firebaseConfig = {
 };
 
 export const ADMIN_EMAIL = "beniwealth70@gmail.com";
-// Use a same-origin /api proxy, or set this to your deployed Worker URL ending in /api.
-// This is a public API origin only; never put the GSUBZ secret here.
+// Deployed Worker URL ending in /api (or a same-origin /api proxy).
+// Public Worker origin only. Secrets live in Wrangler secrets, never in browser code.
 export const API_BASE = "https://kora-sub.owanaomubo80.workers.dev/api";

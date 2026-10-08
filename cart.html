@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Cart — KORASTORE</title>
+  <link rel="stylesheet" href="store.css">
+  <link rel="icon" href="assets/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png"><meta name="theme-color" content="#0b2545">
+</head>
+<body>
+<div id="site-header"></div>
+<main class="wrap page">
+  <div class="page-head"><div><span class="eyebrow">Checkout</span><h1>Your cart</h1><p>Prices and stock are confirmed again by the store when you pay, so what you see here is never final until checkout.</p></div></div>
+  <div id="notice"></div>
+  <div class="cart-layout">
+    <section class="card"><div class="card-head"><div><h2>Items</h2><small id="item-count">Loading…</small></div><a class="link small" href="shop.html">Keep shopping →</a></div><div id="lines"><div class="empty"><b>Loading…</b></div></div></section>
+    <aside class="card" id="summary"></aside>
+  </div>
+</main>
+<div id="site-footer"></div>
+<script type="module">
+  import { mountHeader, mountFooter, getCart, setCart, getProduct, productMedia, stockBadge, naira, esc, apiPost, newRequestId, auth, onAuthStateChanged, watchProfile } from './store.js';
+  mountHeader('cart.html');
+  mountFooter();
+  const lines = document.querySelector('#lines');
+  const summary = document.querySelector('#summary');
+  const notice = document.querySelector('#notice');
+  const countLabel = document.querySelector('#item-count');
+  let products = new Map();
+  let user = null;
+  let profile = null;
+  let wallet = 0;
+  const pendingKey = 'korastore-checkout';
+
+  function setNotice(kind, title, text) {
+    notice.innerHTML = `<div class="notice ${kind}"><span class="notice-icon">${kind === 'ok' ? '✓' : '!'}</span><div><b>${esc(title)}</b>${esc(text)}</div></div>`;
+  }
+
+  function locationReady() {
+    if (!profile) return false;
+    if (!profile.country || !profile.state || !profile.address) return false;
+    if (profile.country === 'Nigeria' && !profile.lga) return false;
+    return true;
+  }
+
+  function totals() {
+    let total = 0;
+    let count = 0;
+    let problem = false;
+    for (const item of getCart()) {
+      const product = products.get(item.productId);
+      if (!product || product.active !== true) { problem = true; continue; }
+      total += Number(product.price) * item.quantity;
+      count += item.quantity;
+      if (item.quantity > Number(product.stock || 0)) problem = true;
+    }
+    return { total, count, problem };
+  }
+
+  function render() {
+    const cart = getCart();
+    const { total, count, problem } = totals();
+    countLabel.textContent = cart.length ? `${count} item${count === 1 ? '' : 's'} in your cart` : 'Your cart is empty';
+    lines.innerHTML = cart.length ? cart.map(item => {
+      const p = products.get(item.productId);
+      if (!p || p.active !== true) return `<div class="cart-line"><div class="cart-thumb" style="--tone:#8a94a6">?</div><div><b>No longer available</b><small class="muted" style="display:block">Remove this line to continue.</small></div><button class="btn btn-sm btn-danger" data-remove="${esc(item.productId)}">Remove</button></div>`;
+      const stock = Number(p.stock || 0);
+      return `<div class="cart-line">
+        ${productMedia(p, 'cart-thumb')}
+        <div><b>${esc(p.name)}</b><div class="small muted">${naira(p.price)} each · ${stockBadge(p).replace('stock-tag', '')}</div>
+          <div class="line-actions"><div class="qty"><button data-dec="${esc(p.id)}" aria-label="Decrease">−</button><span>${item.quantity}</span><button data-inc="${esc(p.id)}" aria-label="Increase" ${item.quantity >= stock ? 'disabled' : ''}>+</button></div>
+          <button class="link small" style="background:none;border:0;cursor:pointer;color:var(--bad)" data-remove="${esc(p.id)}">Remove</button></div>
+        </div>
+        <div class="line-total">${naira(Number(p.price) * item.quantity)}</div>
+      </div>`;
+    }).join('') : `<div class="empty"><b>Nothing here yet</b>Browse the catalogue and add something you love.<br><a class="btn btn-gold" href="shop.html" style="margin-top:14px">Shop now</a></div>`;
+
+    let action;
+    if (!user) action = `<a class="btn btn-gold btn-lg btn-block" href="login.html?next=cart.html">Sign in to checkout</a>`;
+    else if (!cart.length) action = '';
+    else if (!locationReady()) action = `<a class="btn btn-gold btn-lg btn-block" href="profile.html">Add delivery location</a>`;
+    else if (wallet < total) action = `<a class="btn btn-gold btn-lg btn-block" href="wallet.html">Fund your wallet (${naira(total - wallet)} short)</a>`;
+    else action = `<button class="btn btn-gold btn-lg btn-block" id="checkout" ${problem ? 'disabled' : ''}>Pay ${naira(total)} from wallet</button>`;
+
+    summary.innerHTML = `
+      <div class="card-head"><div><h2>Order summary</h2><small>Paid from your KORASTORE wallet</small></div></div>
+      ${user ? `<div class="wallet-pill"><div><small>Wallet balance</small><br><strong>${naira(wallet)}</strong></div><a class="btn btn-sm btn-ghost" href="wallet.html">Top up</a></div>` : ''}
+      ${user && profile && cart.length ? `<div class="small muted" style="margin-bottom:12px">Delivering to <b style="color:var(--navy)">${esc([profile.address, profile.lga, profile.state, profile.country].filter(Boolean).join(', ') || 'your profile')}</b> · <a class="link" href="profile.html">change</a></div>` : ''}
+      <div class="summary-row"><span>Items</span><span>${count}</span></div>
+      <div class="summary-row total"><span>Total</span><span>${naira(total)}</span></div>
+      <div style="margin-top:14px">${action}</div>
+      ${problem ? '<p class="small" style="color:var(--bad);margin:12px 0 0">Some items are unavailable or exceed stock. Adjust your cart.</p>' : ''}`;
+  }
+
+  lines.addEventListener('click', (event) => {
+    const cart = getCart();
+    const inc = event.target.closest('[data-inc]');
+    const dec = event.target.closest('[data-dec]');
+    const rem = event.target.closest('[data-remove]');
+    if (inc || dec) {
+      const id = (inc || dec).dataset.inc || (inc || dec).dataset.dec;
+      const item = cart.find(i => i.productId === id);
+      const stock = Number(products.get(id)?.stock || 0);
+      if (item) item.quantity = Math.max(1, Math.min(stock || 1, item.quantity + (inc ? 1 : -1)));
+    }
+    if (rem) {
+      const id = rem.dataset.remove;
+      setCart(cart.filter(i => i.productId !== id));
+      return render();
+    }
+    if (inc || dec) setCart(cart);
+    render();
+  });
+
+  summary.addEventListener('click', async (event) => {
+    const button = event.target.closest('#checkout');
+    if (!button) return;
+    const cart = getCart();
+    const items = cart.map(i => ({ productId: i.productId, quantity: i.quantity }));
+    // Reuse the same request ID for retries of the same basket, so a lost response never double-charges.
+    const signature = JSON.stringify(items);
+    let pending = null;
+    try { pending = JSON.parse(sessionStorage.getItem(pendingKey) || 'null'); } catch {}
+    const requestId = pending && pending.signature === signature ? pending.requestId : newRequestId();
+    sessionStorage.setItem(pendingKey, JSON.stringify({ requestId, signature }));
+    button.disabled = true;
+    button.textContent = 'Processing payment…';
+    try {
+      const result = await apiPost('/orders', { requestId, items });
+      sessionStorage.removeItem(pendingKey);
+      setCart([]);
+      location.replace(`orders.html?placed=${encodeURIComponent(result.orderId)}`);
+    } catch (error) {
+      setNotice('error', 'Payment was not completed', error.message);
+      button.disabled = false;
+      button.textContent = 'Try again';
+      await refresh();
+    }
+  });
+
+  async function refresh() {
+    const ids = [...new Set(getCart().map(i => i.productId))];
+    const fetched = await Promise.all(ids.map(id => getProduct(id).catch(() => null)));
+    products = new Map(fetched.filter(Boolean).map(p => [p.id, p]));
+    render();
+  }
+
+  window.addEventListener('korastore:cart', refresh);
+  onAuthStateChanged(auth, (current) => {
+    user = current;
+    if (!current) return render();
+    // The profile document holds both the delivery location and the server-managed wallet balance.
+    watchProfile(current.uid, (data) => { profile = data; wallet = Number(data.balance || 0); render(); });
+  });
+  refresh();
+</script>
+</body>
+</html>

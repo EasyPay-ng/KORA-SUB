@@ -2,72 +2,76 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Create account — KORASUB</title><link rel="stylesheet" href="styles.css">
-  <link rel="icon" href="assets/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png"><meta name="theme-color" content="#15374c">
+  <title>Create account — KORASTORE</title>
+  <link rel="stylesheet" href="store.css">
+  <link rel="icon" href="assets/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png"><meta name="theme-color" content="#0b2545">
 </head>
-<body class="auth-page">
-<div class="auth-shell">
-  <aside class="auth-visual"><div class="auth-visual-inner"><a class="brand" href="index.html"><span class="brand-mark">K</span><span>KORASUB</span></a><h1>One account.<br><em>Your own view.</em></h1><p>Create your KORASUB profile to view your wallet, request funding and keep track of your real account activity.</p><div class="auth-benefit"><span>✓</span>Only your signed-in profile data appears in your dashboard.</div></div></aside>
-  <main class="auth-form-wrap"><section class="auth-form"><a class="brand" href="index.html"><span class="brand-mark">K</span><span>KORASUB</span></a><h2>Create your account</h2><p>Use your details to get started.</p>
-    <form id="register-form" novalidate>
-      <label class="field">FULL NAME<input id="name" name="name" required autocomplete="name" placeholder="Your full name"></label>
-      <label class="field">EMAIL ADDRESS<input id="email" name="email" type="email" required autocomplete="email" placeholder="you@example.com"></label>
-      <label class="field">PASSWORD<input id="password" name="password" type="password" minlength="8" required autocomplete="new-password" placeholder="At least 8 characters"></label>
-      <div id="error" class="error" role="alert" aria-live="polite"></div>
-      <button id="submit-register" class="btn btn-primary" type="submit">Create account <span aria-hidden="true">→</span></button>
-    </form>
-    <div class="divider">OR</div>
-    <button id="google-register" class="btn google-btn" type="button">Continue with Google</button>
-    <div class="auth-foot">Already have an account? <a href="login.html">Sign in</a></div>
-    <a class="auth-return" href="index.html">← Back to KORASUB</a>
-  </section></main>
+<body>
+<div class="auth">
+  <aside class="auth-side">
+    <a class="brand" href="index.html"><img src="assets/logo.png" alt="" width="44" height="44"><span class="brand-text"><b style="color:#fff">KORASTORE</b><small>Find it. Fund it. Own it.</small></span></a>
+    <div>
+      <h1>Open your <span>store account.</span></h1>
+      <p>Create a free account, fund your wallet by bank transfer, then shop the catalogue. Add your delivery location before your first order.</p>
+    </div>
+    <p class="small" style="color:#8ea3c0">Your wallet is only credited after the store confirms your transfer.</p>
+  </aside>
+  <main class="auth-form-wrap">
+    <section class="auth-form">
+      <a class="brand" href="index.html"><img src="assets/logo.png" alt="" width="36" height="36"><span class="brand-text"><b>KORASTORE</b></span></a>
+      <h2>Create account</h2>
+      <p>It takes less than a minute.</p>
+      <form id="register-form" novalidate>
+        <label class="field">Full name<input class="input" id="name" required autocomplete="name" placeholder="Your full name"></label>
+        <label class="field">Email address<input class="input" id="email" type="email" required autocomplete="email" placeholder="you@example.com"></label>
+        <label class="field">Password <small>(at least 8 characters)</small><input class="input" id="password" type="password" minlength="8" required autocomplete="new-password"></label>
+        <div id="error" class="error-text" role="alert" aria-live="polite"></div>
+        <button id="submit" class="btn btn-block btn-lg" type="submit">Create account →</button>
+      </form>
+      <div class="divider">or</div>
+      <button id="google" class="btn btn-ghost btn-block" type="button">Continue with Google</button>
+      <div class="auth-foot">Already registered? <a class="link" href="login.html">Sign in</a></div>
+    </section>
+  </main>
 </div>
 <script type="module">
-  import { auth, googleProvider, signInWithPopup, createUserWithEmailAndPassword, updateProfile, ensureUserProfile } from './firebase-client.js';
-  const errorBox = document.querySelector('#error');
-  const form = document.querySelector('#register-form');
-  const submit = document.querySelector('#submit-register');
-  function errorText(error) {
-    const known = {
-      'auth/email-already-in-use': 'An account already exists for this email. Sign in instead.',
-      'auth/weak-password': 'Choose a stronger password with at least 8 characters.',
-      'auth/invalid-email': 'Enter a valid email address.',
-      'auth/popup-closed-by-user': 'The Google sign-in window was closed before finishing.'
-    };
-    return known[error?.code] || 'Unable to create the account. Check your connection and try again.';
-  }
-  async function finish(user, name = '') {
-    if (name) await updateProfile(user, { displayName: name });
-    await ensureUserProfile(user, name);
-    location.replace('dashboard.html');
-  }
-  form.addEventListener('submit', async (event) => {
+  import { auth, googleProvider, signInWithPopup, createUserWithEmailAndPassword, updateProfile, ensureUserProfile } from './store.js';
+  const error = document.querySelector('#error');
+  const submit = document.querySelector('#submit');
+  const messages = {
+    'auth/email-already-in-use': 'An account already exists for this email. Sign in instead.',
+    'auth/weak-password': 'Choose a password with at least 8 characters.',
+    'auth/invalid-email': 'Enter a valid email address.',
+    'auth/popup-closed-by-user': 'The Google window closed before sign-up finished.'
+  };
+  document.querySelector('#register-form').addEventListener('submit', async (event) => {
     event.preventDefault();
-    errorBox.textContent = '';
+    error.textContent = '';
     submit.disabled = true;
     submit.textContent = 'Creating account…';
+    const name = document.querySelector('#name').value.trim();
     try {
-      const name = form.elements.name.value.trim();
-      const result = await createUserWithEmailAndPassword(auth, form.elements.email.value.trim(), form.elements.password.value);
-      await finish(result.user, name);
-    } catch (error) {
-      errorBox.textContent = errorText(error);
+      const result = await createUserWithEmailAndPassword(auth, document.querySelector('#email').value.trim(), document.querySelector('#password').value);
+      await updateProfile(result.user, { displayName: name });
+      await ensureUserProfile(result.user, name);
+      location.replace('profile.html');
+    } catch (problem) {
+      error.textContent = messages[problem?.code] || 'Unable to create the account. Check your connection and try again.';
       submit.disabled = false;
-      submit.innerHTML = 'Create account <span aria-hidden="true">→</span>';
+      submit.textContent = 'Create account →';
     }
   });
-  document.querySelector('#google-register').addEventListener('click', async (event) => {
+  document.querySelector('#google').addEventListener('click', async (event) => {
     const button = event.currentTarget;
-    errorBox.textContent = '';
+    error.textContent = '';
     button.disabled = true;
-    button.textContent = 'Connecting to Google…';
     try {
       const result = await signInWithPopup(auth, googleProvider);
-      await finish(result.user);
-    } catch (error) {
-      errorBox.textContent = errorText(error);
+      await ensureUserProfile(result.user);
+      location.replace('profile.html');
+    } catch (problem) {
+      error.textContent = messages[problem?.code] || 'Google sign-up did not complete.';
       button.disabled = false;
-      button.textContent = 'Continue with Google';
     }
   });
 </script>
