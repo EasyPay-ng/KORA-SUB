@@ -6,6 +6,7 @@
     "deploy:worker": "wrangler deploy"
   },
   "devDependencies": {
+    "firebase-admin": "^13.10.0",
     "wrangler": "^4.0.0"
   }
 }

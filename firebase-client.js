@@ -10,7 +10,18 @@ import {
   onAuthStateChanged,
   signOut
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  collection,
+  query,
+  orderBy,
+  limit,
+  onSnapshot,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { firebaseConfig } from "./firebase-config.js";
 
 const app = initializeApp(firebaseConfig);
@@ -20,6 +31,33 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const googleProvider = new GoogleAuthProvider();
 export { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, onAuthStateChanged, signOut };
+
+// Creates /users/{uid} the first time a user signs in. Firestore creates the
+// "users" collection automatically on this first write. Existing profiles are left untouched.
+// Balance is never written from the browser; the server sets it.
+export async function ensureUserProfile(user, name) {
+  const ref = doc(db, "users", user.uid);
+  const snap = await getDoc(ref);
+  if (snap.exists()) return;
+  await setDoc(ref, {
+    name: name || user.displayName || "",
+    email: user.email,
+    createdAt: serverTimestamp()
+  });
+}
+
+// Live balance for the signed-in user. Returns an unsubscribe function.
+export function watchWallet(uid, callback) {
+  return onSnapshot(doc(db, "users", uid), (snap) => {
+    callback(snap.exists() ? (snap.data().balance ?? 0) : 0);
+  });
+}
+
+// Latest transactions for the signed-in user. Returns an unsubscribe function.
+export function watchTransactions(uid, callback, max = 10) {
+  const q = query(collection(db, "users", uid, "transactions"), orderBy("createdAt", "desc"), limit(max));
+  return onSnapshot(q, (snap) => callback(snap.docs.map((d) => ({ id: d.id, ...d.data() }))));
+}
 
 export async function getFirebaseToken() {
   if (!auth.currentUser) return null;
