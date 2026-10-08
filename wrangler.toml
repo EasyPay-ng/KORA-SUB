@@ -12,3 +12,10 @@ FRONTEND_ORIGIN = "https://easypay-ng.github.io"
 
 # GSUBZ_API_KEY is intentionally NOT a [vars] entry. Set it with:
 #   npx wrangler secret put GSUBZ_API_KEY
+
+# Isolated values for Cloudflare's pull-request Worker Preview builds.
+# These deliberately do not point at the production Firebase project or frontend.
+[previews.vars]
+FIREBASE_PROJECT_ID = "korasub-preview"
+ADMIN_EMAIL = "preview@example.invalid"
+FRONTEND_ORIGIN = "https://preview.example.invalid"
