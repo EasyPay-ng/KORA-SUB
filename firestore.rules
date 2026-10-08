@@ -1,0 +1,76 @@
+rules_version = '2';
+
+// KORASUB Firestore security rules.
+// Principles:
+//  - Clients can read only their own data.
+//  - Clients can never write balances, ledger entries, or transaction status.
+//  - Wallet mutations and funding approvals are performed by the server
+//    (Render API / Firebase Admin SDK), which bypasses these rules.
+//  - Admin access uses a custom claim `admin: true` set via the Admin SDK.
+//    The ADMIN_EMAIL check in firebase-config.js is UI-only and is NOT a security control.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function isAdmin() {
+      return signedIn() && request.auth.token.admin == true;
+    }
+
+    // User profile: /users/{uid}
+    match /users/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+
+      // Client may create its own profile, but cannot set a balance or any other financial field.
+      allow create: if isOwner(uid)
+        && request.resource.data.keys().hasOnly(['name', 'email', 'createdAt'])
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.createdAt is timestamp;
+
+      // Client may only edit display name. Balance and other fields are server-only.
+      allow update: if isOwner(uid)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name']);
+
+      allow delete: if false;
+    }
+
+    // Transaction history (read-only for clients): /users/{uid}/transactions/{txId}
+    match /users/{uid}/transactions/{txId} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow write: if false;
+    }
+
+    // Immutable wallet ledger: /ledger/{entryId}
+    // Written only by the server. Admins may read for audit.
+    match /ledger/{entryId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // Wallet funding requests: /fundingRequests/{requestId}
+    // A customer may submit a request in 'pending' state only.
+    // Approval/rejection is done by the server, so clients cannot change status.
+    match /fundingRequests/{requestId} {
+      allow read: if (signedIn() && resource.data.uid == request.auth.uid) || isAdmin();
+
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['uid', 'amount', 'reference', 'status', 'createdAt'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.amount is number
+        && request.resource.data.amount > 0
+        && request.resource.data.status == 'pending'
+        && request.resource.data.createdAt is timestamp;
+
+      allow update, delete: if false;
+    }
+
+    // Anything not matched above is denied by default.
+  }
+}
