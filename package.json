@@ -1,0 +1,11 @@
+{
+  "name": "korasub",
+  "private": true,
+  "scripts": {
+    "dev:worker": "wrangler dev",
+    "deploy:worker": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}
