@@ -1,0 +1,8 @@
+name = "korasub-api"
+main = "worker/index.js"
+compatibility_date = "2026-10-08"
+workers_dev = true
+
+[vars]
+FIREBASE_PROJECT_ID = "korasub-eb0b8"
+FRONTEND_ORIGIN = "*"
