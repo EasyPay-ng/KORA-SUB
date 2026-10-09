@@ -14,7 +14,7 @@
 </main>
 <div id="site-footer"></div>
 <script type="module">
-  import { mountHeader, mountFooter, getProduct, productMedia, productImages, priceHTML, stockBadge, addToCart, esc, readParam, showToast } from './store.js';
+  import { mountHeader, mountFooter, getProduct, productMedia, productImages, priceHTML, productPrice, stockBadge, addToCart, esc, readParam, showToast } from './store.js';
   mountHeader('shop.html');
   mountFooter();
   const host = document.querySelector('#detail');
@@ -34,8 +34,9 @@
   function paint() {
     if (!product) return;
     const stock = Number(product.stock || 0);
-    const out = stock <= 0 || product.active !== true;
-    quantity = Math.min(quantity, Math.max(1, stock));
+    const minimum = Math.max(1, Number(product.minOrderQuantity || 1));
+    const out = stock < minimum || product.active !== true;
+    quantity = Math.max(minimum, Math.min(quantity, Math.max(minimum, stock)));
     const images = productImages(product);
     const ready = pickReady();
     host.innerHTML = `
@@ -52,7 +53,7 @@
           </div>
           <h1>${esc(product.name)}</h1>
           <div class="row">${stockBadge(product)}<span class="badge gold">Sold ${Number(product.sold || 0)}</span></div>
-          ${priceHTML(product, 'price detail-price')}
+          ${(chosenSize || chosenColor) && ready ? `<div class="price detail-price"><span>${new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', maximumFractionDigits: 0 }).format(productPrice(product, { size: chosenSize, color: chosenColor }))}</span></div>` : priceHTML(product, 'price detail-price')}
           <p class="desc">${esc(product.description || 'Details will be shared by the store admin.')}</p>
           ${(product.keywords || []).length ? `<div class="tags">${product.keywords.map(k => `<span class="tag">#${esc(k)}</span>`).join('')}</div>` : ''}
           <div class="small muted" style="margin-top:12px">Product ID: <span class="mono" style="color:var(--navy)">${esc(product.id)}</span></div>
@@ -69,7 +70,7 @@
             </div>` : ''}
 
           <div class="buy-box">
-            <div class="row"><span class="small muted">Quantity</span>
+            <div class="row"><span class="small muted">Quantity · minimum ${minimum}</span>
               <div class="qty"><button type="button" data-q="-1" aria-label="Decrease" ${out ? 'disabled' : ''}>−</button><span>${quantity}</span><button type="button" data-q="1" aria-label="Increase" ${out ? 'disabled' : ''}>+</button></div>
             </div>
             <div class="row">
@@ -94,7 +95,7 @@
       paint();
     }));
     host.querySelectorAll('[data-q]').forEach(btn => btn.addEventListener('click', () => {
-      quantity = Math.max(1, Math.min(Math.max(1, stock), quantity + Number(btn.dataset.q)));
+      quantity = Math.max(minimum, Math.min(Math.max(minimum, stock), quantity + Number(btn.dataset.q)));
       paint();
     }));
     host.querySelector('#add')?.addEventListener('click', (event) => {
@@ -113,6 +114,7 @@
         return;
       }
       product = data;
+      quantity = Math.max(1, Number(data.minOrderQuantity || 1));
       document.title = `${data.name} — KORASTORE`;
       paint();
     }).catch((error) => {

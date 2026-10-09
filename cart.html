@@ -18,7 +18,7 @@
 </main>
 <div id="site-footer"></div>
 <script type="module">
-  import { mountHeader, mountFooter, getCart, setCart, getProduct, productMedia, stockBadge, naira, esc, placeOrder, newRequestId, auth, onAuthStateChanged, watchProfile, watchFeeSettings, checkoutFees, variantLabel, DEFAULT_FEES } from './store.js';
+  import { mountHeader, mountFooter, getCart, setCart, getProduct, productMedia, stockBadge, naira, esc, placeOrder, newRequestId, auth, onAuthStateChanged, watchProfile, watchFeeSettings, checkoutFees, variantLabel, productPrice, DEFAULT_FEES } from './store.js';
   mountHeader('cart.html');
   mountFooter();
   const lines = document.querySelector('#lines');
@@ -50,9 +50,9 @@
     for (const item of getCart()) {
       const product = products.get(item.productId);
       if (!product || product.active !== true) { problem = true; continue; }
-      subtotal += Number(product.price) * item.quantity;
+      subtotal += productPrice(product, item) * item.quantity;
       count += item.quantity;
-      if (item.quantity > Number(product.stock || 0)) problem = true;
+      if (item.quantity > Number(product.stock || 0) || item.quantity < Math.max(1, Number(product.minOrderQuantity || 1))) problem = true;
     }
     const feeParts = checkoutFees(subtotal, profile, fees);
     return { ...feeParts, count, problem };
@@ -67,14 +67,16 @@
       const variant = variantLabel(item);
       if (!p || p.active !== true) return `<div class="cart-line"><div class="cart-thumb" style="--tone:#8a94a6">?</div><div><b>No longer available</b><small class="muted" style="display:block">Remove this line to continue.${variant ? ` (${esc(variant)})` : ''}</small></div><button class="btn btn-sm btn-danger" data-remove="${index}">Remove</button></div>`;
       const stock = Number(p.stock || 0);
+      const unitPrice = productPrice(p, item);
+      const minimum = Math.max(1, Number(p.minOrderQuantity || 1));
       return `<div class="cart-line">
         ${productMedia(p, 'cart-thumb')}
         <div><b>${esc(p.name)}</b>${variant ? `<div class="small muted">${esc(variant)}</div>` : ''}
-          <div class="small muted">${naira(p.price)} each · ${stockBadge(p).replace('stock-tag', '')}</div>
+          <div class="small muted">${naira(unitPrice)} each${minimum > 1 ? ` · minimum ${minimum}` : ``} · ${stockBadge(p).replace('stock-tag', '')}</div>
           <div class="line-actions"><div class="qty"><button data-dec="${index}" aria-label="Decrease">−</button><span>${item.quantity}</span><button data-inc="${index}" aria-label="Increase" ${item.quantity >= stock ? 'disabled' : ''}>+</button></div>
           <button class="link small" style="background:none;border:0;cursor:pointer;color:var(--bad)" data-remove="${index}">Remove</button></div>
         </div>
-        <div class="line-total">${naira(Number(p.price) * item.quantity)}</div>
+        <div class="line-total">${naira(unitPrice * item.quantity)}</div>
       </div>`;
     }).join('') : `<div class="empty"><b>Nothing here yet</b>Browse the catalogue and add something you love.<br><a class="btn btn-gold" href="shop.html" style="margin-top:14px">Shop now</a></div>`;
 
@@ -113,7 +115,8 @@
       const item = cart[index];
       if (item) {
         const stock = Number(products.get(item.productId)?.stock || 0);
-        item.quantity = Math.max(1, Math.min(stock || 1, item.quantity + (inc ? 1 : -1)));
+        const minimum = Math.max(1, Number(products.get(item.productId)?.minOrderQuantity || 1));
+        item.quantity = Math.max(minimum, Math.min(stock || minimum, item.quantity + (inc ? 1 : -1)));
         setCart(cart);
       }
     }

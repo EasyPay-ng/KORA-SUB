@@ -370,3 +370,4 @@ h1, h2, h3, h4 { font-family: 'Sora', sans-serif; letter-spacing: -.02em; line-h
   .cart-thumb { width: 62px; height: 62px; }
   .detail-media .mono-mark { font-size: 84px; }
 }
+.variant-price-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:10px}.variant-price-grid label{display:flex;flex-direction:column;gap:5px;font-size:.82rem;color:var(--muted)}
