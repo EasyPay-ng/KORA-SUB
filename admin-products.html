@@ -11,27 +11,51 @@
 <div class="admin-shell" id="admin-content" hidden>
   <aside class="admin-side" id="admin-sidebar"></aside>
   <main class="admin-main">
-    <div class="page-head"><div><span class="eyebrow">Catalogue</span><h1>Products</h1><p>Only you can list, price and stock products. Hidden products stay in the database but disappear from the shop.</p></div><button class="btn btn-gold" id="new">+ New product</button></div>
+    <div class="page-head"><div><span class="eyebrow">Catalogue</span><h1>Products</h1><p>Each product has its own product ID and page. Photos are compressed and stored in the database (base64). Hidden products stay in the database but disappear from the shop.</p></div><button class="btn btn-gold" id="new">+ New product</button></div>
     <div class="admin-grid">
       <section class="card">
         <div class="card-head"><div><h2>All products</h2><small id="count">Loading…</small></div></div>
-        <div class="table-wrap"><table class="table"><thead><tr><th>Product</th><th>Price</th><th>Stock</th><th>Sold</th><th>Status</th><th></th></tr></thead><tbody id="rows"><tr><td colspan="6">Loading…</td></tr></tbody></table></div>
+        <div class="table-wrap"><table class="table"><thead><tr><th>Product ID</th><th>Product</th><th>Price</th><th>Stock</th><th>Sold</th><th>Status</th><th></th></tr></thead><tbody id="rows"><tr><td colspan="7">Loading…</td></tr></tbody></table></div>
       </section>
       <section class="card">
         <div class="card-head"><div><h2 id="form-title">New product</h2><small>Customers see changes immediately</small></div></div>
         <form id="form" class="panel-form" novalidate>
           <input type="hidden" id="id">
-          <label class="field">Name<input class="input" id="name" maxlength="120" required></label>
           <div class="field-row">
-            <label class="field">Category<input class="input" id="category" maxlength="60" placeholder="e.g. Fashion"></label>
-            <label class="field">Price (₦)<input class="input" id="price" type="number" min="1" step="1" required></label>
+            <label class="field">Product ID <small>3–40 letters, numbers, – or _ · used in the product link · cannot change later</small><input class="input" id="productId" maxlength="40" placeholder="e.g. TSHIRT-001" required></label>
+            <label class="field">Name<input class="input" id="name" maxlength="120" required></label>
           </div>
           <div class="field-row">
-            <label class="field">Stock units<input class="input" id="stock" type="number" min="0" step="1" required></label>
-            <label class="field">Image URL <small>https only, optional</small><input class="input" id="imageUrl" placeholder="https://…"></label>
+            <label class="field">Quantity available <small>counts every size and colour</small><input class="input" id="stock" type="number" min="0" step="1" required></label>
+            <label class="field">Category <small>e.g. Clothes, Electronics</small><input class="input" id="category" maxlength="60" placeholder="e.g. Clothes" list="cat-list"><datalist id="cat-list"><option>Clothes</option><option>Shoes</option><option>Electronics</option><option>Accessories</option><option>Home</option><option>Beauty</option></datalist></label>
           </div>
+          <label class="field">Search keywords <small>comma separated — search matches these</small><input class="input" id="keywords" maxlength="500" placeholder="e.g. ankara, native, men"></label>
+          <div class="field-row">
+            <label class="field">Selling price (₦) <small>the discounted price customers pay</small><input class="input" id="price" type="number" min="1" step="1" required></label>
+            <label class="field">Original price (₦) <small>slashed through on the shop · optional</small><input class="input" id="compareAtPrice" type="number" min="0" step="1" placeholder="e.g. 20000"></label>
+          </div>
+
+          <div class="field">Product photos <small>up to 5 · compressed and stored in Firestore as base64</small>
+            <input type="file" id="imageInput" accept="image/*" multiple hidden>
+            <div id="thumbs" class="thumbs"></div>
+            <div class="row" style="margin-top:2px">
+              <button class="btn btn-sm btn-ghost" type="button" id="addImage">+ Add photos</button>
+              <small class="muted" id="imageInfo">No photos yet — a placeholder is shown instead.</small>
+            </div>
+          </div>
+
+          <label class="toggle"><input type="checkbox" id="variants"> Clothing product — offer size &amp; colour options</label>
+          <div id="variant-fields" hidden style="margin:12px 0 4px">
+            <div class="field-row">
+              <label class="field">Sizes <small>comma separated</small><input class="input" id="sizes" maxlength="300" placeholder="S, M, L, XL"></label>
+              <label class="field">Colours <small>comma separated</small><input class="input" id="colors" maxlength="300" placeholder="Black, White, Navy"></label>
+            </div>
+            <small class="muted">Shoppers pick a size and colour on the product page before adding to cart.</small>
+          </div>
+
           <label class="field">Description<textarea class="textarea" id="description" maxlength="2000"></textarea></label>
-          <label class="toggle"><input type="checkbox" id="active" checked> Listed in the shop</label>
+          <label class="toggle"><input type="checkbox" id="recommended"> ★ Recommended — feature in the shop and notify shoppers</label>
+          <label class="toggle" style="margin-top:10px"><input type="checkbox" id="active" checked> Listed in the shop</label>
           <div id="error" class="error-text" role="alert" style="margin-top:12px"></div>
           <div class="row" style="margin-top:12px"><button class="btn btn-gold" type="submit" id="save">Save product</button><button class="btn btn-ghost" type="button" id="reset">Clear</button></div>
         </form>
@@ -40,34 +64,136 @@
   </main>
 </div>
 <script type="module">
-  import { mountAdminSidebar, requireAdmin, watchProducts, saveProduct, naira, esc } from './store.js';
+  import { mountAdminSidebar, requireAdmin, watchProducts, saveProduct, announceRecommended, PRODUCT_ID_PATTERN, esc, priceHTML } from './store.js';
   mountAdminSidebar('admin-products.html');
   const $ = (id) => document.querySelector(id);
   let products = [];
+  let images = [];          // base64 data URLs, max 5
+  let editing = null;       // product currently being edited (for recommended detection)
+
+  // ---------- Image upload → compressed base64 ----------
+  const MAX_IMAGES = 5;
+  const MAX_DIM = 1100;           // longest edge in px
+  const TARGET_B64 = 150000;      // ~110 KB per image after compression
+  const QUALITIES = [0.85, 0.75, 0.65, 0.55, 0.45, 0.35];
+
+  function loadImage(file) {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error(`${file.name}: could not read this image.`)); };
+      img.src = url;
+    });
+  }
+
+  async function compressToDataUrl(file) {
+    if (!/^image\//.test(file.type)) throw new Error(`${file.name}: only image files can be uploaded.`);
+    if (file.size > 15 * 1024 * 1024) throw new Error(`${file.name}: file is larger than 15 MB.`);
+    const img = await loadImage(file);
+    let width = img.naturalWidth, height = img.naturalHeight;
+    if (!width || !height) throw new Error(`${file.name}: could not read this image.`);
+    const scale = Math.min(1, MAX_DIM / Math.max(width, height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(width * scale));
+    canvas.height = Math.max(1, Math.round(height * scale));
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    for (const quality of QUALITIES) {
+      const dataUrl = canvas.toDataURL('image/jpeg', quality);
+      if (dataUrl.length <= TARGET_B64) return dataUrl;
+    }
+    return canvas.toDataURL('image/jpeg', 0.3);
+  }
+
+  function totalImageBytes() {
+    return images.reduce((sum, src) => sum + src.length, 0);
+  }
+
+  function renderThumbs() {
+    $('#thumbs').innerHTML = images.map((src, i) => `
+      <div class="thumb">
+        <img src="${esc(src)}" alt="Photo ${i + 1}">
+        ${i === 0 ? '<span class="thumb-main">Main</span>' : ''}
+        <button type="button" class="thumb-x" data-drop="${i}" aria-label="Remove photo ${i + 1}">×</button>
+      </div>`).join('');
+    $('#imageInfo').textContent = images.length
+      ? `${images.length} of ${MAX_IMAGES} photos · ${(totalImageBytes() / 1024).toFixed(0)} KB stored per product`
+      : 'No photos yet — a placeholder is shown instead.';
+    $('#addImage').disabled = images.length >= MAX_IMAGES;
+  }
+
+  $('#addImage').addEventListener('click', () => $('#imageInput').click());
+  $('#imageInput').addEventListener('change', async () => {
+    const error = $('#error'); error.textContent = '';
+    const files = [...$('#imageInput').files].slice(0, MAX_IMAGES - images.length);
+    $('#imageInput').value = '';
+    $('#addImage').disabled = true;
+    $('#imageInfo').textContent = 'Compressing photos…';
+    for (const file of files) {
+      try {
+        images.push(await compressToDataUrl(file));
+      } catch (problem) {
+        error.textContent = problem.message;
+      }
+    }
+    renderThumbs();
+  });
+  $('#thumbs').addEventListener('click', (event) => {
+    const drop = event.target.closest('[data-drop]');
+    if (!drop) return;
+    images.splice(Number(drop.dataset.drop), 1);
+    renderThumbs();
+  });
+
+  // ---------- Variants ----------
+  $('#variants').addEventListener('change', () => {
+    $('#variant-fields').hidden = !$('#variants').checked;
+  });
+
+  // ---------- Form ----------
+  const parseList = (value) => [...new Set(String(value || '').split(',').map(s => s.trim()).filter(Boolean))].slice(0, 20);
+
   function fill(p) {
+    editing = p || null;
     $('#form-title').textContent = p ? `Edit: ${p.name}` : 'New product';
     $('#id').value = p?.id || '';
+    $('#productId').value = p?.id || '';
+    $('#productId').disabled = Boolean(p);
     $('#name').value = p?.name || '';
     $('#category').value = p?.category || '';
+    $('#keywords').value = (p?.keywords || []).join(', ');
     $('#price').value = p?.price ?? '';
+    $('#compareAtPrice').value = p?.compareAtPrice ?? '';
     $('#stock').value = p?.stock ?? '';
-    $('#imageUrl').value = p?.imageUrl || '';
     $('#description').value = p?.description || '';
+    images = Array.isArray(p?.images) ? [...p.images] : [];
+    const variantOn = Boolean(p?.sizes?.length || p?.colors?.length);
+    $('#variants').checked = variantOn;
+    $('#variant-fields').hidden = !variantOn;
+    $('#sizes').value = (p?.sizes || []).join(', ');
+    $('#colors').value = (p?.colors || []).join(', ');
+    $('#recommended').checked = p?.recommended === true;
     $('#active').checked = p ? p.active === true : true;
     $('#error').textContent = '';
+    renderThumbs();
   }
+
   function render() {
     $('#count').textContent = `${products.length} product${products.length === 1 ? '' : 's'} · ${products.filter(p => p.active).length} listed`;
     $('#rows').innerHTML = products.length ? products.sort((a, b) => a.name.localeCompare(b.name)).map(p => `
       <tr>
-        <td><b>${esc(p.name)}</b><small>${esc(p.category || 'Store')}</small></td>
-        <td class="mono">${naira(p.price)}</td>
+        <td class="mono"><b>${esc(p.id)}</b></td>
+        <td><b>${esc(p.name)}</b><small>${esc(p.category || 'Store')}${p.recommended ? ' · ★ Recommended' : ''}</small></td>
+        <td>${priceHTML(p, 'table-price')}</td>
         <td class="mono">${Number(p.stock || 0)}</td>
         <td class="mono">${Number(p.sold || 0)}</td>
         <td><span class="badge ${p.active ? 'ok' : ''}">${p.active ? 'Listed' : 'Hidden'}</span></td>
         <td><div class="table-actions"><button class="btn btn-sm btn-ghost" data-edit="${esc(p.id)}">Edit</button><button class="btn btn-sm btn-ghost" data-toggle="${esc(p.id)}">${p.active ? 'Hide' : 'List'}</button></div></td>
-      </tr>`).join('') : '<tr><td colspan="6">No products yet. Create your first one.</td></tr>';
+      </tr>`).join('') : '<tr><td colspan="7">No products yet. Create your first one.</td></tr>';
   }
+
   $('#rows').addEventListener('click', async (event) => {
     const edit = event.target.closest('[data-edit]');
     const toggle = event.target.closest('[data-toggle]');
@@ -79,40 +205,67 @@
   });
   $('#new').addEventListener('click', () => fill(null));
   $('#reset').addEventListener('click', () => fill(null));
+
   $('#form').addEventListener('submit', async (event) => {
     event.preventDefault();
     const error = $('#error');
     error.textContent = '';
-    const price = Math.round(Number($('#price').value));
-    const stock = Math.round(Number($('#stock').value));
+    const isNew = !$('#id').value;
+    const productId = $('#productId').value.trim();
     const name = $('#name').value.trim();
-    const imageUrl = $('#imageUrl').value.trim();
+    const price = Math.round(Number($('#price').value));
+    const compareRaw = $('#compareAtPrice').value.trim();
+    const compareAtPrice = compareRaw === '' ? 0 : Math.round(Number(compareRaw));
+    const stock = Math.round(Number($('#stock').value));
+    const keywords = parseList($('#keywords').value);
+    const sizes = $('#variants').checked ? parseList($('#sizes').value) : [];
+    const colors = $('#variants').checked ? parseList($('#colors').value) : [];
+    const recommended = $('#recommended').checked;
+
+    if (!PRODUCT_ID_PATTERN.test(productId)) return error.textContent = 'Product ID must be 3–40 letters, numbers, dashes or underscores.';
+    if (isNew && products.some(p => p.id === productId)) return error.textContent = `Product ID “${productId}” is already used. Pick another one.`;
     if (!name) return error.textContent = 'Enter a product name.';
-    if (!Number.isFinite(price) || price < 1) return error.textContent = 'Price must be at least ₦1.';
-    if (!Number.isFinite(stock) || stock < 0) return error.textContent = 'Stock must be zero or more.';
-    if (imageUrl && !/^https:\/\/\S+$/.test(imageUrl)) return error.textContent = 'Image must be an https:// link.';
+    if (!Number.isFinite(price) || price < 1) return error.textContent = 'Selling price must be at least ₦1.';
+    if (!Number.isFinite(compareAtPrice) || compareAtPrice < 0) return error.textContent = 'Original price must be zero or more.';
+    if (compareAtPrice && compareAtPrice <= price) return error.textContent = 'The slashed original price must be higher than the selling price (or empty).';
+    if (!Number.isFinite(stock) || stock < 0) return error.textContent = 'Quantity must be zero or more.';
+    if ($('#variants').checked && !sizes.length && !colors.length) return error.textContent = 'Add at least one size or colour, or untick the clothing option.';
+    if (totalImageBytes() > 750000) return error.textContent = 'These photos are too heavy together. Remove one, or pick smaller images.';
+
     const data = {
       name,
       category: $('#category').value.trim() || 'Store',
       price,
+      compareAtPrice,
       stock,
-      imageUrl,
+      keywords,
+      images,
+      sizes,
+      colors,
+      recommended,
       description: $('#description').value.trim(),
       active: $('#active').checked
     };
+
     const save = $('#save');
     save.disabled = true;
+    save.textContent = 'Saving…';
     try {
-      await saveProduct($('#id').value || null, data);
+      await saveProduct(productId, data, { isNew });
+      if (recommended && (isNew || editing?.recommended !== true)) {
+        await announceRecommended(productId, name).catch(() => {});
+      }
       fill(null);
     } catch (problem) {
       error.textContent = problem.message || 'Could not save the product.';
     } finally {
       save.disabled = false;
+      save.textContent = 'Save product';
     }
   });
+
   if (await requireAdmin('admin-products.html')) {
-    watchProducts((rows) => { products = rows; render(); }, (problem) => { $('#rows').innerHTML = `<tr><td colspan="6">${esc(problem.message)}</td></tr>`; }, { includeInactive: true });
+    watchProducts((rows) => { products = rows; render(); }, (problem) => { $('#rows').innerHTML = `<tr><td colspan="7">${esc(problem.message)}</td></tr>`; }, { includeInactive: true });
   }
 </script>
 </body>

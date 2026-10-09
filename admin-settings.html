@@ -11,7 +11,7 @@
 <div class="admin-shell" id="admin-content" hidden>
   <aside class="admin-side" id="admin-sidebar"></aside>
   <main class="admin-main">
-    <div class="page-head"><div><span class="eyebrow">Payments</span><h1>Deposit bank details</h1><p>This is the only account customers may pay into. Customers see these details on their wallet page.</p></div></div>
+    <div class="page-head"><div><span class="eyebrow">Payments</span><h1>Deposit bank details</h1><p>Deposits only. Customers fund their wallet by bank transfer to this account — orders are paid from the wallet balance when they check out, never by bank transfer.</p></div></div>
     <div class="admin-grid">
       <section class="card">
         <form id="form" class="panel-form" novalidate>
@@ -28,6 +28,7 @@
         <div id="preview" class="bank-card"><div class="empty">Loading…</div></div>
       </aside>
     </div>
+
   </main>
 </div>
 <script type="module">
@@ -75,6 +76,7 @@
       save.disabled = false;
     }
   });
+
   if (await requireAdmin('admin-settings.html')) {
     watchPaymentSettings(onSettings);
   }

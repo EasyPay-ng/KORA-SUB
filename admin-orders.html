@@ -37,7 +37,7 @@
       return `<tr>
         <td><b class="mono">${esc(o.id.slice(-8).toUpperCase())}</b><small>${esc(formatDateTime(o.createdAt))}</small></td>
         <td><b>${esc(u?.name || 'Customer')}</b><small>${esc([d.address, d.lga, d.state, d.country].filter(Boolean).join(', '))}</small></td>
-        <td>${(o.items || []).map(i => `<small style="color:var(--ink)">${esc(i.name)} × ${i.quantity}</small>`).join('')}</td>
+        <td>${(o.items || []).map(i => `<small style="color:var(--ink)">${esc(i.name)}${(i.size || i.color) ? ` · ${esc([i.size, i.color].filter(Boolean).join(' · '))}` : ''} × ${i.quantity}</small>`).join('')}${o.serviceFee != null ? `<small class="muted">incl. ${naira(o.serviceFee || 0)} fee + ${naira(o.deliveryFee || 0)} delivery</small>` : ''}</td>
         <td class="mono"><b>${naira(o.total)}</b></td>
         <td><span class="badge ${statusClass(o.status)}">${esc(STATUS_LABEL[o.status] || o.status)}</span></td>
         <td><div class="table-actions">${actions || '<small class="muted">Closed</small>'}</div></td>

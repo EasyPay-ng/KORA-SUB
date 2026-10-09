@@ -12,8 +12,17 @@
   <div class="page-head">
     <div><span class="eyebrow">The catalogue</span><h1>Shop KORASTORE</h1><p>Everything listed here is sold by KORASTORE. Browse freely; sign in to fund your wallet and buy.</p></div>
   </div>
+
+  <section class="card rec-section" id="rec-section" hidden>
+    <div class="card-head">
+      <div><h2>★ Recommended</h2><small>Hand-picked by the store admin — turn on alerts to hear the moment one lands</small></div>
+      <button class="btn btn-sm btn-ghost" id="alerts-btn">🔔 Turn on alerts</button>
+    </div>
+    <div id="rec-grid" class="products"></div>
+  </section>
+
   <div class="toolbar">
-    <input id="search" class="input" type="search" placeholder="Search products" aria-label="Search products">
+    <input id="search" class="input" type="search" placeholder="Search products and keywords" aria-label="Search products">
     <select id="sort" class="select" aria-label="Sort products">
       <option value="new">Newest</option>
       <option value="low">Price: low to high</option>
@@ -26,22 +35,56 @@
 </main>
 <div id="site-footer"></div>
 <script type="module">
-  import { mountHeader, mountFooter, watchProducts, productCard, bindAddToCart, esc } from './store.js';
+  import { mountHeader, mountFooter, watchProducts, productCard, bindAddToCart, esc, requestNotificationPermission, notificationState, showToast } from './store.js';
   mountHeader('shop.html');
   mountFooter();
   const grid = document.querySelector('#grid');
   const chips = document.querySelector('#chips');
   const search = document.querySelector('#search');
   const sort = document.querySelector('#sort');
+  const recSection = document.querySelector('#rec-section');
+  const recGrid = document.querySelector('#rec-grid');
+  const alertsBtn = document.querySelector('#alerts-btn');
   let products = [];
   let category = 'All';
   bindAddToCart(grid);
+  bindAddToCart(recGrid);
+
+  // Recommended products live in their own section above the catalogue. Browser
+  // notifications for new recommended products are wired site-wide in the shared header;
+  // the button here just asks for permission.
+  function paintAlertsButton() {
+    const state = notificationState();
+    if (state === 'granted') { alertsBtn.textContent = '🔔 Alerts on'; alertsBtn.disabled = true; }
+    else if (state === 'denied') { alertsBtn.textContent = '🔕 Alerts blocked'; alertsBtn.disabled = true; }
+    else if (state === 'unsupported') { alertsBtn.hidden = true; }
+  }
+  paintAlertsButton();
+  alertsBtn.addEventListener('click', async () => {
+    alertsBtn.disabled = true;
+    alertsBtn.textContent = 'Asking…';
+    const result = await requestNotificationPermission();
+    if (result === 'granted') showToast('Alerts on', 'We will notify you when a recommended product is added.');
+    paintAlertsButton();
+    if (result === 'default') alertsBtn.disabled = false;
+  });
+
+  function matches(p, term) {
+    const haystack = `${p.name} ${p.category || ''} ${p.description || ''} ${(p.keywords || []).join(' ')} ${p.id}`.toLowerCase();
+    return haystack.includes(term);
+  }
+
   function render() {
     const term = search.value.trim().toLowerCase();
     const categories = ['All', ...new Set(products.map(p => p.category || 'Store'))];
     chips.innerHTML = categories.map(c => `<button class="chip ${c === category ? 'on' : ''}" data-cat="${esc(c)}">${esc(c)}</button>`).join('');
+
+    const recommended = products.filter(p => p.recommended === true);
+    recSection.hidden = recommended.length === 0;
+    recGrid.innerHTML = recommended.map(productCard).join('');
+
     let list = products.filter(p => (category === 'All' || (p.category || 'Store') === category)
-      && `${p.name} ${p.category} ${p.description || ''}`.toLowerCase().includes(term));
+      && (!term || matches(p, term)));
     const order = {
       new: (a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0),
       low: (a, b) => a.price - b.price,

@@ -39,6 +39,9 @@
         <div class="track">${ORDER_STEPS.map((_, i) => `<span class="${i <= current ? 'done' : ''}"></span>`).join('')}</div>
         <div class="track-labels">${ORDER_STEPS.map((s, i) => `<span class="${i === current ? 'now' : ''}">${ORDER_LABEL[s]}</span>`).join('')}</div>`;
       const d = o.delivery || {};
+      const feeRows = (o.serviceFee != null || o.deliveryFee != null) ? `
+        <li><span>Platform service fee</span><span>${naira(o.serviceFee || 0)}</span></li>
+        <li><span>Delivery</span><span>${naira(o.deliveryFee || 0)}</span></li>` : '';
       return `
         <article class="order">
           <div class="order-head">
@@ -46,7 +49,7 @@
             <div class="row"><span class="badge ${statusClass(o.status)}">${esc(STATUS_LABEL[o.status] || o.status)}</span><b class="mono" style="color:var(--navy)">${naira(o.total)}</b></div>
           </div>
           ${track}
-          <ul class="order-items">${(o.items || []).map(i => `<li><span>${esc(i.name)} × ${i.quantity}</span><span>${naira(i.lineTotal)}</span></li>`).join('')}</ul>
+          <ul class="order-items">${(o.items || []).map(i => `<li><span>${esc(i.name)}${(i.size || i.color) ? ` · <small class="muted">${esc([i.size, i.color].filter(Boolean).join(' · '))}</small>` : ''} × ${i.quantity}</span><span>${naira(i.lineTotal)}</span></li>`).join('')}${feeRows}</ul>
           <p class="small muted" style="margin:12px 0 0">Deliver to: ${esc([d.address, d.lga, d.state, d.country].filter(Boolean).join(', '))}${cancelled ? ' · Refunded to your wallet' : ''}</p>
         </article>`;
     }).join('');

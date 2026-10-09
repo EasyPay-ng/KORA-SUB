@@ -7,15 +7,21 @@ rules_version = '2';
 // the same batch:
 //
 //  - A customer's wallet can go DOWN only in a batch that creates their own paid order
-//    whose total equals the balance decrease (prices are re-read from /products).
+//    whose total equals the balance decrease (prices are re-read from /products, and the
+//    total must be items + platform service fee + delivery fee).
 //  - A customer's wallet can never go UP. Funding is credited by the admin only.
 //  - Stock can go DOWN only in a batch that creates the order that includes that product.
 //  - Orders are created once (create-only), so a retried checkout can't double-charge.
-//  - The admin account (email + verified email) approves funding, moves order status and
-//    cancels with refunds. The admin can set any balance; that trust is by design.
+//  - Checkout fees are fixed by the fee schedule in /settings/fees (admin-edited), with
+//    built-in defaults: ₦2,000 platform service fee, ₦2,500 delivery inside the store's
+//    local state, ₦6,000 delivery anywhere else.
+//  - Product documents use the admin-chosen product ID as their id (3–40 of A–Z a–z 0–9 _ -).
+//  - The admin account (email + verified email) approves funding, moves order status,
+//    cancels with refunds, lists products and announces recommended ones. The admin can
+//    set any balance; that trust is by design.
 //
-// Limits: a cart is capped at 5 different products per order (rules have no loops, so
-// each line is checked by index).
+// Limits: a cart is capped at 5 lines per order (rules have no loops, so each line is
+// checked by index).
 
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -53,15 +59,41 @@ service cloud.firestore {
         + (list.size() > 4 && list[4].productId == productId ? list[4].quantity : 0);
     }
 
-    // One order line: must match the product as it is now in /products.
+    // Checkout fee schedule. The admin edits /settings/fees; before it exists the
+    // built-in defaults apply, so checkout works from day one. Cached lookups of the
+    // same document do not count against the rules lookup limit.
+    function feeData() {
+      return exists(/databases/$(database)/documents/settings/fees)
+        ? get(/databases/$(database)/documents/settings/fees).data
+        : {'serviceFee': 2000, 'deliveryLocal': 2500, 'deliveryNigeria': 6000, 'localState': 'Lagos'};
+    }
+
+    function serviceFeeAmount() {
+      return feeData().get('serviceFee', 2000);
+    }
+
+    // Cheaper delivery only inside the store's local state; everywhere else uses the
+    // nationwide rate.
+    function deliveryFeeAmount(delivery) {
+      return (delivery.country == 'Nigeria' && delivery.state == feeData().get('localState', 'Lagos'))
+        ? feeData().get('deliveryLocal', 2500)
+        : feeData().get('deliveryNigeria', 6000);
+    }
+
+    // One order line: must match the product as it is now in /products, including the
+    // chosen size/colour for clothing variants.
     function lineMatchesProduct(line) {
       let product = get(/databases/$(database)/documents/products/$(line.productId)).data;
-      return line.keys().hasOnly(['productId', 'name', 'price', 'quantity', 'lineTotal'])
+      return line.keys().hasOnly(['productId', 'name', 'price', 'quantity', 'lineTotal', 'size', 'color'])
         && line.productId is string
         && line.name == product.name
         && line.price is int && line.price == product.price
         && line.quantity is int && line.quantity >= 1 && line.quantity <= 50
         && line.lineTotal == line.price * line.quantity
+        && line.size is string && line.size.size() <= 40
+        && line.color is string && line.color.size() <= 40
+        && (line.size == '' || ('sizes' in product && line.size in product.sizes))
+        && (line.color == '' || ('colors' in product && line.color in product.colors))
         && product.active == true
         && product.stock >= line.quantity;
     }
@@ -78,7 +110,8 @@ service cloud.firestore {
         && request.resource.data.email == request.auth.token.email
         && request.resource.data.createdAt is timestamp;
 
-      // Profile edits (name and delivery location). Balance may NOT change here.
+      // Profile edits (name and delivery location — saved here, never in the browser).
+      // Balance may NOT change here.
       allow update: if isOwner(uid)
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
           'name', 'country', 'state', 'lga', 'address', 'updatedAt'
@@ -119,24 +152,56 @@ service cloud.firestore {
     }
 
     // ---------------------------------------------------------------
-    // Products: /products/{productId}
+    // Products: /products/{productId} — the document id IS the admin-chosen product ID
     // ---------------------------------------------------------------
     match /products/{productId} {
       allow read: if resource.data.active == true || isAdmin();
 
       allow create: if isAdmin()
+        && productId.matches('^[A-Za-z0-9_-]{3,40}$')
         && isText(request.resource.data.name, 120)
         && request.resource.data.price is int
         && request.resource.data.price > 0
         && request.resource.data.stock is int
         && request.resource.data.stock >= 0
-        && request.resource.data.active is bool;
+        && request.resource.data.active is bool
+        && (!('compareAtPrice' in request.resource.data)
+          || (request.resource.data.compareAtPrice is int
+            && (request.resource.data.compareAtPrice == 0
+              || request.resource.data.compareAtPrice >= request.resource.data.price)))
+        && (!('images' in request.resource.data)
+          || (request.resource.data.images is list
+            && request.resource.data.images.size() <= 5
+            && (request.resource.data.images.size() == 0
+              || (request.resource.data.images[0] is string && request.resource.data.images[0].size() <= 250000)
+              && (request.resource.data.images.size() <= 1
+                || (request.resource.data.images[1] is string && request.resource.data.images[1].size() <= 250000))
+              && (request.resource.data.images.size() <= 2
+                || (request.resource.data.images[2] is string && request.resource.data.images[2].size() <= 250000))
+              && (request.resource.data.images.size() <= 3
+                || (request.resource.data.images[3] is string && request.resource.data.images[3].size() <= 250000))
+              && (request.resource.data.images.size() <= 4
+                || (request.resource.data.images[4] is string && request.resource.data.images[4].size() <= 250000)))))
+        && (!('keywords' in request.resource.data)
+          || (request.resource.data.keywords is list && request.resource.data.keywords.size() <= 20))
+        && (!('sizes' in request.resource.data)
+          || (request.resource.data.sizes is list && request.resource.data.sizes.size() <= 20))
+        && (!('colors' in request.resource.data)
+          || (request.resource.data.colors is list && request.resource.data.colors.size() <= 20))
+        && (!('recommended' in request.resource.data) || request.resource.data.recommended is bool);
 
       allow update: if isAdmin()
         && request.resource.data.price is int
         && request.resource.data.price > 0
         && request.resource.data.stock is int
-        && request.resource.data.stock >= 0;
+        && request.resource.data.stock >= 0
+        && (!('compareAtPrice' in request.resource.data)
+          || (request.resource.data.compareAtPrice is int
+            && (request.resource.data.compareAtPrice == 0
+              || request.resource.data.compareAtPrice >= request.resource.data.price)))
+        && (!('images' in request.resource.data)
+          || (request.resource.data.images is list && request.resource.data.images.size() <= 5))
+        && (!('recommended' in request.resource.data) || request.resource.data.recommended is bool);
 
       // A customer's purchase: stock goes down and sold goes up by exactly the quantity
       // in the order created in this batch (named in lastOrderId).
@@ -156,7 +221,7 @@ service cloud.firestore {
     }
 
     // ---------------------------------------------------------------
-    // Bank details for deposits: /settings/{docId}
+    // Bank details and checkout fees: /settings/{docId}
     // ---------------------------------------------------------------
     match /settings/{docId} {
       allow read: if signedIn() || isAdmin();
@@ -169,12 +234,16 @@ service cloud.firestore {
     match /orders/{orderId} {
       allow read: if (signedIn() && resource.data.uid == request.auth.uid) || isAdmin();
 
-      // A customer creates an order once. The total and every line must match current
-      // prices, the wallet must go down by exactly the total, and the id must be
+      // A customer creates an order once. Every line must match current prices and
+      // variants, the total must be items + platform service fee + delivery fee from the
+      // fee schedule, the wallet must go down by exactly the total, and the id must be
       // "<uid>_<requestId>" so retries reuse the same id.
       allow create: if signedIn()
         && orderId == request.auth.uid + '_' + request.resource.data.requestId
-        && request.resource.data.keys().hasOnly(['uid', 'requestId', 'items', 'total', 'status', 'delivery', 'createdAt', 'updatedAt'])
+        && request.resource.data.keys().hasOnly([
+          'uid', 'requestId', 'items', 'subtotal', 'serviceFee', 'deliveryFee', 'total',
+          'status', 'delivery', 'createdAt', 'updatedAt'
+        ])
         && request.resource.data.uid == request.auth.uid
         && isText(request.resource.data.requestId, 80)
         && request.resource.data.requestId.size() >= 8
@@ -183,8 +252,14 @@ service cloud.firestore {
         && request.resource.data.items.size() <= 5
         && request.resource.data.status == 'paid'
         && request.resource.data.delivery is map
+        && request.resource.data.delivery.country is string
+        && request.resource.data.delivery.state is string
+        && request.resource.data.delivery.address is string
         && request.resource.data.createdAt is timestamp
         && request.resource.data.updatedAt is timestamp
+        && request.resource.data.subtotal is int
+        && request.resource.data.serviceFee is int
+        && request.resource.data.deliveryFee is int
         && request.resource.data.total is int
         && request.resource.data.total >= 1
         && (request.resource.data.items.size() <= 0 || lineMatchesProduct(request.resource.data.items[0]))
@@ -192,11 +267,16 @@ service cloud.firestore {
         && (request.resource.data.items.size() <= 2 || lineMatchesProduct(request.resource.data.items[2]))
         && (request.resource.data.items.size() <= 3 || lineMatchesProduct(request.resource.data.items[3]))
         && (request.resource.data.items.size() <= 4 || lineMatchesProduct(request.resource.data.items[4]))
-        && request.resource.data.total == numAt(request.resource.data.items, 0, 'lineTotal')
+        && request.resource.data.subtotal == numAt(request.resource.data.items, 0, 'lineTotal')
              + numAt(request.resource.data.items, 1, 'lineTotal')
              + numAt(request.resource.data.items, 2, 'lineTotal')
              + numAt(request.resource.data.items, 3, 'lineTotal')
              + numAt(request.resource.data.items, 4, 'lineTotal')
+        && request.resource.data.serviceFee == serviceFeeAmount()
+        && request.resource.data.deliveryFee == deliveryFeeAmount(request.resource.data.delivery)
+        && request.resource.data.total == request.resource.data.subtotal
+             + request.resource.data.serviceFee
+             + request.resource.data.deliveryFee
         && getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.balance
              == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('balance', 0) - request.resource.data.total
         && getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.balance >= 0;
@@ -235,6 +315,22 @@ service cloud.firestore {
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'reviewedAt', 'reviewedBy']);
 
       allow delete: if false;
+    }
+
+    // ---------------------------------------------------------------
+    // Recommended-product announcements: /notifications/{id}
+    // Written by the admin when a product is listed as "recommended"; every visitor's
+    // browser watches this feed and raises a notification.
+    // ---------------------------------------------------------------
+    match /notifications/{id} {
+      allow read: if true;
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['type', 'productId', 'name', 'createdAt'])
+        && request.resource.data.type == 'recommended'
+        && isText(request.resource.data.productId, 40)
+        && isText(request.resource.data.name, 120)
+        && request.resource.data.createdAt is timestamp;
+      allow update, delete: if isAdmin();
     }
 
     // ---------------------------------------------------------------

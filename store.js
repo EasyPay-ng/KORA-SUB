@@ -16,6 +16,11 @@ export const db = getFirestore(app);
 export const googleProvider = new GoogleAuthProvider();
 export { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, onAuthStateChanged, signOut, sendEmailVerification };
 
+// Tiny service worker so browser notifications can also fire on mobile (showNotification).
+if (typeof navigator !== "undefined" && "serviceWorker" in navigator && location.protocol !== "file:") {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
+
 const noop = () => {};
 const rows = (snap) => snap.docs.map((item) => ({ ...item.data(), id: item.id }));
 
@@ -90,10 +95,17 @@ export async function getProduct(id) {
   return snap.exists() ? { ...snap.data(), id: snap.id } : null;
 }
 
-export function saveProduct(id, data) {
+// The admin-chosen product ID is the Firestore document id, so every product has a stable
+// id that appears in its link: product.html?id=<productId>.
+export const PRODUCT_ID_PATTERN = /^[A-Za-z0-9_-]{3,40}$/;
+
+export function saveProduct(productId, data, { isNew = false } = {}) {
+  if (typeof productId !== "string" || !PRODUCT_ID_PATTERN.test(productId)) {
+    throw new Error("Product ID must be 3–40 letters, numbers, dashes or underscores.");
+  }
   const payload = { ...data, updatedAt: serverTimestamp() };
-  if (id) return updateDoc(doc(db, "products", id), payload);
-  return addDoc(collection(db, "products"), { ...payload, sold: 0, createdAt: serverTimestamp() });
+  if (isNew) return setDoc(doc(db, "products", productId), { ...payload, sold: 0, createdAt: serverTimestamp() });
+  return updateDoc(doc(db, "products", productId), payload);
 }
 
 export function watchPaymentSettings(callback, onError = noop) {
@@ -102,6 +114,71 @@ export function watchPaymentSettings(callback, onError = noop) {
 
 export function savePaymentSettings(data) {
   return setDoc(doc(db, "settings", "payment"), { ...data, updatedAt: serverTimestamp() }, { merge: true });
+}
+
+// ---------- Checkout fees ----------
+// Platform service fee and delivery fees added to every order. Defaults match the store
+// policy; the admin can adjust them (and which state counts as "local") in admin-settings.
+export const DEFAULT_FEES = { serviceFee: 2000, deliveryLocal: 2500, deliveryNigeria: 6000, localState: "Lagos" };
+
+export function watchFeeSettings(callback, onError = noop) {
+  return onSnapshot(doc(db, "settings", "fees"),
+    (snap) => callback({ ...DEFAULT_FEES, ...(snap.exists() ? snap.data() : {}) }), onError);
+}
+
+export function saveFeeSettings(data) {
+  return setDoc(doc(db, "settings", "fees"), {
+    serviceFee: Math.round(Number(data.serviceFee ?? DEFAULT_FEES.serviceFee)),
+    deliveryLocal: Math.round(Number(data.deliveryLocal ?? DEFAULT_FEES.deliveryLocal)),
+    deliveryNigeria: Math.round(Number(data.deliveryNigeria ?? DEFAULT_FEES.deliveryNigeria)),
+    localState: String(data.localState || DEFAULT_FEES.localState).slice(0, 60),
+    updatedAt: serverTimestamp()
+  }, { merge: true });
+}
+
+export async function getFeeSettings() {
+  try {
+    const snap = await getDoc(doc(db, "settings", "fees"));
+    return { ...DEFAULT_FEES, ...(snap.exists() ? snap.data() : {}) };
+  } catch {
+    return { ...DEFAULT_FEES };
+  }
+}
+
+// Splits a basket into subtotal + platform service fee + delivery fee.
+// Delivery is the cheaper local rate only inside the store's local state; everywhere
+// else in Nigeria (and abroad) uses the nationwide rate.
+export function checkoutFees(subtotal, delivery, fees = DEFAULT_FEES) {
+  const items = Math.round(Number(subtotal) || 0);
+  const serviceFee = Math.max(0, Math.round(Number(fees.serviceFee) || 0));
+  const country = String(delivery?.country || "").trim();
+  const state = String(delivery?.state || "").trim();
+  const localState = String(fees.localState || DEFAULT_FEES.localState).trim();
+  const local = country === "Nigeria" && state === localState && !!state;
+  const deliveryFee = Math.max(0, Math.round(Number(local ? fees.deliveryLocal : fees.deliveryNigeria) || 0));
+  return {
+    subtotal: items,
+    serviceFee,
+    deliveryFee,
+    deliveryLabel: local ? `Delivery · ${localState}` : (country === "Nigeria" ? "Delivery · Nigeria" : (country ? "Delivery · outside Nigeria" : "Delivery")),
+    total: items + serviceFee + deliveryFee
+  };
+}
+
+// ---------- Recommended-product alerts ----------
+// Written when the admin lists (or flags) a product as "recommended".
+export function announceRecommended(productId, name) {
+  return addDoc(collection(db, "notifications"), {
+    type: "recommended",
+    productId: String(productId),
+    name: String(name || "New product").slice(0, 120),
+    createdAt: serverTimestamp()
+  });
+}
+
+export function watchNotifications(callback, onError = noop, max = 10) {
+  return onSnapshot(query(collection(db, "notifications"), orderBy("createdAt", "desc"), limit(max)),
+    (snap) => callback(rows(snap)), onError);
 }
 
 // ---------- Customer data ----------
@@ -178,8 +255,9 @@ async function validateDelivery(profile) {
   return { country, state, lga, address };
 }
 
-// Places an order: debits the wallet, decrements stock and writes the order, all in one transaction.
-// Retrying with the same requestId returns the original order instead of charging twice.
+// Places an order: debits the wallet (items + service fee + delivery fee), decrements stock
+// and writes the order, all in one transaction. Retrying with the same requestId returns
+// the original order instead of charging twice.
 export async function placeOrder(requestId, items) {
   const user = auth.currentUser;
   if (!user) throw new Error("Sign in to continue.");
@@ -189,21 +267,29 @@ export async function placeOrder(requestId, items) {
   const merged = new Map();
   for (const item of items || []) {
     const quantity = Number(item?.quantity);
-    if (!item?.productId || !ID_PATTERN.test(item.productId)) throw new Error("Product is invalid.");
+    const productId = String(item?.productId || "");
+    const size = String(item?.size || "").slice(0, 40);
+    const color = String(item?.color || "").slice(0, 40);
+    if (!productId || !ID_PATTERN.test(productId)) throw new Error("Product is invalid.");
     if (!Number.isInteger(quantity) || quantity < 1 || quantity > MAX_QTY) {
       throw new Error(`Quantity must be a whole number from 1 to ${MAX_QTY}.`);
     }
-    merged.set(item.productId, Math.min(MAX_QTY, (merged.get(item.productId) || 0) + quantity));
+    // Lines merge only when product AND variant match, so two sizes stay separate lines.
+    const key = `${productId}|${size}|${color}`;
+    const found = merged.get(key) || { productId, size, color, quantity: 0 };
+    found.quantity = Math.min(MAX_QTY, found.quantity + quantity);
+    merged.set(key, found);
   }
   if (merged.size === 0) throw new Error("Your cart is empty.");
   if (merged.size > MAX_CART_LINES) {
-    throw new Error(`An order can have up to ${MAX_CART_LINES} different products. Remove some items from your cart.`);
+    throw new Error(`An order can have up to ${MAX_CART_LINES} cart lines. Remove some items from your cart.`);
   }
 
   const uid = user.uid;
   const orderId = `${uid}_${requestId}`;
   const orderRef = doc(db, "orders", orderId);
   const userRef = doc(db, "users", uid);
+  const fees = await getFeeSettings();
 
   return runTransaction(db, async (tx) => {
     const existing = await tx.get(orderRef);
@@ -219,9 +305,9 @@ export async function placeOrder(requestId, items) {
 
     const lines = [];
     const stockChanges = [];
-    let total = 0;
-    for (const [productId, quantity] of merged) {
-      const productRef = doc(db, "products", productId);
+    let subtotal = 0;
+    for (const entry of merged.values()) {
+      const productRef = doc(db, "products", entry.productId);
       const productSnap = await tx.get(productRef);
       const product = productSnap.exists() ? productSnap.data() : null;
       if (!product || product.active !== true) {
@@ -230,18 +316,28 @@ export async function placeOrder(requestId, items) {
       const price = Number(product.price);
       const stock = Number(product.stock || 0);
       if (!Number.isInteger(price) || price <= 0) throw new Error(`${product.name} has no valid price.`);
-      if (stock < quantity) {
+      if (stock < entry.quantity) {
         throw new Error(stock > 0 ? `Only ${stock} left of ${product.name}.` : `${product.name} is out of stock.`);
       }
-      const lineTotal = price * quantity;
-      total += lineTotal;
-      lines.push({ productId, name: String(product.name || "Product"), price, quantity, lineTotal });
-      stockChanges.push({ ref: productRef, stock, sold: Number(product.sold || 0), quantity });
+      // Clothing variants must be one of the sizes/colours the admin listed.
+      const sizes = Array.isArray(product.sizes) ? product.sizes.map(String) : [];
+      const colors = Array.isArray(product.colors) ? product.colors.map(String) : [];
+      if (entry.size && !sizes.includes(entry.size)) throw new Error(`Size ${entry.size} is not available for ${product.name}.`);
+      if (entry.color && !colors.includes(entry.color)) throw new Error(`Colour ${entry.color} is not available for ${product.name}.`);
+      const lineTotal = price * entry.quantity;
+      subtotal += lineTotal;
+      lines.push({
+        productId: entry.productId, name: String(product.name || "Product"), price,
+        quantity: entry.quantity, lineTotal, size: entry.size, color: entry.color
+      });
+      stockChanges.push({ ref: productRef, stock, sold: Number(product.sold || 0), quantity: entry.quantity });
     }
 
+    const feeParts = checkoutFees(subtotal, delivery, fees);
+    const total = feeParts.total;
     const balance = Number(profile.balance || 0);
     if (balance < total) {
-      throw new Error(`Your wallet has ${naira(balance)} but this order costs ${naira(total)}. Fund your wallet first.`);
+      throw new Error(`Your wallet has ${naira(balance)} but this order costs ${naira(total)} (items + fees). Fund your wallet first.`);
     }
     const newBalance = balance - total;
 
@@ -255,7 +351,9 @@ export async function placeOrder(requestId, items) {
       });
     }
     tx.set(orderRef, {
-      uid, requestId, items: lines, total, status: "paid", delivery,
+      uid, requestId, items: lines,
+      subtotal: feeParts.subtotal, serviceFee: feeParts.serviceFee, deliveryFee: feeParts.deliveryFee,
+      total, status: "paid", delivery,
       createdAt: serverTimestamp(), updatedAt: serverTimestamp()
     });
     tx.set(doc(db, "users", uid, "transactions", `purchase_${orderId}`), {
@@ -266,7 +364,11 @@ export async function placeOrder(requestId, items) {
       type: "purchase", uid, amount: -total, balanceAfter: newBalance,
       reference: orderId, actor: uid, createdAt: serverTimestamp()
     });
-    return { orderId, status: "paid", total, balance: newBalance, duplicate: false };
+    return {
+      orderId, status: "paid",
+      subtotal: feeParts.subtotal, serviceFee: feeParts.serviceFee, deliveryFee: feeParts.deliveryFee,
+      total, balance: newBalance, duplicate: false
+    };
   });
 }
 
@@ -274,10 +376,18 @@ export const newRequestId = () => (crypto.randomUUID ? crypto.randomUUID() : `${
 
 // ---------- Cart (kept on this device; checkout re-prices everything from the database) ----------
 const CART_KEY = "korastore-cart";
+const cleanVariant = (value) => String(value || "").trim().slice(0, 40);
 export function getCart() {
   try {
     const items = JSON.parse(localStorage.getItem(CART_KEY) || "[]");
-    return Array.isArray(items) ? items.filter((i) => i && typeof i.productId === "string" && i.quantity > 0) : [];
+    return Array.isArray(items)
+      ? items.filter((i) => i && typeof i.productId === "string" && i.quantity > 0).map((i) => ({
+        productId: i.productId,
+        quantity: Math.min(50, Math.max(1, Math.round(Number(i.quantity) || 1))),
+        size: cleanVariant(i.size),
+        color: cleanVariant(i.color)
+      }))
+      : [];
   } catch {
     return [];
   }
@@ -286,15 +396,18 @@ export function setCart(items) {
   localStorage.setItem(CART_KEY, JSON.stringify(items));
   window.dispatchEvent(new CustomEvent("korastore:cart"));
 }
-export function addToCart(productId, quantity = 1) {
+export function addToCart(productId, quantity = 1, variant = {}) {
   const items = getCart();
-  const found = items.find((i) => i.productId === productId);
+  const size = cleanVariant(variant.size);
+  const color = cleanVariant(variant.color);
+  const found = items.find((i) => i.productId === productId && i.size === size && i.color === color);
   if (found) found.quantity = Math.min(50, found.quantity + quantity);
-  else items.push({ productId, quantity: Math.min(50, quantity) });
+  else items.push({ productId, quantity: Math.min(50, quantity), size, color });
   setCart(items);
 }
 
 // ---------- Page shells ----------
+let alertsStarted = false;
 const NAV = [
   ["shop.html", "Shop"],
   ["cart.html", "Cart"],
@@ -324,6 +437,8 @@ export function mountHeader(active) {
   paint();
   window.addEventListener("korastore:cart", paint);
   window.addEventListener("storage", paint);
+  // Every storefront page listens for new recommended products and notifies the user.
+  if (!alertsStarted) { alertsStarted = true; watchRecommendedAlerts(); }
 }
 
 export function mountFooter() {
@@ -408,6 +523,7 @@ const ADMIN_LINKS = [
   ["admin-products.html", "Products", "▣"],
   ["admin-funding.html", "Funding", "＋"],
   ["admin-orders.html", "Orders", "▤"],
+  ["admin-fees.html", "Checkout fees", "₦"],
   ["admin-settings.html", "Bank details", "⌂"]
 ];
 
@@ -436,14 +552,40 @@ function toneFor(text) {
   for (const char of String(text)) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
   return TONES[hash % TONES.length];
 }
-const safeImage = (url) => /^https:\/\/[^\s"'<>]+$/.test(String(url || "")) ? String(url) : "";
-
-export function productMedia(product, extraClass = "") {
+// Product images are base64 data URLs stored in Firestore (admin uploads), with an
+// https:// URL accepted as a legacy fallback. Anything else is ignored.
+const DATA_IMAGE = /^data:image\/(png|jpe?g|webp|gif);base64,[A-Za-z0-9+/=]+$/;
+const safeImage = (url) => {
+  const value = String(url || "");
+  return (/^https:\/\/[^\s"'<>]+$/.test(value) || DATA_IMAGE.test(value)) ? value : "";
+};
+export function productImages(product) {
+  return (Array.isArray(product?.images) ? product.images.map(safeImage) : []).filter(Boolean);
+}
+export function productMedia(product, extraClass = "", index = 0) {
   const tone = `--tone:${toneFor(product.id || product.name)}`;
-  const image = safeImage(product.imageUrl);
+  const images = productImages(product);
+  const image = images[index] || safeImage(product.imageUrl);
   return `<div class="product-media ${extraClass}" style="${tone}">${image
     ? `<img src="${esc(image)}" alt="${esc(product.name)}" loading="lazy">`
     : `<span class="mono-mark" aria-hidden="true">${esc(initials(product.name).slice(0, 2))}</span>`}</div>`;
+}
+
+// Selling price, with the original price slashed through when a discount is set.
+export function priceHTML(product, extraClass = "product-price") {
+  const price = Math.round(Number(product?.price) || 0);
+  const compare = Math.round(Number(product?.compareAtPrice) || 0);
+  const discounted = compare > price;
+  const off = discounted ? Math.round((1 - price / compare) * 100) : 0;
+  return `<div class="${extraClass}"><span>${naira(price)}</span>${discounted
+    ? ` <s class="price-was">${naira(compare)}</s> <span class="price-off">−${off}%</span>` : ""}</div>`;
+}
+
+export const hasVariants = (product) =>
+  Boolean((Array.isArray(product?.sizes) && product.sizes.length) || (Array.isArray(product?.colors) && product.colors.length));
+
+export function variantLabel(item) {
+  return [item?.size, item?.color].filter(Boolean).join(" · ");
 }
 
 export function stockBadge(product) {
@@ -455,16 +597,19 @@ export function stockBadge(product) {
 
 export function productCard(product) {
   const out = Number(product.stock || 0) <= 0;
+  const link = `product.html?id=${encodeURIComponent(product.id)}`;
   return `
     <article class="product">
-      <a href="product.html?id=${encodeURIComponent(product.id)}" aria-label="View ${esc(product.name)}">${productMedia(product)}${stockBadge(product)}</a>
+      <a href="${link}" aria-label="View ${esc(product.name)}">${productMedia(product)}${stockBadge(product)}${product.recommended ? '<span class="badge gold rec-tag">★ Recommended</span>' : ""}</a>
       <div class="product-body">
         <span class="product-cat">${esc(product.category || "Store")}</span>
-        <a class="product-name" href="product.html?id=${encodeURIComponent(product.id)}">${esc(product.name)}</a>
-        <div class="product-price">${naira(product.price)}</div>
+        <a class="product-name" href="${link}">${esc(product.name)}</a>
+        ${priceHTML(product)}
         <div class="product-actions">
-          <button class="btn btn-sm btn-gold" data-add="${esc(product.id)}" ${out ? "disabled" : ""}>${out ? "Sold out" : "Add to cart"}</button>
-          <a class="btn btn-sm btn-ghost" href="product.html?id=${encodeURIComponent(product.id)}">View</a>
+          ${hasVariants(product)
+    ? `<a class="btn btn-sm btn-gold" href="${link}">Choose options</a>`
+    : `<button class="btn btn-sm btn-gold" data-add="${esc(product.id)}" ${out ? "disabled" : ""}>${out ? "Sold out" : "Add to cart"}</button>`}
+          <a class="btn btn-sm btn-ghost" href="${link}">View</a>
         </div>
       </div>
     </article>`;
@@ -484,6 +629,84 @@ export function bindAddToCart(root = document) {
 
 export function readParam(name) {
   return new URLSearchParams(location.search).get(name) || "";
+}
+
+// ---------- Browser notifications ----------
+// Best-effort: a real browser notification when permission is granted (with a service
+// worker fallback on mobile), and always an in-page toast so nothing is silently lost.
+const NOTIFIED_KEY = "korastore-notified-at";
+
+export function notificationState() {
+  return typeof Notification === "undefined" ? "unsupported" : Notification.permission;
+}
+
+export async function requestNotificationPermission() {
+  if (typeof Notification === "undefined") return "unsupported";
+  if (Notification.permission !== "default") return Notification.permission;
+  try { return await Notification.requestPermission(); } catch { return Notification.permission; }
+}
+
+export function showToast(title, text = "") {
+  let host = document.querySelector("#toasts");
+  if (!host) {
+    host = document.createElement("div");
+    host.id = "toasts";
+    document.body.appendChild(host);
+  }
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.innerHTML = `<div class="toast-body"><b>${esc(title)}</b>${text ? `<small>${esc(text)}</small>` : ""}</div><button class="toast-x" aria-label="Dismiss">×</button>`;
+  toast.querySelector(".toast-x").addEventListener("click", () => toast.remove());
+  host.appendChild(toast);
+  setTimeout(() => toast.remove(), 8000);
+}
+
+export async function showBrowserNotification({ title, body, tag, icon = "assets/icon-512.png", link = "" }) {
+  if (typeof Notification === "undefined" || Notification.permission !== "granted") return false;
+  const options = { body: String(body || ""), tag: String(tag || "korastore"), icon };
+  try {
+    const note = new Notification(title, options);
+    if (link) note.onclick = () => { window.open(link, "_blank"); note.close(); };
+    return true;
+  } catch {
+    try {
+      const reg = await navigator.serviceWorker?.getRegistration();
+      if (reg) { await reg.showNotification(title, { ...options, data: { link } }); return true; }
+    } catch { /* fall back to the in-page toast only */ }
+  }
+  return false;
+}
+
+// Notifies this browser about recommended products added since it last looked:
+// live while a page is open, and a catch-up on the next visit. The first visit only
+// records where the feed is, so a new visitor is not spammed with old items.
+export function watchRecommendedAlerts() {
+  let lastSeen = Number(localStorage.getItem(NOTIFIED_KEY) || 0);
+  let baselineSet = lastSeen > 0;
+  return watchNotifications((items) => {
+    const fresh = items.filter((item) => (toDate(item.createdAt)?.getTime() || 0) > lastSeen);
+    const newest = fresh.length ? Math.max(...fresh.map((i) => toDate(i.createdAt)?.getTime() || 0)) : lastSeen;
+    if (!baselineSet) {
+      baselineSet = true;
+      lastSeen = newest;
+      if (newest) localStorage.setItem(NOTIFIED_KEY, String(newest));
+      return;
+    }
+    if (fresh.length) {
+      for (const item of fresh.slice(0, 3).reverse()) {
+        const link = item.productId ? `product.html?id=${encodeURIComponent(item.productId)}` : "shop.html";
+        showToast("Recommended for you", `${item.name} just landed in the shop`);
+        showBrowserNotification({
+          title: "KORASTORE · Recommended for you",
+          body: `${item.name} just landed in the shop`,
+          tag: item.productId || item.id,
+          link
+        });
+      }
+      lastSeen = newest;
+      localStorage.setItem(NOTIFIED_KEY, String(newest));
+    }
+  });
 }
 
 // ---------- Admin actions (run as one transaction each; firestore.rules allow them only for the admin) ----------

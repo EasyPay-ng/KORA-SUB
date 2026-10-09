@@ -296,6 +296,50 @@ h1, h2, h3, h4 { font-family: 'Sora', sans-serif; letter-spacing: -.02em; line-h
 .toggle { display: inline-flex; align-items: center; gap: 10px; font-weight: 600; cursor: pointer; }
 .toggle input { width: 18px; height: 18px; accent-color: var(--navy); }
 
+/* ---------- Prices, keywords, variants ---------- */
+.price-was { color: var(--faint); font-weight: 600; font-size: .62em; margin-left: 6px; }
+.price-off { display: inline-block; margin-left: 6px; padding: 2px 8px; border-radius: 99px; background: var(--bad-soft); color: var(--bad); font-size: 11px; font-weight: 800; vertical-align: middle; }
+.detail-price { display: flex; align-items: baseline; gap: 4px; flex-wrap: wrap; }
+.detail-price .price-was { font-size: .5em; }
+.detail-price .price-off { font-size: 13px; }
+.table-price span { font: 700 14px 'Sora', sans-serif; color: var(--navy); white-space: nowrap; }
+.table-price .price-was { display: block; font-size: 12px; margin-left: 0; }
+.rec-tag { position: absolute; right: 12px; top: 12px; }
+.rec-section { margin-bottom: 26px; border-color: #f6e2a6; background: linear-gradient(180deg, #fffdf6, #fff); }
+
+.tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.tag { padding: 4px 10px; border-radius: 99px; background: #eef2f8; color: var(--navy-3); font-size: 12px; font-weight: 600; }
+
+.variant-block { margin-top: 16px; }
+.variant-opts { display: flex; flex-wrap: wrap; gap: 8px; }
+.variant-opt { min-height: 38px; padding: 0 14px; border: 1px solid #d5dde9; border-radius: 10px; background: #fff; font-weight: 600; font-size: 13px; color: var(--navy); cursor: pointer; }
+.variant-opt:hover { border-color: var(--navy-3); }
+.variant-opt.on { background: var(--navy); color: #fff; border-color: var(--navy); }
+
+/* ---------- Product gallery ---------- */
+.detail-gallery { display: grid; gap: 12px; }
+.gallery-thumbs { display: flex; gap: 10px; flex-wrap: wrap; }
+.gallery-thumb { width: 68px; height: 68px; padding: 0; border: 2px solid var(--line); border-radius: 12px; overflow: hidden; background: #fff; cursor: pointer; }
+.gallery-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.gallery-thumb.on { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(242, 169, 0, .25); }
+
+/* ---------- Admin image uploader ---------- */
+.thumbs { display: flex; gap: 10px; flex-wrap: wrap; }
+.thumb { position: relative; width: 86px; height: 86px; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); background: #f4f6fa; }
+.thumb img { width: 100%; height: 100%; object-fit: cover; }
+.thumb-x { position: absolute; right: 4px; top: 4px; width: 22px; height: 22px; border: 0; border-radius: 50%; background: rgba(11, 37, 69, .82); color: #fff; font-size: 13px; line-height: 1; cursor: pointer; }
+.thumb-main { position: absolute; left: 4px; bottom: 4px; padding: 1px 7px; border-radius: 99px; background: var(--gold); color: var(--navy); font-size: 10px; font-weight: 800; }
+
+/* ---------- Toasts (in-page notification fallback) ---------- */
+#toasts { position: fixed; right: 18px; bottom: 18px; z-index: 90; display: grid; gap: 10px; width: min(340px, calc(100vw - 36px)); }
+.toast { display: flex; align-items: flex-start; gap: 10px; padding: 14px 14px 14px 16px; border-radius: 14px; background: var(--navy); color: #fff; box-shadow: var(--shadow-lg); animation: toast-in .25s ease; }
+.toast-body { flex: 1; min-width: 0; }
+.toast-body b { display: block; font-family: 'Sora', sans-serif; font-size: 14px; }
+.toast-body small { color: #b5c6de; font-size: 12.5px; }
+.toast-x { border: 0; background: none; color: #b5c6de; font-size: 18px; line-height: 1; cursor: pointer; padding: 0 2px; }
+.toast-x:hover { color: #fff; }
+@keyframes toast-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
 /* ---------- Responsive ---------- */
 @media (max-width: 980px) {
   .hero-inner, .grid-2, .detail, .cart-layout, .admin-grid, .auth { grid-template-columns: 1fr; }
