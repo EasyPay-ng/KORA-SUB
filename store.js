@@ -313,7 +313,9 @@ export async function placeOrder(requestId, items) {
       if (!product || product.active !== true) {
         throw new Error("An item in your order is no longer available. Review your cart.");
       }
-      const price = Number(product.price);
+      const variantPrices = Array.isArray(product.variantPrices) ? product.variantPrices : [];
+      const variantIndex = variantPrices.findIndex(v => String(v?.size || '') === entry.size && String(v?.color || '') === entry.color);
+      const price = Number(variantIndex >= 0 ? variantPrices[variantIndex].price : product.price);
       const stock = Number(product.stock || 0);
       if (!Number.isInteger(price) || price <= 0) throw new Error(`${product.name} has no valid price.`);
       if (stock < entry.quantity) {
@@ -324,11 +326,14 @@ export async function placeOrder(requestId, items) {
       const colors = Array.isArray(product.colors) ? product.colors.map(String) : [];
       if (entry.size && !sizes.includes(entry.size)) throw new Error(`Size ${entry.size} is not available for ${product.name}.`);
       if (entry.color && !colors.includes(entry.color)) throw new Error(`Colour ${entry.color} is not available for ${product.name}.`);
+      if (variantPrices.length && variantIndex < 0) throw new Error(`The selected option is not available for ${product.name}.`);
+      const minimum = Math.max(1, Number(product.minOrderQuantity || 1));
+      if (entry.quantity < minimum) throw new Error(`${product.name} has a minimum order of ${minimum}.`);
       const lineTotal = price * entry.quantity;
       subtotal += lineTotal;
       lines.push({
         productId: entry.productId, name: String(product.name || "Product"), price,
-        quantity: entry.quantity, lineTotal, size: entry.size, color: entry.color
+        quantity: entry.quantity, lineTotal, size: entry.size, color: entry.color, variantIndex
       });
       stockChanges.push({ ref: productRef, stock, sold: Number(product.sold || 0), quantity: entry.quantity });
     }
@@ -571,13 +576,22 @@ export function productMedia(product, extraClass = "", index = 0) {
     : `<span class="mono-mark" aria-hidden="true">${esc(initials(product.name).slice(0, 2))}</span>`}</div>`;
 }
 
+// Returns the admin-set price for a chosen size/colour, or the base price.
+export function productPrice(product, variant = {}) {
+  const options = Array.isArray(product?.variantPrices) ? product.variantPrices : [];
+  const match = options.find(v => String(v?.size || '') === String(variant.size || '') && String(v?.color || '') === String(variant.color || ''));
+  return Math.round(Number(match?.price ?? product?.price) || 0);
+}
+
 // Selling price, with the original price slashed through when a discount is set.
 export function priceHTML(product, extraClass = "product-price") {
-  const price = Math.round(Number(product?.price) || 0);
+  const optionPrices = (Array.isArray(product?.variantPrices) ? product.variantPrices : []).map(v => Math.round(Number(v.price) || 0)).filter(v => v > 0);
+  const price = optionPrices.length ? Math.min(...optionPrices) : Math.round(Number(product?.price) || 0);
+  const high = optionPrices.length ? Math.max(...optionPrices) : price;
   const compare = Math.round(Number(product?.compareAtPrice) || 0);
   const discounted = compare > price;
   const off = discounted ? Math.round((1 - price / compare) * 100) : 0;
-  return `<div class="${extraClass}"><span>${naira(price)}</span>${discounted
+  return `<div class="${extraClass}"><span>${high > price ? `${naira(price)} – ${naira(high)}` : naira(price)}</span>${discounted
     ? ` <s class="price-was">${naira(compare)}</s> <span class="price-off">−${off}%</span>` : ""}</div>`;
 }
 
@@ -608,7 +622,7 @@ export function productCard(product) {
         <div class="product-actions">
           ${hasVariants(product)
     ? `<a class="btn btn-sm btn-gold" href="${link}">Choose options</a>`
-    : `<button class="btn btn-sm btn-gold" data-add="${esc(product.id)}" ${out ? "disabled" : ""}>${out ? "Sold out" : "Add to cart"}</button>`}
+    : `<button class="btn btn-sm btn-gold" data-add="${esc(product.id)}" data-min="${Math.max(1, Number(product.minOrderQuantity || 1))}" ${out ? "disabled" : ""}>${out ? "Sold out" : "Add to cart"}</button>`}
           <a class="btn btn-sm btn-ghost" href="${link}">View</a>
         </div>
       </div>
@@ -620,7 +634,7 @@ export function bindAddToCart(root = document) {
   root.addEventListener("click", (event) => {
     const button = event.target.closest("[data-add]");
     if (!button || button.disabled) return;
-    addToCart(button.dataset.add, 1);
+    addToCart(button.dataset.add, Number(button.dataset.min || 1));
     const original = button.textContent;
     button.textContent = "Added ✓";
     setTimeout(() => { button.textContent = original; }, 1100);
