@@ -14,48 +14,96 @@
 </main>
 <div id="site-footer"></div>
 <script type="module">
-  import { mountHeader, mountFooter, getProduct, productMedia, stockBadge, addToCart, naira, esc, readParam, onAuthStateChanged, auth } from './store.js';
+  import { mountHeader, mountFooter, getProduct, productMedia, productImages, priceHTML, stockBadge, addToCart, esc, readParam, showToast } from './store.js';
   mountHeader('shop.html');
   mountFooter();
   const host = document.querySelector('#detail');
   const id = readParam('id');
   let quantity = 1;
   let product = null;
+  let galleryIndex = 0;
+  let chosenSize = '';
+  let chosenColor = '';
+
+  function pickReady() {
+    const needsSize = (product.sizes || []).length > 0;
+    const needsColor = (product.colors || []).length > 0;
+    return (!needsSize || chosenSize) && (!needsColor || chosenColor);
+  }
+
   function paint() {
     if (!product) return;
     const stock = Number(product.stock || 0);
     const out = stock <= 0 || product.active !== true;
     quantity = Math.min(quantity, Math.max(1, stock));
+    const images = productImages(product);
+    const ready = pickReady();
     host.innerHTML = `
       <div class="detail">
-        ${productMedia(product, 'detail-media')}
+        <div class="detail-gallery">
+          ${productMedia(product, 'detail-media', galleryIndex)}
+          ${images.length > 1 ? `<div class="gallery-thumbs">${images.map((src, i) => `
+            <button type="button" class="gallery-thumb ${i === galleryIndex ? 'on' : ''}" data-img="${i}" aria-label="Photo ${i + 1}"><img src="${esc(src)}" alt=""></button>`).join('')}</div>` : ''}
+        </div>
         <div>
-          <span class="product-cat">${esc(product.category || 'Store')}</span>
+          <div class="row">
+            <span class="product-cat">${esc(product.category || 'Store')}</span>
+            ${product.recommended ? '<span class="badge gold">★ Recommended</span>' : ''}
+          </div>
           <h1>${esc(product.name)}</h1>
           <div class="row">${stockBadge(product)}<span class="badge gold">Sold ${Number(product.sold || 0)}</span></div>
-          <div class="price" style="margin-top:14px">${naira(product.price)}</div>
+          ${priceHTML(product, 'price detail-price')}
           <p class="desc">${esc(product.description || 'Details will be shared by the store admin.')}</p>
+          ${(product.keywords || []).length ? `<div class="tags">${product.keywords.map(k => `<span class="tag">#${esc(k)}</span>`).join('')}</div>` : ''}
+          <div class="small muted" style="margin-top:12px">Product ID: <span class="mono" style="color:var(--navy)">${esc(product.id)}</span></div>
+
+          ${(product.sizes || []).length ? `
+            <div class="variant-block">
+              <div class="small muted" style="margin-bottom:8px">Size${chosenSize ? '' : ' — pick one'}</div>
+              <div class="variant-opts">${product.sizes.map(s => `<button type="button" class="variant-opt ${s === chosenSize ? 'on' : ''}" data-size="${esc(s)}">${esc(s)}</button>`).join('')}</div>
+            </div>` : ''}
+          ${(product.colors || []).length ? `
+            <div class="variant-block">
+              <div class="small muted" style="margin-bottom:8px">Colour${chosenColor ? '' : ' — pick one'}</div>
+              <div class="variant-opts">${product.colors.map(c => `<button type="button" class="variant-opt ${c === chosenColor ? 'on' : ''}" data-color="${esc(c)}">${esc(c)}</button>`).join('')}</div>
+            </div>` : ''}
+
           <div class="buy-box">
             <div class="row"><span class="small muted">Quantity</span>
               <div class="qty"><button type="button" data-q="-1" aria-label="Decrease" ${out ? 'disabled' : ''}>−</button><span>${quantity}</span><button type="button" data-q="1" aria-label="Increase" ${out ? 'disabled' : ''}>+</button></div>
             </div>
             <div class="row">
-              <button class="btn btn-gold btn-lg" id="add" ${out ? 'disabled' : ''}>${out ? 'Currently unavailable' : 'Add to cart'}</button>
+              <button class="btn btn-gold btn-lg" id="add" ${out || !ready ? 'disabled' : ''}>${out ? 'Currently unavailable' : (ready ? 'Add to cart' : 'Pick the options above')}</button>
               <a class="btn btn-ghost btn-lg" href="cart.html">View cart</a>
             </div>
-            <p class="small muted" style="margin:0">Pay from your KORASTORE wallet at checkout. Fund it first by bank transfer if your balance is low.</p>
+            <p class="small muted" style="margin:0">Pay from your KORASTORE wallet at checkout — the items price plus a platform service fee and delivery. Fund your wallet first if your balance is low.</p>
           </div>
         </div>
       </div>`;
+
+    host.querySelectorAll('[data-img]').forEach(btn => btn.addEventListener('click', () => {
+      galleryIndex = Number(btn.dataset.img);
+      paint();
+    }));
+    host.querySelectorAll('[data-size]').forEach(btn => btn.addEventListener('click', () => {
+      chosenSize = btn.dataset.size;
+      paint();
+    }));
+    host.querySelectorAll('[data-color]').forEach(btn => btn.addEventListener('click', () => {
+      chosenColor = btn.dataset.color;
+      paint();
+    }));
     host.querySelectorAll('[data-q]').forEach(btn => btn.addEventListener('click', () => {
       quantity = Math.max(1, Math.min(Math.max(1, stock), quantity + Number(btn.dataset.q)));
       paint();
     }));
     host.querySelector('#add')?.addEventListener('click', (event) => {
-      addToCart(product.id, quantity);
+      addToCart(product.id, quantity, { size: chosenSize, color: chosenColor });
       event.currentTarget.textContent = 'Added to cart ✓';
+      showToast('Added to cart', `${product.name}${chosenSize || chosenColor ? ` · ${[chosenSize, chosenColor].filter(Boolean).join(' · ')}` : ''}`);
     });
   }
+
   if (!id) {
     host.innerHTML = '<div class="empty"><b>No product selected</b>Open a product from the shop.</div>';
   } else {
