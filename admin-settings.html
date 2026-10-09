@@ -11,7 +11,7 @@
 <div class="admin-shell" id="admin-content" hidden>
   <aside class="admin-side" id="admin-sidebar"></aside>
   <main class="admin-main">
-    <div class="page-head"><div><span class="eyebrow">Payments</span><h1>Deposit bank details</h1><p>This is the only account customers may pay into. Customers see these details on their wallet page.</p></div></div>
+    <div class="page-head"><div><span class="eyebrow">Payments</span><h1>Deposit bank details</h1><p>Deposits only. Customers fund their wallet by bank transfer to this account — orders are paid from the wallet balance when they check out, never by bank transfer.</p></div></div>
     <div class="admin-grid">
       <section class="card">
         <form id="form" class="panel-form" novalidate>
@@ -29,25 +29,10 @@
       </aside>
     </div>
 
-    <section class="card" style="margin-top:20px">
-      <div class="card-head"><div><h2>Checkout fees</h2><small>Added to every order on top of the items price · security rules enforce these amounts</small></div></div>
-      <form id="fee-form" class="panel-form" novalidate>
-        <div class="field-row">
-          <label class="field">Platform service fee (₦)<input class="input" id="serviceFee" type="number" min="0" step="1"></label>
-          <label class="field">Delivery — local state (₦)<input class="input" id="deliveryLocal" type="number" min="0" step="1"></label>
-        </div>
-        <div class="field-row">
-          <label class="field">Delivery — rest of Nigeria &amp; abroad (₦)<input class="input" id="deliveryNigeria" type="number" min="0" step="1"></label>
-          <label class="field">Which state counts as “local”?<select class="select" id="localState"></select></label>
-        </div>
-        <div id="fee-error" class="error-text" role="alert"></div>
-        <div class="row"><button class="btn btn-gold" type="submit" id="fee-save">Save fee settings</button><small class="muted">Defaults: ₦2,000 service · ₦2,500 local delivery · ₦6,000 nationwide</small></div>
-      </form>
-    </section>
   </main>
 </div>
 <script type="module">
-  import { mountAdminSidebar, requireAdmin, watchPaymentSettings, savePaymentSettings, watchFeeSettings, saveFeeSettings, esc, naira } from './store.js';
+  import { mountAdminSidebar, requireAdmin, watchPaymentSettings, savePaymentSettings, esc } from './store.js';
   mountAdminSidebar('admin-settings.html');
   const $ = (id) => document.querySelector(id);
   let loaded = false;
@@ -87,48 +72,6 @@
     } catch (problem) {
       error.style.color = '';
       error.textContent = problem.message || 'Could not publish the details.';
-    } finally {
-      save.disabled = false;
-    }
-  });
-
-  // ---------- Checkout fees ----------
-  let ngStates = [];
-  try {
-    const ng = await (await fetch('data/ng-locations.json')).json();
-    ngStates = ng.map(s => s.state);
-  } catch { ngStates = ['Lagos', 'Abuja (FCT)', 'Rivers', 'Kano', 'Oyo', 'Enugu']; }
-  $('#localState').innerHTML = ngStates.map(s => `<option>${esc(s)}</option>`).join('');
-  let feesLoaded = false;
-  watchFeeSettings((data) => {
-    if (!feesLoaded) {
-      feesLoaded = true;
-      $('#serviceFee').value = data.serviceFee;
-      $('#deliveryLocal').value = data.deliveryLocal;
-      $('#deliveryNigeria').value = data.deliveryNigeria;
-      $('#localState').value = ngStates.includes(data.localState) ? data.localState : ngStates[0];
-    }
-  });
-  $('#fee-form').addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const error = $('#fee-error');
-    error.style.color = '';
-    error.textContent = '';
-    const serviceFee = Math.round(Number($('#serviceFee').value));
-    const deliveryLocal = Math.round(Number($('#deliveryLocal').value));
-    const deliveryNigeria = Math.round(Number($('#deliveryNigeria').value));
-    const localState = $('#localState').value;
-    if (![serviceFee, deliveryLocal, deliveryNigeria].every(n => Number.isFinite(n) && n >= 0)) {
-      return error.textContent = 'All three fee amounts must be zero or more.';
-    }
-    const save = $('#fee-save');
-    save.disabled = true;
-    try {
-      await saveFeeSettings({ serviceFee, deliveryLocal, deliveryNigeria, localState });
-      error.style.color = 'var(--ok)';
-      error.textContent = `Saved. Orders now add ${naira(serviceFee)} service + delivery of ${naira(deliveryLocal)} in ${localState} or ${naira(deliveryNigeria)} elsewhere.`;
-    } catch (problem) {
-      error.textContent = problem.message || 'Could not save the fee settings.';
     } finally {
       save.disabled = false;
     }

@@ -44,7 +44,7 @@ Added to every order on top of the items price, shown on the cart before paying:
 | Delivery — local state | ₦2,500 | delivery inside the store's local state |
 | Delivery — rest of Nigeria & abroad | ₦6,000 | every other delivery address |
 
-The admin can change the amounts and which state counts as "local" under **Admin → Bank details → Checkout fees** (`settings/fees`). The security rules re-verify the fee amounts and the total on every order, with the same defaults built in, so an order cannot skip or fake the fees.
+The admin can change the amounts and which state counts as "local" under **Admin → Checkout fees** (`settings/fees`). These fees are added when the customer checks out and their wallet balance is debited — they are unrelated to the deposit bank details (which are only for funding the wallet). The security rules re-verify the fee amounts and the total on every order, with the same defaults built in, so an order cannot skip or fake the fees.
 
 ## What the rules enforce
 
@@ -73,7 +73,7 @@ The admin can change the amounts and which state counts as "local" under **Admin
 - Storefront: `index.html` (home), `shop.html` (catalogue with search, categories and sorting), `product.html`, `cart.html`
 - Accounts: `login.html`, `register.html`
 - Customer: `dashboard.html` (overview), `wallet.html` (fund), `orders.html`, `profile.html` (delivery location)
-- Admin: `admin.html` (overview), `admin-products.html`, `admin-funding.html`, `admin-orders.html`, `admin-settings.html` (bank details)
+- Admin: `admin.html` (overview), `admin-products.html`, `admin-funding.html`, `admin-orders.html`, `admin-fees.html` (checkout fees), `admin-settings.html` (deposit bank details)
 
 Shared client code is in `store.js`, styles in `store.css`. Nigerian states and LGAs are in `data/ng-locations.json` (from the MIT-licensed `nigeria-state-lga-data` package, 37 entries, 777 LGAs). Non-Nigerian addresses use free text for state and area.
 
@@ -111,7 +111,7 @@ Money is stored as whole naira (integers). Product documents hold the admin-chos
    npm run deploy:rules
    ```
    Or paste `firestore.rules` into **Firestore → Rules → Publish** in the console.
-5. **Publish deposit details.** Sign in as the admin, open **Bank details**, and save the bank name, account name and 10-digit account number. Customers can't fund until these are published.
+5. **Publish deposit details.** Sign in as the admin, open **Bank details**, and save the bank name, account name and 10-digit account number. These are for wallet **deposits only** — customers transfer in, the admin approves, and orders then debit the wallet balance. Customers can't fund until these are published. Review **Checkout fees** at the same time.
 6. **Frontend.** Serve the static files (GitHub Pages or any static host). The site has no backend to configure.
 
 ## Tests

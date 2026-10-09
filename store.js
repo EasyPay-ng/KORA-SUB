@@ -523,6 +523,7 @@ const ADMIN_LINKS = [
   ["admin-products.html", "Products", "▣"],
   ["admin-funding.html", "Funding", "＋"],
   ["admin-orders.html", "Orders", "▤"],
+  ["admin-fees.html", "Checkout fees", "₦"],
   ["admin-settings.html", "Bank details", "⌂"]
 ];
 
