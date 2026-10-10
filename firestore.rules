@@ -16,12 +16,13 @@ rules_version = '2';
 //    built-in defaults: ₦2,000 platform service fee, ₦2,500 delivery inside the store's
 //    local state, ₦6,000 delivery anywhere else.
 //  - Product documents use the admin-chosen product ID as their id (3–40 of A–Z a–z 0–9 _ -).
-//  - The admin account (email + verified email) approves funding, moves order status,
-//    cancels with refunds, lists products and announces recommended ones. The admin can
-//    set any balance; that trust is by design.
+//  - The admin accounts (email + verified email, listed in isAdmin() below) approve
+//    funding, move order status, cancel with refunds, list products and announce
+//    recommended ones. An admin can set any balance; that trust is by design.
 //
 // Limits: a cart is capped at 5 lines per order (rules have no loops, so each line is
-// checked by index).
+// checked by index). There is no fixed cap on the quantity per line, or on the
+// admin-set minimum order quantity — the ceiling for both is the product's stock.
 
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -34,11 +35,15 @@ service cloud.firestore {
       return signedIn() && request.auth.uid == uid;
     }
 
-    // Admin: the one admin email, with a verified email address.
+    // Admins: any address in this list, each with a verified email address.
+    // Keep this list in sync with ADMIN_EMAILS in firebase-config.js.
     function isAdmin() {
       return signedIn()
-        && request.auth.token.email == 'beniwealth70@gmail.com'
-        && request.auth.token.email_verified == true;
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in [
+          'beniwealth70@gmail.com',
+          'okogbagideon28@gmail.com'
+        ];
     }
 
     function isText(value, max) {
@@ -96,7 +101,11 @@ service cloud.firestore {
               && product.variantPrices[line.variantIndex].size == line.size
               && product.variantPrices[line.variantIndex].color == line.color
               && product.variantPrices[line.variantIndex].price == line.price))
-        && line.quantity is int && line.quantity >= product.get('minOrderQuantity', 1) && line.quantity <= 50
+        // No fixed upper limit on quantity: the ceiling is the stock the admin set for
+        // the product, checked by `product.stock >= line.quantity` below. A hardcoded cap
+        // here would also make any product whose minimum order quantity is above it
+        // impossible to buy.
+        && line.quantity is int && line.quantity >= product.get('minOrderQuantity', 1)
         && line.lineTotal == line.price * line.quantity
         && line.size is string && line.size.size() <= 40
         && line.color is string && line.color.size() <= 40
@@ -174,7 +183,6 @@ service cloud.firestore {
         && request.resource.data.stock >= 0
         && request.resource.data.get('minOrderQuantity', 1) is int
         && request.resource.data.get('minOrderQuantity', 1) >= 1
-        && request.resource.data.get('minOrderQuantity', 1) <= 50
         && request.resource.data.get('variantPrices', []) is list
         && request.resource.data.get('variantPrices', []).size() <= 400
         && request.resource.data.active is bool
@@ -210,7 +218,6 @@ service cloud.firestore {
         && request.resource.data.stock >= 0
         && request.resource.data.get('minOrderQuantity', 1) is int
         && request.resource.data.get('minOrderQuantity', 1) >= 1
-        && request.resource.data.get('minOrderQuantity', 1) <= 50
         && request.resource.data.get('variantPrices', []) is list
         && request.resource.data.get('variantPrices', []).size() <= 400
         && (!('compareAtPrice' in request.resource.data)

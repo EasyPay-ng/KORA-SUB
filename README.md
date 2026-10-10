@@ -8,7 +8,7 @@ There is no server. The site is static files plus Firebase (Auth and Firestore).
 
 ## Roles
 
-- **Administrator**: only `beniwealth70@gmail.com`, with a verified email. The admin lists, prices, stocks and hides products; uploads up to 5 photos per product; sets search keywords, slashed original prices, size/colour variants and the "Recommended" flag; publishes the deposit bank account; sets the checkout fee schedule; approves funding; and moves orders through packing, shipping and delivery.
+- **Administrators**: `beniwealth70@gmail.com` and `okogbagideon28@gmail.com`, each with a verified email. Either admin lists, prices, stocks and hides products; uploads up to 5 photos per product; sets search keywords, slashed original prices, size/colour variants and the "Recommended" flag; publishes the deposit bank account; sets the checkout fee schedule; approves funding; and moves orders through packing, shipping and delivery.
 - **Customers**: anyone who registers. They browse, add to cart, fund their wallet, check out, set delivery location and track orders. They cannot list products, change their own balance upward, or edit other people's data.
 - **Visitors**: can browse the shop without an account. Checkout and funding require sign-in.
 
@@ -19,6 +19,7 @@ Every product has an **admin-chosen product ID** (3–40 letters, numbers, `-`, 
 - a photo gallery (up to **5 images**, uploaded by the admin and stored **compressed as base64 in Firestore** — no image host or URL needed),
 - the **discounted price** with the **original price slashed through** (and the % off),
 - quantity available (stock, shared across all variants),
+- a **minimum order quantity** the admin sets per product (1 or more, with **no upper limit** — the ceiling for any purchase is the stock available),
 - **size and colour options** for clothing products (set by the admin; shoppers must pick them before adding to cart),
 - **search keywords** set by the admin, so search finds the product even by words not in its name,
 - the product ID and the "Recommended" badge where applicable.
@@ -55,7 +56,7 @@ The admin can change the amounts and which state counts as "local" under **Admin
 - Stock can **go down only** in the same batch that creates an order containing that product, and only by the ordered quantity.
 - Orders are **create-only**. Customers can't edit or delete them.
 - Product documents use the admin's product ID as their id, and only the admin can create/edit them (including photos, keywords, variants and the recommended flag).
-- The admin account (email plus verified email) is the only account that approves funding, changes order status, edits any user's balance, or posts recommended-product announcements.
+- The admin accounts (email plus verified email) are the only accounts that approve funding, change order status, edit any user's balance, or post recommended-product announcements.
 
 ## Limitations of this design
 
@@ -96,7 +97,7 @@ Money is stored as whole naira (integers). Product documents hold the admin-chos
 ## Setup and deployment
 
 1. **Firebase console** (project `korasub-eb0b8`): enable Email/Password and Google sign-in, and create the Firestore database.
-2. **Admin account.** Register with `beniwealth70@gmail.com` and verify the email. No custom claim is needed; the rules check the email and verification.
+2. **Admin accounts.** Register `beniwealth70@gmail.com` and `okogbagideon28@gmail.com`, and verify each email. No custom claim is needed; the rules check the email and verification. To add or remove an admin later, edit the list in **both** `firestore.rules` (`isAdmin()`) and `firebase-config.js` (`ADMIN_EMAILS`), then redeploy the rules — the rules are the real gate, so editing only the JS just shows or hides the admin screens.
 3. **Test the rules first.** In the Firebase console, open **Firestore → Rules → Rules Playground** and check at least:
    - a customer can create an order, and the wallet goes down by exactly the total (items + fees);
    - a customer **cannot** change their own `balance` without an order;

@@ -27,7 +27,7 @@
           </div>
           <div class="field-row">
             <label class="field">Quantity available <small>counts every size and colour</small><input class="input" id="stock" type="number" min="0" step="1" required></label>
-            <label class="field">Minimum order quantity <small>least number a customer can buy</small><input class="input" id="minOrderQuantity" type="number" min="1" max="50" step="1" value="1" required></label>
+            <label class="field">Minimum order quantity <small>least number a customer can buy · no upper limit</small><input class="input" id="minOrderQuantity" type="number" min="1" step="1" value="1" required></label>
             <label class="field">Category <small>e.g. Clothes, Electronics</small><input class="input" id="category" maxlength="60" placeholder="e.g. Clothes" list="cat-list"><datalist id="cat-list"><option>Clothes</option><option>Shoes</option><option>Electronics</option><option>Accessories</option><option>Home</option><option>Beauty</option></datalist></label>
           </div>
           <label class="field">Search keywords <small>comma separated — search matches these</small><input class="input" id="keywords" maxlength="500" placeholder="e.g. ankara, native, men"></label>
@@ -248,7 +248,7 @@
     if (!Number.isFinite(compareAtPrice) || compareAtPrice < 0) return error.textContent = 'Original price must be zero or more.';
     if (compareAtPrice && compareAtPrice <= price) return error.textContent = 'The slashed original price must be higher than the selling price (or empty).';
     if (!Number.isFinite(stock) || stock < 0) return error.textContent = 'Quantity must be zero or more.';
-    if (!Number.isInteger(minOrderQuantity) || minOrderQuantity < 1 || minOrderQuantity > 50) return error.textContent = 'Minimum order quantity must be from 1 to 50.';
+    if (!Number.isSafeInteger(minOrderQuantity) || minOrderQuantity < 1) return error.textContent = 'Minimum order quantity must be a whole number of 1 or more.';
     if (variantPrices.some(v => !Number.isInteger(v.price) || v.price < 1)) return error.textContent = 'Every option price must be at least ₦1.';
     if ($('#variants').checked && !sizes.length && !colors.length) return error.textContent = 'Add at least one size or colour, or untick the clothing option.';
     if (totalImageBytes() > 750000) return error.textContent = 'These photos are too heavy together. Remove one, or pick smaller images.';

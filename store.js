@@ -8,7 +8,7 @@ import {
   getFirestore, doc, getDoc, setDoc, updateDoc, addDoc, collection, query, where,
   orderBy, limit, onSnapshot, serverTimestamp, runTransaction
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-import { firebaseConfig, ADMIN_EMAIL } from "./firebase-config.js";
+import { firebaseConfig, ADMIN_EMAIL, isAdminEmail } from "./firebase-config.js";
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
@@ -226,7 +226,12 @@ export function watchAllUsers(callback, onError = noop) {
 
 // ---------- Checkout and admin actions (Firestore transactions, enforced by firestore.rules) ----------
 export const MAX_CART_LINES = 5;
-export const MAX_QTY = 50;
+// There is no fixed upper limit on quantity: the real ceiling is the stock the admin set
+// for the product, which firestore.rules enforces (`product.stock >= line.quantity`) and
+// which the cart and product pages clamp against. This sentinel only rejects nonsense
+// values, e.g. from a hand-edited localStorage cart, and stays inside Firestore's 64-bit
+// integer range so the rules' `is int` checks still pass.
+export const MAX_QTY = Number.MAX_SAFE_INTEGER;
 const ID_PATTERN = /^[A-Za-z0-9_-]+$/;
 let locationsCache = null;
 
@@ -271,8 +276,8 @@ export async function placeOrder(requestId, items) {
     const size = String(item?.size || "").slice(0, 40);
     const color = String(item?.color || "").slice(0, 40);
     if (!productId || !ID_PATTERN.test(productId)) throw new Error("Product is invalid.");
-    if (!Number.isInteger(quantity) || quantity < 1 || quantity > MAX_QTY) {
-      throw new Error(`Quantity must be a whole number from 1 to ${MAX_QTY}.`);
+    if (!Number.isSafeInteger(quantity) || quantity < 1 || quantity > MAX_QTY) {
+      throw new Error(`Quantity for ${productId} must be a whole number of 1 or more.`);
     }
     // Lines merge only when product AND variant match, so two sizes stay separate lines.
     const key = `${productId}|${size}|${color}`;
@@ -388,7 +393,7 @@ export function getCart() {
     return Array.isArray(items)
       ? items.filter((i) => i && typeof i.productId === "string" && i.quantity > 0).map((i) => ({
         productId: i.productId,
-        quantity: Math.min(50, Math.max(1, Math.round(Number(i.quantity) || 1))),
+        quantity: Math.min(MAX_QTY, Math.max(1, Math.round(Number(i.quantity) || 1))),
         size: cleanVariant(i.size),
         color: cleanVariant(i.color)
       }))
@@ -406,8 +411,8 @@ export function addToCart(productId, quantity = 1, variant = {}) {
   const size = cleanVariant(variant.size);
   const color = cleanVariant(variant.color);
   const found = items.find((i) => i.productId === productId && i.size === size && i.color === color);
-  if (found) found.quantity = Math.min(50, found.quantity + quantity);
-  else items.push({ productId, quantity: Math.min(50, quantity), size, color });
+  if (found) found.quantity = Math.min(MAX_QTY, found.quantity + quantity);
+  else items.push({ productId, quantity: Math.min(MAX_QTY, quantity), size, color });
   setCart(items);
 }
 
@@ -453,7 +458,7 @@ export function mountFooter() {
     <footer class="footer">
       <div class="wrap footer-inner">
         <div><b>KORASTORE</b><p>Find it. Fund it. Own it.</p></div>
-        <div class="footer-links"><a href="shop.html">Shop</a><a href="wallet.html">Fund wallet</a><a href="orders.html">Orders</a><a href="mailto:beniwealth70@gmail.com">Contact</a></div>
+        <div class="footer-links"><a href="shop.html">Shop</a><a href="wallet.html">Fund wallet</a><a href="orders.html">Orders</a><a href="mailto:${ADMIN_EMAIL}">Contact</a></div>
         <small>© ${new Date().getFullYear()} KORASTORE</small>
       </div>
     </footer>`;
@@ -502,8 +507,8 @@ export function requireAdmin(activePage, gateSelector = "#gate", contentSelector
     const stop = onAuthStateChanged(auth, async (user) => {
       stop();
       if (!user) { location.replace(`login.html?next=${encodeURIComponent(activePage)}`); resolve(null); return; }
-      if ((user.email || "").toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
-        deny("Admins only", "This area is restricted to the KORASTORE administrator.");
+      if (!isAdminEmail(user.email)) {
+        deny("Admins only", "This area is restricted to KORASTORE administrators.");
         resolve(null);
         return;
       }
