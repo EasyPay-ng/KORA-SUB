@@ -8,7 +8,7 @@ import {
   getFirestore, doc, getDoc, setDoc, updateDoc, addDoc, collection, query, where,
   orderBy, limit, onSnapshot, serverTimestamp, runTransaction
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-import { firebaseConfig, ADMIN_EMAIL } from "./firebase-config.js";
+import { firebaseConfig, ADMIN_EMAILS } from "./firebase-config.js";
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
@@ -226,7 +226,6 @@ export function watchAllUsers(callback, onError = noop) {
 
 // ---------- Checkout and admin actions (Firestore transactions, enforced by firestore.rules) ----------
 export const MAX_CART_LINES = 5;
-export const MAX_QTY = 50;
 const ID_PATTERN = /^[A-Za-z0-9_-]+$/;
 let locationsCache = null;
 
@@ -271,13 +270,17 @@ export async function placeOrder(requestId, items) {
     const size = String(item?.size || "").slice(0, 40);
     const color = String(item?.color || "").slice(0, 40);
     if (!productId || !ID_PATTERN.test(productId)) throw new Error("Product is invalid.");
-    if (!Number.isInteger(quantity) || quantity < 1 || quantity > MAX_QTY) {
-      throw new Error(`Quantity must be a whole number from 1 to ${MAX_QTY}.`);
+    if (!Number.isSafeInteger(quantity) || quantity < 1) {
+      throw new Error("Quantity must be a positive whole number.");
     }
     // Lines merge only when product AND variant match, so two sizes stay separate lines.
     const key = `${productId}|${size}|${color}`;
     const found = merged.get(key) || { productId, size, color, quantity: 0 };
-    found.quantity = Math.min(MAX_QTY, found.quantity + quantity);
+    const combinedQuantity = found.quantity + quantity;
+    if (!Number.isSafeInteger(combinedQuantity)) {
+      throw new Error("The combined quantity is too large.");
+    }
+    found.quantity = combinedQuantity;
     merged.set(key, found);
   }
   if (merged.size === 0) throw new Error("Your cart is empty.");
@@ -386,9 +389,10 @@ export function getCart() {
   try {
     const items = JSON.parse(localStorage.getItem(CART_KEY) || "[]");
     return Array.isArray(items)
-      ? items.filter((i) => i && typeof i.productId === "string" && i.quantity > 0).map((i) => ({
+      ? items.filter((i) => i && typeof i.productId === "string"
+          && Number.isSafeInteger(Number(i.quantity)) && Number(i.quantity) > 0).map((i) => ({
         productId: i.productId,
-        quantity: Math.min(50, Math.max(1, Math.round(Number(i.quantity) || 1))),
+        quantity: Number(i.quantity),
         size: cleanVariant(i.size),
         color: cleanVariant(i.color)
       }))
@@ -402,12 +406,17 @@ export function setCart(items) {
   window.dispatchEvent(new CustomEvent("korastore:cart"));
 }
 export function addToCart(productId, quantity = 1, variant = {}) {
+  const amount = Number(quantity);
+  if (!Number.isSafeInteger(amount) || amount < 1) throw new Error("Quantity must be a positive whole number.");
   const items = getCart();
   const size = cleanVariant(variant.size);
   const color = cleanVariant(variant.color);
   const found = items.find((i) => i.productId === productId && i.size === size && i.color === color);
-  if (found) found.quantity = Math.min(50, found.quantity + quantity);
-  else items.push({ productId, quantity: Math.min(50, quantity), size, color });
+  if (found) {
+    const combinedQuantity = found.quantity + amount;
+    if (!Number.isSafeInteger(combinedQuantity)) throw new Error("The combined quantity is too large.");
+    found.quantity = combinedQuantity;
+  } else items.push({ productId, quantity: amount, size, color });
   setCart(items);
 }
 
@@ -490,8 +499,8 @@ export function requireCustomer(nextPage) {
   });
 }
 
-// Admin gate: matches firestore.rules — the configured admin email with a verified
-// email address. Security is enforced server-side by the rules; this is the same check.
+// Admin gate: matches firestore.rules — one of the configured admin emails with a
+// verified email address. Security is enforced server-side by the rules; this is the same check.
 export function requireAdmin(activePage, gateSelector = "#gate", contentSelector = "#admin-content") {
   return new Promise((resolve) => {
     const gate = document.querySelector(gateSelector);
@@ -502,14 +511,14 @@ export function requireAdmin(activePage, gateSelector = "#gate", contentSelector
     const stop = onAuthStateChanged(auth, async (user) => {
       stop();
       if (!user) { location.replace(`login.html?next=${encodeURIComponent(activePage)}`); resolve(null); return; }
-      if ((user.email || "").toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
-        deny("Admins only", "This area is restricted to the KORASTORE administrator.");
+      if (!ADMIN_EMAILS.includes((user.email || "").trim().toLowerCase())) {
+        deny("Admins only", "This area is restricted to approved KORASTORE administrators.");
         resolve(null);
         return;
       }
       try { await user.reload(); } catch { /* fall back to cached profile */ }
       if (!user.emailVerified) {
-        deny("Verify your email first", "The admin account must have a verified email address. Check your inbox for the verification link, then sign in again.");
+        deny("Verify your email first", "Administrator accounts must have a verified email address. Check your inbox for the verification link, then sign in again.");
         resolve(null);
         return;
       }
@@ -604,13 +613,17 @@ export function variantLabel(item) {
 
 export function stockBadge(product) {
   const stock = Number(product.stock || 0);
+  const minimum = Math.max(1, Number(product.minOrderQuantity || 1));
   if (stock <= 0) return `<span class="badge bad stock-tag">Out of stock</span>`;
+  if (stock < minimum) return `<span class="badge bad stock-tag">Below minimum order</span>`;
   if (stock <= 5) return `<span class="badge wait stock-tag">Only ${stock} left</span>`;
   return `<span class="badge ok stock-tag">In stock</span>`;
 }
 
 export function productCard(product) {
-  const out = Number(product.stock || 0) <= 0;
+  const stock = Number(product.stock || 0);
+  const minimum = Math.max(1, Number(product.minOrderQuantity || 1));
+  const out = stock < minimum;
   const link = `product.html?id=${encodeURIComponent(product.id)}`;
   return `
     <article class="product">
@@ -622,7 +635,7 @@ export function productCard(product) {
         <div class="product-actions">
           ${hasVariants(product)
     ? `<a class="btn btn-sm btn-gold" href="${link}">Choose options</a>`
-    : `<button class="btn btn-sm btn-gold" data-add="${esc(product.id)}" data-min="${Math.max(1, Number(product.minOrderQuantity || 1))}" ${out ? "disabled" : ""}>${out ? "Sold out" : "Add to cart"}</button>`}
+    : `<button class="btn btn-sm btn-gold" data-add="${esc(product.id)}" data-min="${minimum}" ${out ? "disabled" : ""}>${out ? (stock <= 0 ? "Sold out" : "Unavailable") : "Add to cart"}</button>`}
           <a class="btn btn-sm btn-ghost" href="${link}">View</a>
         </div>
       </div>
@@ -723,7 +736,7 @@ export function watchRecommendedAlerts() {
   });
 }
 
-// ---------- Admin actions (run as one transaction each; firestore.rules allow them only for the admin) ----------
+// ---------- Admin actions (run as one transaction each; firestore.rules allow them only for admins) ----------
 export async function reviewFunding(requestId, decision) {
   if (decision !== "approve" && decision !== "reject") throw new Error("Decision must be approve or reject.");
   const admin = auth.currentUser?.email || "admin";

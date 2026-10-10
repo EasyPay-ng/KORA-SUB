@@ -8,7 +8,7 @@ There is no server. The site is static files plus Firebase (Auth and Firestore).
 
 ## Roles
 
-- **Administrator**: only `beniwealth70@gmail.com`, with a verified email. The admin lists, prices, stocks and hides products; uploads up to 5 photos per product; sets search keywords, slashed original prices, size/colour variants and the "Recommended" flag; publishes the deposit bank account; sets the checkout fee schedule; approves funding; and moves orders through packing, shipping and delivery.
+- **Administrators**: `beniwealth70@gmail.com` and `okogbagideon28@gmail.com`, each with a verified email. Either admin can list, price, stock and hide products; upload up to 5 photos per product; set search keywords, slashed original prices, size/colour variants and the "Recommended" flag; publish the deposit bank account; set the checkout fee schedule; approve funding; and move orders through packing, shipping and delivery.
 - **Customers**: anyone who registers. They browse, add to cart, fund their wallet, check out, set delivery location and track orders. They cannot list products, change their own balance upward, or edit other people's data.
 - **Visitors**: can browse the shop without an account. Checkout and funding require sign-in.
 
@@ -19,6 +19,7 @@ Every product has an **admin-chosen product ID** (3–40 letters, numbers, `-`, 
 - a photo gallery (up to **5 images**, uploaded by the admin and stored **compressed as base64 in Firestore** — no image host or URL needed),
 - the **discounted price** with the **original price slashed through** (and the % off),
 - quantity available (stock, shared across all variants),
+- the admin-set **minimum order quantity** (any positive whole number, with no fixed 50-item cap),
 - **size and colour options** for clothing products (set by the admin; shoppers must pick them before adding to cart),
 - **search keywords** set by the admin, so search finds the product even by words not in its name,
 - the product ID and the "Recommended" badge where applicable.
@@ -49,13 +50,13 @@ The admin can change the amounts and which state counts as "local" under **Admin
 ## What the rules enforce
 
 - A customer's wallet can **go down only** in the same batch that creates their own order, and only by exactly the order total (items + service fee + delivery fee).
-- A customer's wallet **never goes up**. Only the admin credits funding and refunds.
-- Prices, stock and size/colour choices can only be used as they are in `/products` at checkout. The browser's totals are checked against them.
+- A customer's wallet **never goes up**. Only approved admins credit funding and refunds.
+- Prices, stock and size/colour choices can only be used as they are in `/products` at checkout. An order must meet each product's admin-set minimum quantity and cannot exceed available stock; there is no fixed 50-item cap. The browser's totals are checked against them.
 - The **service fee and delivery fee** on an order must equal the fee schedule (admin-edited `settings/fees`, defaults ₦2,000 / ₦2,500 / ₦6,000), and the total must be exactly items + those fees.
 - Stock can **go down only** in the same batch that creates an order containing that product, and only by the ordered quantity.
 - Orders are **create-only**. Customers can't edit or delete them.
-- Product documents use the admin's product ID as their id, and only the admin can create/edit them (including photos, keywords, variants and the recommended flag).
-- The admin account (email plus verified email) is the only account that approves funding, changes order status, edits any user's balance, or posts recommended-product announcements.
+- Product documents use the admin's product ID as their id, and only approved admins can create/edit them (including photos, keywords, variants and the recommended flag).
+- Either approved admin account (email plus verified email) can approve funding, change order status, edit any user's balance, or post recommended-product announcements.
 
 ## Limitations of this design
 
@@ -91,19 +92,19 @@ Shared client code is in `store.js`, styles in `store.css`. Nigerian states and 
 | `notifications/{id}` | admin (recommended-product announcements) | everyone |
 | `ledger/{id}` | customer (purchase entries only); admin (all) | admin |
 
-Money is stored as whole naira (integers). Product documents hold the admin-chosen `productId` as their id plus `name`, `category`, `price` (selling), `compareAtPrice` (slashed original, optional), `stock`, `sold`, `description`, `keywords[]`, `images[]` (base64), `sizes[]`, `colors[]`, `recommended`, `active`. Orders hold `items[]` (with optional `size`/`color` per line), `subtotal`, `serviceFee`, `deliveryFee`, `total` and the `delivery` snapshot.
+Money is stored as whole naira (integers). Product documents hold the admin-chosen `productId` as their id plus `name`, `category`, `price` (selling), `compareAtPrice` (slashed original, optional), `stock`, `minOrderQuantity`, `sold`, `description`, `keywords[]`, `images[]` (base64), `sizes[]`, `colors[]`, `recommended`, `active`. Orders hold `items[]` (with quantity and optional `size`/`color` per line), `subtotal`, `serviceFee`, `deliveryFee`, `total` and the `delivery` snapshot.
 
 ## Setup and deployment
 
 1. **Firebase console** (project `korasub-eb0b8`): enable Email/Password and Google sign-in, and create the Firestore database.
-2. **Admin account.** Register with `beniwealth70@gmail.com` and verify the email. No custom claim is needed; the rules check the email and verification.
+2. **Admin accounts.** Register using either approved email (`beniwealth70@gmail.com` or `okogbagideon28@gmail.com`) and verify it. No custom claim is needed; the rules check the email and verification.
 3. **Test the rules first.** In the Firebase console, open **Firestore → Rules → Rules Playground** and check at least:
    - a customer can create an order, and the wallet goes down by exactly the total (items + fees);
    - a customer **cannot** change their own `balance` without an order;
    - a customer **cannot** raise their own `balance`;
    - a customer cannot change product price, name or stock outside a matching order;
    - a customer cannot skip the platform service fee or the delivery fee on an order;
-   - only the admin can approve funding, change order status, list products, or post notifications.
+   - only approved admins can approve funding, change order status, list products, or post notifications.
    Then run through a full purchase and refund on a test account.
 4. **Deploy the rules.** Sign in with the Firebase CLI, then:
    ```sh
