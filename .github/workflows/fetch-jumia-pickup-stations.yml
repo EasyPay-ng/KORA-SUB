@@ -1,0 +1,76 @@
+name: Fetch Jumia pickup stations
+
+# Temporary helper: GitHub runners have internet access (this repo's dev sandbox does
+# not), so this job pulls the Nigerian Jumia pickup-station table, writes it into
+# data/ and commits the result back to the branch it runs on.
+#
+# Runs once when this file is pushed, or on demand from the Actions tab.
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fetch-jumia-pickup-stations.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Download pickup stations
+        env:
+          SUPABASE_URL: https://dpioixansygkjdbphfdj.supabase.co
+          SUPABASE_ANON_KEY: >-
+            eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRwaW9peGFuc3lna2pkYnBoZmRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQwMjkxNDQsImV4cCI6MjA3OTYwNTE0NH0.-ySc75siLeB2F1Mdsb44zWk7qetX1288DF3hISpMJyg
+        run: |
+          set -euo pipefail
+          mkdir -p data
+          FIELDS="id,name,state,address,landmark,latitude,longitude,is_active"
+          curl -sS --fail -D /tmp/headers.txt \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+            -H "Prefer: count=exact" \
+            "${SUPABASE_URL}/rest/v1/pickup_stations?select=${FIELDS}&order=state.asc,name.asc&limit=2000" \
+            -o /tmp/stations.json
+          echo "--- Content-Range (rows returned / total) ---"
+          grep -i '^content-range' /tmp/headers.txt || true
+          echo "--- rows in payload ---"
+          jq 'length' /tmp/stations.json
+
+      - name: Write data files
+        run: |
+          set -euo pipefail
+          jq '.' /tmp/stations.json > data/jumia-pickup-stations.json
+          jq -r '["id","name","state","address","landmark","latitude","longitude","active"],
+                 (.[] | [.id, .name, .state, .address, (.landmark // ""),
+                         (.latitude | tostring), (.longitude | tostring),
+                         (if .is_active then "yes" else "no" end)]) | @csv' \
+            /tmp/stations.json > data/jumia-pickup-stations.csv
+          jq 'group_by(.state)
+              | map({state: .[0].state,
+                     stations: length,
+                     active: (map(select(.is_active)) | length)})
+              | sort_by(-.stations)' \
+            /tmp/stations.json > data/jumia-pickup-stations-summary.json
+          wc -l data/jumia-pickup-stations.csv
+          echo "--- states ---"
+          jq -r '.[] | "\(.state) \(.stations) (\(.active) active)"' data/jumia-pickup-stations-summary.json
+
+      - name: Commit results
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/jumia-pickup-stations.json data/jumia-pickup-stations.csv data/jumia-pickup-stations-summary.json
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "data: Jumia Nigeria pickup stations (synced $(date -u +%Y-%m-%d))"
+            git push origin HEAD:${{ github.ref_name }}
+          fi
