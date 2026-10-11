@@ -26,6 +26,49 @@
   let user = null, balance = 0;
   let selected = null;   // subcategory being ordered
   let quantity = 1;
+  const catalogueReady = { platforms: false, categories: false, subcategories: false };
+  const catalogueErrors = {};
+  const catalogueLabels = {
+    platforms: 'platforms',
+    categories: 'categories',
+    subcategories: 'services'
+  };
+  let catalogueTimeout;
+
+  function renderCatalogueStatus() {
+    const failures = Object.entries(catalogueErrors)
+      .map(([key, message]) => `${catalogueLabels[key] || key}: ${message}`);
+    if (failures.length) {
+      detail.innerHTML = `
+        <div class="empty">
+          <b>Could not load this platform</b>
+          <p class="small" style="margin:8px 0">${esc(failures.join(' · '))}</p>
+          <p class="small muted">Check your connection and that the Firestore rules are published, then try again.</p>
+          <button class="btn btn-ghost" type="button" id="boost-retry" style="margin-top:8px">Try again</button>
+        </div>`;
+      detail.querySelector('#boost-retry').addEventListener('click', () => location.reload());
+      return;
+    }
+
+    if (Object.values(catalogueReady).every(Boolean)) {
+      clearTimeout(catalogueTimeout);
+      paint();
+    }
+  }
+
+  function receiveCatalogue(key, rows) {
+    if (key === 'platforms') platforms = rows;
+    if (key === 'categories') categories = rows;
+    if (key === 'subcategories') subcategories = rows;
+    catalogueReady[key] = true;
+    delete catalogueErrors[key];
+    renderCatalogueStatus();
+  }
+
+  function failCatalogue(key, problem) {
+    catalogueErrors[key] = problem?.message || 'Unknown Firestore error.';
+    renderCatalogueStatus();
+  }
 
   onAuthStateChanged(auth, (u) => {
     user = u;
@@ -141,9 +184,27 @@
   if (!id) {
     detail.innerHTML = '<div class="empty"><b>No platform selected</b>Open a platform from the <a class="link" href="boost.html">boost page</a>.</div>';
   } else {
-    watchBoostPlatforms((rows) => { platforms = rows; paint(); });
-    watchBoostCategories((rows) => { categories = rows; paint(); });
-    watchBoostSubcategories((rows) => { subcategories = rows; paint(); });
+    catalogueTimeout = setTimeout(() => {
+      for (const [key, ready] of Object.entries(catalogueReady)) {
+        if (!ready && !catalogueErrors[key]) {
+          catalogueErrors[key] = 'Timed out while waiting for Firestore.';
+        }
+      }
+      renderCatalogueStatus();
+    }, 15000);
+
+    watchBoostPlatforms(
+      (rows) => receiveCatalogue('platforms', rows),
+      (problem) => failCatalogue('platforms', problem)
+    );
+    watchBoostCategories(
+      (rows) => receiveCatalogue('categories', rows),
+      (problem) => failCatalogue('categories', problem)
+    );
+    watchBoostSubcategories(
+      (rows) => receiveCatalogue('subcategories', rows),
+      (problem) => failCatalogue('subcategories', problem)
+    );
   }
 </script>
 </body>

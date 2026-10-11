@@ -27,8 +27,26 @@
   mountHeader('boost.html');
   mountFooter();
   const host = document.querySelector('#platforms');
+  let platformListLoaded = false;
+
+  function showPlatformLoadError(message) {
+    host.innerHTML = `
+      <div class="empty">
+        <b>Could not load platforms</b>
+        <p class="small" style="margin:8px 0">${esc(message)}</p>
+        <p class="small muted">Check your connection and that the Firestore rules are published, then try again.</p>
+        <button class="btn btn-ghost" type="button" id="boost-retry" style="margin-top:8px">Try again</button>
+      </div>`;
+    host.querySelector('#boost-retry').addEventListener('click', () => location.reload());
+  }
+
+  const platformLoadTimeout = setTimeout(() => {
+    if (!platformListLoaded) showPlatformLoadError('Timed out while waiting for Firestore.');
+  }, 15000);
 
   watchBoostPlatforms((platforms) => {
+    platformListLoaded = true;
+    clearTimeout(platformLoadTimeout);
     if (!platforms.length) {
       host.innerHTML = '<div class="empty"><b>No platforms yet</b>Boosting services are coming soon. Check back shortly.</div>';
       return;
@@ -45,7 +63,9 @@
         </div>
       </article>`).join('')}</div>`;
   }, (problem) => {
-    host.innerHTML = `<div class="empty"><b>Could not load platforms</b>${esc(problem.message)}</div>`;
+    platformListLoaded = true;
+    clearTimeout(platformLoadTimeout);
+    showPlatformLoadError(problem?.message || 'Unknown Firestore error.');
   });
 </script>
 </body>
