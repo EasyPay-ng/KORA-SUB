@@ -9,13 +9,15 @@
 <body>
 <div id="site-header"></div>
 <main class="wrap page">
-  <div class="page-head"><div><span class="eyebrow">Social media marketing</span><h1>Boost your socials</h1><p>Followers, likes, views and more for Facebook, TikTok, YouTube and the rest. Pick a platform to see its services and prices, then order and pay from your KORASTORE wallet.</p></div></div>
-  <div id="platforms"><div class="empty"><b>Loading platforms…</b></div></div>
-  <div class="card" style="margin-top:24px;max-width:760px">
+  <div class="page-head"><div><span class="eyebrow">Social media marketing</span><h1>Boost your socials</h1><p>Followers, likes, views and more. Pick a category and a plan below, paste your link, set the quantity and pay from your KORASTORE wallet.</p></div></div>
+  <section class="card" style="max-width:720px">
+    <div id="order-host"><div class="empty"><b>Loading boost services…</b></div></div>
+  </section>
+  <div class="card" style="margin-top:24px;max-width:720px">
     <div class="card-head"><div><h2>How it works</h2><small>Simple, wallet-paid boosts</small></div></div>
     <ol style="margin:0;padding-left:20px;line-height:2" class="muted">
-      <li>Pick your platform and the service you want (e.g. TikTok followers).</li>
-      <li>Enter the link or username to boost and how many units you want.</li>
+      <li>Choose a category (e.g. Twitter Views) and the plan you want.</li>
+      <li>Paste the link or username to boost and set the quantity within the plan's Min–Max.</li>
       <li>Pay from your wallet — fund it first if your balance is low.</li>
       <li>We start the work and mark it delivered when done. Track everything under <a class="link" href="orders.html">Orders</a>.</li>
     </ol>
@@ -23,50 +25,282 @@
 </main>
 <div id="site-footer"></div>
 <script type="module">
-  import { mountHeader, mountFooter, watchBoostPlatforms, esc } from './store.js';
+  import { mountHeader, mountFooter, watchBoostPlatforms, watchBoostCategories, watchBoostSubcategories, placeBoostOrder, newRequestId, auth, onAuthStateChanged, watchProfile, naira, esc, readParam, showToast, boostCategoryTitle, formatBoostLimits, boostServiceLimits, BOOST_MAX_QUANTITY } from './store.js';
   mountHeader('boost.html');
   mountFooter();
-  const host = document.querySelector('#platforms');
-  let platformListLoaded = false;
 
-  function showPlatformLoadError(message) {
+  const host = document.querySelector('#order-host');
+  let platforms = [], categories = [], subcategories = [];
+  let user = null, balance = 0;
+  let categoryId = readParam('category') || '';
+  let serviceId = readParam('service') || '';
+  const platformParam = readParam('platform') || '';
+  let paramsApplied = false;
+  let formBuilt = false;
+  const catalogueReady = { platforms: false, categories: false, subcategories: false };
+  const catalogueErrors = {};
+  const catalogueLabels = { platforms: 'platforms', categories: 'categories', subcategories: 'plans' };
+  let catalogueTimeout;
+
+  const platformOf = (id) => platforms.find(p => p.id === id);
+  const visibleCategories = () => categories.filter(c => c.active === true && platformOf(c.platformId)?.active === true);
+  const categoryTitle = (cat) => boostCategoryTitle(platformOf(cat?.platformId), cat);
+  const servicesOf = (catId) => subcategories.filter(s => s.categoryId === catId && s.active === true);
+  const currentService = () => subcategories.find(s => s.id === serviceId && s.active === true) || null;
+  const serviceLabel = (s) => `${s.name} - ${naira(s.price)}${s.unit ? ` per ${s.unit}` : ''}`;
+
+  function showCatalogueError() {
+    const failures = Object.entries(catalogueErrors).map(([key, message]) => `${catalogueLabels[key] || key}: ${message}`);
     host.innerHTML = `
       <div class="empty">
-        <b>Could not load platforms</b>
-        <p class="small" style="margin:8px 0">${esc(message)}</p>
+        <b>Could not load boost services</b>
+        <p class="small" style="margin:8px 0">${esc(failures.join(' · '))}</p>
         <p class="small muted">Check your connection and that the Firestore rules are published, then try again.</p>
         <button class="btn btn-ghost" type="button" id="boost-retry" style="margin-top:8px">Try again</button>
       </div>`;
     host.querySelector('#boost-retry').addEventListener('click', () => location.reload());
   }
 
-  const platformLoadTimeout = setTimeout(() => {
-    if (!platformListLoaded) showPlatformLoadError('Timed out while waiting for Firestore.');
-  }, 15000);
+  function receiveCatalogue(key, rows) {
+    if (key === 'platforms') platforms = rows;
+    if (key === 'categories') categories = rows;
+    if (key === 'subcategories') subcategories = rows;
+    catalogueReady[key] = true;
+    delete catalogueErrors[key];
+    if (Object.values(catalogueReady).every(Boolean)) {
+      clearTimeout(catalogueTimeout);
+      buildOrSync();
+    }
+  }
 
-  watchBoostPlatforms((platforms) => {
-    platformListLoaded = true;
-    clearTimeout(platformLoadTimeout);
-    if (!platforms.length) {
-      host.innerHTML = '<div class="empty"><b>No platforms yet</b>Boosting services are coming soon. Check back shortly.</div>';
+  function failCatalogue(key, problem) {
+    catalogueErrors[key] = problem?.message || 'Unknown Firestore error.';
+    showCatalogueError();
+  }
+
+  onAuthStateChanged(auth, (u) => {
+    user = u;
+    if (u) watchProfile(u.uid, (profile) => { balance = Number(profile.balance || 0); paintPayArea(); });
+    if (formBuilt) paintPayArea();
+  });
+
+  // ---------- Form ----------
+  function buildOrSync() {
+    const cats = [...visibleCategories()].sort((a, b) => categoryTitle(a).localeCompare(categoryTitle(b)));
+    if (!cats.length) {
+      formBuilt = false;
+      host.innerHTML = '<div class="empty"><b>No boost services yet</b>Boosting services are coming soon. Check back shortly.</div>';
       return;
     }
-    host.innerHTML = `<div class="products">${platforms.sort((a, b) => a.name.localeCompare(b.name)).map(p => `
-      <article class="product">
-        <div class="product-body">
-          <span class="product-cat">Platform</span>
-          <a class="product-name" href="boost-platform.html?id=${encodeURIComponent(p.id)}">${esc(p.name)}</a>
-          <p class="small muted" style="margin:8px 0 12px">${esc(String(p.description || '').slice(0, 160))}${String(p.description || '').length > 160 ? '…' : ''}</p>
-          <div class="product-actions">
-            <a class="btn btn-sm btn-gold" href="boost-platform.html?id=${encodeURIComponent(p.id)}">View services</a>
-          </div>
+    if (!paramsApplied) {
+      paramsApplied = true;
+      const wantedService = subcategories.find(s => s.id === serviceId && s.active === true);
+      if (wantedService && cats.some(c => c.id === wantedService.categoryId)) {
+        categoryId = wantedService.categoryId;
+      } else {
+        serviceId = '';
+        if (!cats.some(c => c.id === categoryId)) {
+          const platCats = platformParam ? cats.filter(c => c.platformId === platformParam) : [];
+          categoryId = platCats.length ? platCats[0].id : cats[0].id;
+        }
+      }
+    }
+    if (!cats.some(c => c.id === categoryId)) categoryId = cats[0].id;
+    const services = [...servicesOf(categoryId)].sort((a, b) => a.name.localeCompare(b.name));
+    if (!services.some(s => s.id === serviceId)) serviceId = services.length ? services[0].id : '';
+
+    if (!formBuilt) {
+      buildForm();
+      formBuilt = true;
+    }
+    syncOptions(cats, services);
+    paintDetails(false);
+  }
+
+  function buildForm() {
+    host.innerHTML = `
+      <label class="field">Category<select class="select" id="boost-category"></select></label>
+      <label class="field">Plans <span class="req" aria-hidden="true">*</span><select class="select" id="boost-service"></select></label>
+      <p class="small" id="boost-limits" style="font-weight:700;color:var(--muted);margin:10px 0"></p>
+      <div class="info-box" id="boost-info" style="margin-bottom:16px"></div>
+      <label class="field">Link: <span class="req" aria-hidden="true">*</span><input class="input" id="boost-link" maxlength="300" placeholder="Enter Link:" autocomplete="off"></label>
+      <label class="field">Quantity <span class="req" aria-hidden="true">*</span><input class="input" id="boost-qty" type="number" min="1" step="1" value="1"></label>
+      <label class="field">Amount (₦)<input class="input" id="boost-amount" disabled></label>
+      <div id="boost-error" class="error-text" role="alert"></div>
+      <div id="pay-area" style="margin-top:12px">
+        <div id="pay-signed-in" hidden>
+          <p class="small muted">Wallet balance: <b id="boost-balance" style="color:var(--navy)">…</b> · <a class="link" href="wallet.html">Fund wallet</a></p>
+          <button class="btn btn-gold btn-block" id="boost-pay" type="button">Pay</button>
         </div>
-      </article>`).join('')}</div>`;
-  }, (problem) => {
-    platformListLoaded = true;
-    clearTimeout(platformLoadTimeout);
-    showPlatformLoadError(problem?.message || 'Unknown Firestore error.');
-  });
+        <div id="pay-signed-out" hidden>
+          <p class="muted">Sign in to order this plan and pay from your wallet.</p>
+          <div class="row"><a class="btn btn-gold" id="boost-login" href="login.html">Sign in to order</a><a class="btn btn-ghost" href="register.html">Create account</a></div>
+        </div>
+      </div>
+      <p class="small muted" style="margin:12px 0 0">Paid from your KORASTORE wallet. We start the work once payment lands — track it under <a class="link" href="orders.html">Orders</a>.</p>`;
+    host.querySelector('#boost-login').href = `login.html?next=${encodeURIComponent('boost.html' + window.location.search)}`;
+    host.querySelector('#boost-category').addEventListener('change', (event) => {
+      categoryId = event.target.value;
+      const services = [...servicesOf(categoryId)].sort((a, b) => a.name.localeCompare(b.name));
+      serviceId = services.length ? services[0].id : '';
+      syncServiceOptions(services);
+      paintDetails(true);
+    });
+    host.querySelector('#boost-service').addEventListener('change', (event) => {
+      serviceId = event.target.value;
+      paintDetails(true);
+    });
+    host.querySelector('#boost-qty').addEventListener('input', paintAmount);
+    host.querySelector('#boost-qty').addEventListener('change', () => paintDetails(false));
+    host.querySelector('#boost-pay').addEventListener('click', submitOrder);
+  }
+
+  function syncOptions(cats, services) {
+    const catSelect = host.querySelector('#boost-category');
+    catSelect.innerHTML = cats.map(c => `<option value="${esc(c.id)}">${esc(categoryTitle(c))}</option>`).join('');
+    catSelect.value = categoryId;
+    syncServiceOptions(services);
+  }
+
+  function syncServiceOptions(services) {
+    const serviceSelect = host.querySelector('#boost-service');
+    serviceSelect.innerHTML = services.length
+      ? services.map(s => `<option value="${esc(s.id)}">${esc(serviceLabel(s))}</option>`).join('')
+      : '<option value="">No plans in this category yet</option>';
+    serviceSelect.value = serviceId;
+    serviceSelect.disabled = !services.length;
+  }
+
+  function paintDetails(resetQty) {
+    const service = currentService();
+    const limitsEl = host.querySelector('#boost-limits');
+    const infoEl = host.querySelector('#boost-info');
+    const qtyInput = host.querySelector('#boost-qty');
+    if (!service) {
+      limitsEl.textContent = '';
+      infoEl.innerHTML = '<div>This category has no plans yet — pick another category.</div>';
+      qtyInput.disabled = true;
+      paintAmount();
+      return;
+    }
+    qtyInput.disabled = false;
+    const { min, max } = boostServiceLimits(service);
+    limitsEl.textContent = formatBoostLimits(service);
+    const avg = String(service.averageTime || '').trim();
+    const desc = String(service.description || '').trim();
+    infoEl.innerHTML = `<div>Average time: <b>${esc(avg || 'Varies')}</b></div>${desc ? `<div>${esc(desc)}</div>` : ''}`;
+    qtyInput.min = String(min);
+    qtyInput.max = String(max);
+    let qty = Math.round(Number(qtyInput.value) || min);
+    if (resetQty || !Number.isFinite(qty)) qty = min;
+    qty = Math.min(Math.max(qty, min), max);
+    qtyInput.value = String(qty);
+    paintAmount();
+  }
+
+  function orderQty() {
+    const service = currentService();
+    if (!service) return 0;
+    const { min, max } = boostServiceLimits(service);
+    const qty = Math.round(Number(host.querySelector('#boost-qty').value));
+    if (!Number.isSafeInteger(qty)) return 0;
+    return Math.min(Math.max(qty, min), max);
+  }
+
+  function paintAmount() {
+    const service = currentService();
+    const amountInput = host.querySelector('#boost-amount');
+    if (!service) {
+      amountInput.value = '';
+      paintPayArea();
+      return;
+    }
+    const qty = orderQty() || boostServiceLimits(service).min;
+    amountInput.value = naira(Number(service.price || 0) * qty);
+    paintPayArea();
+  }
+
+  function paintPayArea() {
+    const signedIn = host.querySelector('#pay-signed-in');
+    const signedOut = host.querySelector('#pay-signed-out');
+    if (!signedIn || !signedOut) return;
+    signedIn.hidden = !user;
+    signedOut.hidden = Boolean(user);
+    if (!user) return;
+    host.querySelector('#boost-balance').textContent = naira(balance);
+    const service = currentService();
+    const payButton = host.querySelector('#boost-pay');
+    if (!service) {
+      payButton.disabled = true;
+      payButton.textContent = 'Pay';
+      return;
+    }
+    const total = Number(service.price || 0) * (orderQty() || boostServiceLimits(service).min);
+    payButton.disabled = false;
+    payButton.textContent = `Pay ${naira(total)} from wallet`;
+  }
+
+  async function submitOrder(event) {
+    const service = currentService();
+    const error = host.querySelector('#boost-error');
+    error.textContent = '';
+    if (!service) return;
+    const { min, max } = boostServiceLimits(service);
+    const qty = Math.round(Number(host.querySelector('#boost-qty').value));
+    const link = host.querySelector('#boost-link').value.trim();
+    if (!link) return error.textContent = 'Enter the link or username to boost.';
+    if (!Number.isSafeInteger(qty) || qty < min || qty > max) {
+      return error.textContent = max >= BOOST_MAX_QUANTITY
+        ? `Quantity must be at least ${min.toLocaleString('en-NG')}.`
+        : `Quantity must be between ${min.toLocaleString('en-NG')} and ${max.toLocaleString('en-NG')}.`;
+    }
+    const button = event.currentTarget;
+    button.disabled = true;
+    button.textContent = 'Processing…';
+    try {
+      // Reuse the same request ID for retries of the same order, so a lost response never double-charges.
+      const signature = JSON.stringify({ subcategoryId: service.id, quantity: qty, link });
+      const pendingKey = 'korastore-boost-pending';
+      let pending = null;
+      try { pending = JSON.parse(sessionStorage.getItem(pendingKey) || 'null'); } catch {}
+      const requestId = pending && pending.signature === signature ? pending.requestId : newRequestId();
+      sessionStorage.setItem(pendingKey, JSON.stringify({ requestId, signature }));
+      const result = await placeBoostOrder(requestId, { subcategoryId: service.id, quantity: qty, link });
+      sessionStorage.removeItem(pendingKey);
+      showToast('Boost ordered', `${service.name} × ${qty.toLocaleString('en-NG')}`);
+      formBuilt = false;
+      host.innerHTML = `
+        <div class="notice ok"><span class="notice-icon">✓</span><div><b>Order placed</b>Reference ${esc(result.orderId.slice(-8).toUpperCase())}. ${naira(result.total)} was paid from your wallet — we'll start the work shortly.</div></div>
+        <div class="row" style="margin-top:14px"><a class="btn btn-gold" href="orders.html">Track this order</a><button class="btn btn-ghost" type="button" id="boost-again">Order another boost</button></div>`;
+      host.querySelector('#boost-again').addEventListener('click', buildOrSync);
+    } catch (problem) {
+      error.textContent = problem.message || 'Could not place the order.';
+      button.disabled = false;
+      paintAmount();
+    }
+  }
+
+  catalogueTimeout = setTimeout(() => {
+    for (const [key, ready] of Object.entries(catalogueReady)) {
+      if (!ready && !catalogueErrors[key]) {
+        catalogueErrors[key] = 'Timed out while waiting for Firestore.';
+      }
+    }
+    showCatalogueError();
+  }, 15000);
+
+  watchBoostPlatforms(
+    (rows) => receiveCatalogue('platforms', rows),
+    (problem) => failCatalogue('platforms', problem)
+  );
+  watchBoostCategories(
+    (rows) => receiveCatalogue('categories', rows),
+    (problem) => failCatalogue('categories', problem)
+  );
+  watchBoostSubcategories(
+    (rows) => receiveCatalogue('subcategories', rows),
+    (problem) => failCatalogue('subcategories', problem)
+  );
 </script>
 </body>
 </html>

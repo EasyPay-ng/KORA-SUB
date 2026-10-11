@@ -101,6 +101,10 @@ h1, h2, h3, h4 { font-family: 'Sora', sans-serif; letter-spacing: -.02em; line-h
 .empty { padding: 26px; border: 1.5px dashed #d3dbe7; border-radius: 14px; color: var(--muted); text-align: center; background: #fbfcfe; }
 .empty b { display: block; color: var(--navy); font-family: 'Sora', sans-serif; margin-bottom: 4px; }
 
+/* ---------- Boost order form ---------- */
+.info-box { padding: 14px 16px; border-radius: 12px; background: #eef4ff; border: 1px solid #d6e4ff; color: #1d4478; font-size: 14px; line-height: 1.7; }
+.req { color: var(--bad); font-weight: 700; }
+
 /* ---------- Forms ---------- */
 .field { display: grid; gap: 7px; margin-bottom: 16px; font-size: 13px; font-weight: 600; color: #3a4a63; }
 .field small { font-weight: 400; color: var(--faint); }
@@ -345,31 +349,65 @@ h1, h2, h3, h4 { font-family: 'Sora', sans-serif; letter-spacing: -.02em; line-h
 @media (max-width: 980px) {
   .hero-inner, .grid-2, .detail, .cart-layout, .admin-grid, .auth { grid-template-columns: 1fr; }
   .auth-side { display: none; }
+  .Detail { gap: 24px; }
   .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .admin-shell { grid-template-columns: 1fr; }
   .admin-side { position: static; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; padding: 14px 18px; }
   .admin-nav { display: flex; flex-wrap: wrap; }
   .admin-foot { margin-top: 0; display: flex; gap: 12px; align-items: center; }
+  .admin-main { padding: 24px 20px 50px; }
 }
 @media (max-width: 640px) {
+  body { overflow-x: clip; }
   .wrap { padding: 0 16px; }
-  .topbar-inner { height: 64px; }
+  .page { padding: 24px 0 50px; }
+  .card { padding: 18px; }
+  .card-head { flex-wrap: wrap; }
+  .topbar-inner { height: 64px; gap: 10px; }
+  .brand { flex: 0 0 auto; }
+  .brand img { width: 36px; height: 36px; }
+  .brand-text b { font-size: 17px; }
   .brand-text small { display: none; }
-  .nav a { padding: 8px 9px; font-size: 13px; }
+  .nav { flex: 0 1 auto; min-width: 0; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav a { padding: 8px 10px; font-size: 13px; white-space: nowrap; flex: 0 0 auto; }
+  .input, .select, .textarea { font-size: 16px; } /* stops iOS auto-zoom on focus */
+  .toolbar .input, .toolbar .select { max-width: none; flex: 1 1 200px; }
   .hero-inner { padding: 44px 0 56px; gap: 28px; }
   .products { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-  .product-body { padding: 12px; }
-  .product-actions .btn { font-size: 12px; padding: 0 10px; }
+  .product-body { padding: 12px; min-width: 0; }
+  .product-name { overflow-wrap: anywhere; }
+  .product-actions { flex-direction: column; }
+  .product-actions .btn { font-size: 13px; width: 100%; }
   .field-row, .quick { grid-template-columns: 1fr; }
+  .variant-row { grid-template-columns: minmax(0, 1fr) 104px 38px; }
+  .variant-row .input { min-width: 0; padding: 0 10px; }
   .track, .track-labels { grid-template-columns: repeat(4, 1fr); font-size: 10px; }
-  .stats { grid-template-columns: 1fr 1fr; gap: 10px; }
-  .stat strong { font-size: 20px; }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .stat { padding: 14px; }
+  .stat strong { font-size: 19px; overflow-wrap: anywhere; }
   .admin-main { padding: 22px 16px 50px; }
+  .admin-nav a { padding: 9px 10px; font-size: 13px; gap: 8px; }
+  .table { font-size: 13px; }
+  .table th, .table td { padding: 9px 8px; }
+  .table-wrap { margin: 0 -18px; padding: 0 18px; }
   .tab-signout { margin-left: 0; }
   .cart-line { grid-template-columns: 62px 1fr; }
   .cart-line .line-total { grid-column: 2; text-align: left; }
+  .cart-line .line-actions { flex-wrap: wrap; }
   .cart-thumb { width: 62px; height: 62px; }
   .detail-media .mono-mark { font-size: 84px; }
+  .balance-card { padding: 22px; }
+  .bank-card dd { flex-wrap: wrap; }
+  .order-items li { flex-wrap: wrap; gap: 4px 12px; }
+  .order-items li span { min-width: 0; overflow-wrap: anywhere; }
+  .gate { padding: 20px; }
+  .gate-card { padding: 28px 22px; }
+}
+@media (max-width: 400px) {
+  .brand-text { display: none; }
+  .topbar-inner { gap: 8px; }
+  .nav a { padding: 8px; }
 }
 .variant-rows{display:flex;flex-direction:column;gap:8px;margin-top:10px}.variant-row{display:grid;grid-template-columns:1fr 150px auto;gap:8px;align-items:center}
 .delivery-rows{display:flex;flex-direction:column;gap:8px;margin-top:10px}.range-row,.range-head{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:center}
