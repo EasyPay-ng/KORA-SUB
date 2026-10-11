@@ -66,6 +66,12 @@ service cloud.firestore {
         + (list.size() > 4 && list[4].productId == productId ? list[4].quantity : 0);
     }
 
+    // The pickup station document (a station that does not exist fails the rule; the
+    // lookups below share one cached read of the same document).
+    function pickupStation(id) {
+      return get(/databases/$(database)/documents/pickupStations/$(id)).data;
+    }
+
     // What a boost order costs: the plan's price per unit × quantity, worked out in
     // kobo (a plan may price a unit at a fraction of ₦1, e.g. ₦0.10) and rounded to
     // whole naira because the wallet only ever holds whole naira — never below ₦1.
@@ -132,17 +138,32 @@ service cloud.firestore {
         && request.resource.data.email == request.auth.token.email
         && request.resource.data.createdAt is timestamp;
 
-      // Profile edits (name and delivery location — saved here, never in the browser).
-      // Balance may NOT change here.
+      // Profile edits (name, the record-only delivery address and the chosen pickup
+      // station — saved here, never in the browser). Balance may NOT change here.
       allow update: if isOwner(uid)
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'name', 'country', 'state', 'lga', 'address', 'updatedAt'
+          'name', 'country', 'state', 'lga', 'address', 'pickup', 'updatedAt'
         ])
         && (!('country' in request.resource.data) || request.resource.data.country is string)
         && (!('state' in request.resource.data) || request.resource.data.state is string)
         && (!('lga' in request.resource.data) || request.resource.data.lga is string)
         && (!('address' in request.resource.data) || request.resource.data.address is string)
-        && (!('address' in request.resource.data) || request.resource.data.address.size() <= 300);
+        && (!('address' in request.resource.data) || request.resource.data.address.size() <= 300)
+        // The station is picked from the store's catalogue: the id, name, state and
+        // address saved here must match the station document itself.
+        && (!('pickup' in request.resource.data)
+          || request.resource.data.pickup == null
+          || (request.resource.data.pickup is map
+            && request.resource.data.pickup.keys().hasOnly(['stationId', 'stationName', 'state', 'address', 'landmark'])
+            && request.resource.data.pickup.stationId is string
+            && request.resource.data.pickup.stationId.matches('^[A-Za-z0-9_-]{2,40}$')
+            && request.resource.data.pickup.stationName is string && request.resource.data.pickup.stationName.size() <= 120
+            && request.resource.data.pickup.state is string && request.resource.data.pickup.state.size() <= 40
+            && request.resource.data.pickup.address is string && request.resource.data.pickup.address.size() <= 300
+            && request.resource.data.pickup.landmark is string && request.resource.data.pickup.landmark.size() <= 120
+            && exists(/databases/$(database)/documents/pickupStations/$(request.resource.data.pickup.stationId))
+            && pickupStation(request.resource.data.pickup.stationId).name == request.resource.data.pickup.stationName
+            && pickupStation(request.resource.data.pickup.stationId).state == request.resource.data.pickup.state));
 
       // Purchase debit: the wallet goes down, and only for the order created in this batch.
       allow update: if isOwner(uid)
@@ -263,11 +284,44 @@ service cloud.firestore {
     }
 
     // ---------------------------------------------------------------
-    // Bank details and checkout fees: /settings/{docId}
+    // Bank details, checkout fees and the pickup catalogue summary: /settings/{docId}
     // ---------------------------------------------------------------
     match /settings/{docId} {
       allow read: if signedIn() || isAdmin();
       allow write: if isAdmin();
+    }
+
+    // The pickup catalogue summary (which states have stations, and how many) is not
+    // private: the cart's station picker shows it before sign-in. Writes stay admin-only
+    // above.
+    match /settings/pickupStations {
+      allow read: if true;
+    }
+
+    // ---------------------------------------------------------------
+    // Pickup stations: /pickupStations/{stationId} — the collection points orders are
+    // collected from. Published by the admin from data/jumia-pickup-stations.json; every
+    // visitor can read the active ones. An order (and a profile) may only name a station
+    // that exists here, and the name, state and address on it must match this document —
+    // which also pins the order's state (and so its delivery fee) to the real station.
+    // ---------------------------------------------------------------
+    match /pickupStations/{stationId} {
+      allow read: if resource.data.active == true || isAdmin();
+
+      allow create: if isAdmin()
+        && stationId.matches('^[A-Za-z0-9_-]{2,40}$')
+        && isText(request.resource.data.name, 120)
+        && isText(request.resource.data.state, 40)
+        && request.resource.data.address is string
+        && request.resource.data.address.size() <= 300
+        && request.resource.data.landmark is string
+        && request.resource.data.landmark.size() <= 120
+        && (!('latitude' in request.resource.data) || request.resource.data.latitude is number)
+        && (!('longitude' in request.resource.data) || request.resource.data.longitude is number)
+        && request.resource.data.active is bool;
+
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
     }
 
     // ---------------------------------------------------------------
@@ -293,10 +347,22 @@ service cloud.firestore {
         && request.resource.data.items.size() >= 1
         && request.resource.data.items.size() <= 5
         && request.resource.data.status == 'paid'
+        // The order is collected at a pickup station: the delivery map must carry that
+        // station's id, name, state and address exactly as the catalogue has them.
         && request.resource.data.delivery is map
-        && request.resource.data.delivery.country is string
-        && request.resource.data.delivery.state is string
-        && request.resource.data.delivery.address is string
+        && request.resource.data.delivery.keys().hasOnly([
+          'method', 'country', 'state', 'stationId', 'stationName', 'stationAddress', 'landmark'
+        ])
+        && request.resource.data.delivery.method == 'pickup'
+        && request.resource.data.delivery.country == 'Nigeria'
+        && request.resource.data.delivery.stationId is string
+        && request.resource.data.delivery.stationId.matches('^[A-Za-z0-9_-]{2,40}$')
+        && exists(/databases/$(database)/documents/pickupStations/$(request.resource.data.delivery.stationId))
+        && pickupStation(request.resource.data.delivery.stationId).active == true
+        && request.resource.data.delivery.stationName == pickupStation(request.resource.data.delivery.stationId).name
+        && request.resource.data.delivery.state == pickupStation(request.resource.data.delivery.stationId).state
+        && request.resource.data.delivery.stationAddress == pickupStation(request.resource.data.delivery.stationId).address
+        && request.resource.data.delivery.landmark == pickupStation(request.resource.data.delivery.stationId).get('landmark', '')
         && request.resource.data.createdAt is timestamp
         && request.resource.data.updatedAt is timestamp
         && request.resource.data.subtotal is int

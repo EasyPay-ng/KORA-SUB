@@ -10,7 +10,7 @@
 <div id="site-header"></div>
 <main class="wrap page">
   <div class="page-head">
-    <div><span class="eyebrow">Your account</span><h1 id="greeting">Welcome</h1><p>Your wallet, delivery location and recent activity in one place.</p></div>
+    <div><span class="eyebrow">Your account</span><h1 id="greeting">Welcome</h1><p>Your wallet, pickup station and recent activity in one place.</p></div>
   </div>
   <div id="account-tabs"></div>
   <div class="grid-2">
@@ -24,7 +24,7 @@
         <a href="shop.html"><span class="ico">▣</span><b>Browse catalogue</b><small>See every product KORASTORE sells.</small></a>
         <a href="wallet.html"><span class="ico">＋</span><b>Fund your account</b><small>Pay the store account, then confirm.</small></a>
         <a href="orders.html"><span class="ico">▤</span><b>Track orders</b><small>Follow each order to delivery.</small></a>
-        <a href="profile.html"><span class="ico">⌖</span><b>Delivery location</b><small id="loc-short">Set your country, state and LGA.</small></a>
+        <a href="profile.html"><span class="ico">⌖</span><b>Pickup station</b><small id="loc-short">Choose your pickup station.</small></a>
       </div>
     </div>
     <section class="card">
@@ -39,7 +39,7 @@
 </main>
 <div id="site-footer"></div>
 <script type="module">
-  import { mountHeader, mountFooter, mountAccountTabs, requireCustomer, watchProfile, watchMyOrders, watchMyTransactions, naira, esc, formatDate, formatDateTime, STATUS_LABEL, statusClass } from './store.js';
+  import { mountHeader, mountFooter, mountAccountTabs, requireCustomer, watchProfile, watchMyOrders, watchMyTransactions, naira, esc, formatDate, formatDateTime, STATUS_LABEL, statusClass, stationShortName } from './store.js';
   mountHeader('dashboard.html');
   mountFooter();
   mountAccountTabs('dashboard.html');
@@ -48,8 +48,10 @@
   document.querySelector('#greeting').textContent = `Hi, ${first}`;
   watchProfile(user.uid, (profile) => {
     document.querySelector('#balance').textContent = naira(profile.balance || 0);
-    const parts = [profile.lga, profile.state, profile.country].filter(Boolean);
-    document.querySelector('#loc-short').textContent = parts.length ? parts.join(' · ') : 'Set your country, state and LGA.';
+    const saved = profile.pickup;
+    document.querySelector('#loc-short').textContent = saved && saved.stationId
+      ? `${stationShortName(saved.stationName, 40)} · ${saved.state || ''}`.trim()
+      : 'Choose your pickup station.';
   });
   watchMyTransactions(user.uid, (rows) => {
     document.querySelector('#activity').innerHTML = rows.length ? rows.slice(0, 6).map(t => `

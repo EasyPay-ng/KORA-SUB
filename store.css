@@ -411,3 +411,18 @@ h1, h2, h3, h4 { font-family: 'Sora', sans-serif; letter-spacing: -.02em; line-h
 }
 .variant-rows{display:flex;flex-direction:column;gap:8px;margin-top:10px}.variant-row{display:grid;grid-template-columns:1fr 150px auto;gap:8px;align-items:center}
 .delivery-rows{display:flex;flex-direction:column;gap:8px;margin-top:10px}.range-row,.range-head{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:center}
+
+/* ---------- Pickup station chooser (cart, profile) ---------- */
+.pickup-tools { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+.pickup-tools .field { flex: 1 1 240px; margin: 0; }
+.pickup-tools .btn { margin-bottom: 1px; }
+.pickup-list { max-height: 360px; overflow: auto; border: 1px solid var(--line); border-radius: 14px; background: #fff; padding: 6px; }
+.pickup-list .empty { border: 0; background: none; }
+.pickup-row { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 10px; border: 1px solid transparent; cursor: pointer; }
+.pickup-row:hover { background: #f6f8fb; }
+.pickup-row.on { border-color: var(--gold); background: var(--gold-soft); }
+.pickup-row input { margin: 3px 0 0; accent-color: var(--navy); }
+.pickup-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.pickup-body b { color: var(--navy); }
+.pickup-body small { color: var(--muted); font-size: 12.5px; }
+.pickup-body em { color: var(--navy-3); font-style: normal; font-weight: 700; font-size: 12px; }

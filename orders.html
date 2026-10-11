@@ -18,7 +18,7 @@
 </main>
 <div id="site-footer"></div>
 <script type="module">
-  import { mountHeader, mountFooter, mountAccountTabs, requireCustomer, watchMyOrders, watchMyBoostOrders, naira, esc, formatDateTime, formatDate, readParam, ORDER_STEPS, STATUS_LABEL, statusClass, variantLabel } from './store.js';
+  import { mountHeader, mountFooter, mountAccountTabs, requireCustomer, watchMyOrders, watchMyBoostOrders, naira, esc, formatDateTime, formatDate, readParam, ORDER_STEPS, STATUS_LABEL, statusClass, variantLabel, stationShortName } from './store.js';
   mountHeader('orders.html');
   mountFooter();
   mountAccountTabs('orders.html');
@@ -52,7 +52,9 @@
           </div>
           ${track}
           <ul class="order-items">${(o.items || []).map(i => `<li><span>${esc(i.name)}${variantLabel(i) ? ` · <small class="muted">${esc(variantLabel(i))}</small>` : ''} × ${i.quantity}</span><span>${naira(i.lineTotal)}</span></li>`).join('')}${feeRows}</ul>
-          <p class="small muted" style="margin:12px 0 0">Deliver to: ${esc([d.address, d.lga, d.state, d.country].filter(Boolean).join(', '))}${cancelled ? ' · Refunded to your wallet' : ''}</p>
+          <p class="small muted" style="margin:12px 0 0">${d.stationId
+            ? `Collect at: <b style="color:var(--navy)">${esc(stationShortName(d.stationName, 60))}</b>${d.stationAddress ? ` · ${esc(d.stationAddress)}` : ''}${d.landmark ? ` (near ${esc(d.landmark)})` : ''}${d.state ? ` · ${esc(d.state)}` : ''}`
+            : `Deliver to: ${esc([d.address, d.lga, d.state, d.country].filter(Boolean).join(', '))}`}${cancelled ? ' · Refunded to your wallet' : ''}</p>
         </article>`;
     }).join('');
   }, (error) => {

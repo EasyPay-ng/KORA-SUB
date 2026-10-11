@@ -9,16 +9,21 @@
 <body>
 <div id="site-header"></div>
 <main class="wrap page">
-  <div class="page-head"><div><span class="eyebrow">Checkout</span><h1>Your cart</h1><p>Prices and stock are confirmed again by the store when you pay. Checkout adds a platform service fee and delivery to your items total.</p></div></div>
+  <div class="page-head"><div><span class="eyebrow">Checkout</span><h1>Your cart</h1><p>Prices and stock are confirmed again by the store when you pay. Checkout adds a platform service fee and delivery to your pickup station.</p></div></div>
   <div id="notice"></div>
   <div class="cart-layout">
     <section class="card"><div class="card-head"><div><h2>Items</h2><small id="item-count">Loading…</small></div><a class="link small" href="shop.html">Keep shopping →</a></div><div id="lines"><div class="empty"><b>Loading…</b></div></div></section>
     <aside class="card" id="summary"></aside>
   </div>
+  <section class="card" id="pickup-card" style="margin-top:20px">
+    <div class="card-head"><div><h2>Pickup station</h2><small>Pick it up at the station closest to you</small></div></div>
+    <p class="small muted" style="margin:-6px 0 14px">Choose your state, then select the station you will collect your order from. Delivery is charged by the station's state.</p>
+    <div id="pickup-picker"></div>
+  </section>
 </main>
 <div id="site-footer"></div>
 <script type="module">
-  import { mountHeader, mountFooter, getCart, setCart, getProduct, productMedia, stockBadge, naira, esc, placeOrder, newRequestId, auth, onAuthStateChanged, watchProfile, watchFeeSettings, checkoutFees, variantLabel, productPrice, DEFAULT_FEES } from './store.js';
+  import { mountHeader, mountFooter, getCart, setCart, getProduct, productMedia, stockBadge, naira, esc, placeOrder, newRequestId, auth, onAuthStateChanged, watchProfile, watchFeeSettings, checkoutFees, variantLabel, productPrice, DEFAULT_FEES, mountPickupPicker, savePickupStation, stationShortName } from './store.js';
   mountHeader('cart.html');
   mountFooter();
   const lines = document.querySelector('#lines');
@@ -31,16 +36,16 @@
   let wallet = 0;
   let fees = { ...DEFAULT_FEES };
   const pendingKey = 'korastore-checkout';
+  let picker = null;
 
   function setNotice(kind, title, text) {
     notice.innerHTML = `<div class="notice ${kind}"><span class="notice-icon">${kind === 'ok' ? '✓' : '!'}</span><div><b>${esc(title)}</b>${esc(text)}</div></div>`;
   }
 
-  function locationReady() {
-    if (!profile) return false;
-    if (!profile.country || !profile.state || !profile.address) return false;
-    if (profile.country === 'Nigeria' && !profile.lga) return false;
-    return true;
+  // The station saved on the profile is the one the order will be collected from.
+  function chosenStation() {
+    const saved = profile?.pickup;
+    return saved && saved.stationId ? saved : null;
   }
 
   function totals() {
@@ -56,7 +61,8 @@
       const variations = Array.isArray(product.variations) ? product.variations : [];
       if (variations.length && !variations.some(v => String(v?.name || '') === (item.variant || ''))) problem = true;
     }
-    const feeParts = checkoutFees(subtotal, profile, fees);
+    const station = chosenStation();
+    const feeParts = checkoutFees(subtotal, station ? { method: 'pickup', state: station.state } : null, fees);
     return { ...feeParts, count, problem };
   }
 
@@ -82,17 +88,20 @@
       </div>`;
     }).join('') : `<div class="empty"><b>Nothing here yet</b>Browse the catalogue and add something you love.<br><a class="btn btn-gold" href="shop.html" style="margin-top:14px">Shop now</a></div>`;
 
+    const station = chosenStation();
     let action;
     if (!user) action = `<a class="btn btn-gold btn-lg btn-block" href="login.html?next=cart.html">Sign in to checkout</a>`;
     else if (!cart.length) action = '';
-    else if (!locationReady()) action = `<a class="btn btn-gold btn-lg btn-block" href="profile.html">Add delivery location</a>`;
+    else if (!station) action = `<button class="btn btn-gold btn-lg btn-block" id="choose-pickup" type="button">Choose your pickup station</button>`;
     else if (wallet < t.total) action = `<a class="btn btn-gold btn-lg btn-block" href="wallet.html">Fund your wallet (${naira(t.total - wallet)} short)</a>`;
     else action = `<button class="btn btn-gold btn-lg btn-block" id="checkout" ${t.problem ? 'disabled' : ''}>Pay ${naira(t.total)} from wallet</button>`;
 
     summary.innerHTML = `
       <div class="card-head"><div><h2>Order summary</h2><small>Paid from your KORASTORE wallet</small></div></div>
       ${user ? `<div class="wallet-pill"><div><small>Wallet balance</small><br><strong>${naira(wallet)}</strong></div><a class="btn btn-sm btn-ghost" href="wallet.html">Top up</a></div>` : ''}
-      ${user && profile && cart.length ? `<div class="small muted" style="margin-bottom:12px">Delivering to <b style="color:var(--navy)">${esc([profile.address, profile.lga, profile.state, profile.country].filter(Boolean).join(', ') || 'your profile')}</b> · <a class="link" href="profile.html">change</a></div>` : ''}
+      ${user && cart.length ? (station
+        ? `<div class="small muted" style="margin-bottom:12px">Pickup at <b style="color:var(--navy)">${esc(stationShortName(station.stationName, 60))}</b> (${esc(station.state)})<br>${esc(station.address || '')} · <button class="link" type="button" id="change-pickup" style="background:none;border:0;cursor:pointer;padding:0">change</button></div>`
+        : `<div class="small muted" style="margin-bottom:12px">No pickup station chosen yet — orders are collected at a station, not delivered to a doorstep.</div>`) : ''}
       <div class="summary-row"><span>Items</span><span>${t.count}</span></div>
       <div class="summary-row"><span>Items subtotal</span><span>${naira(t.subtotal)}</span></div>
       <div class="summary-row"><span>Platform service fee</span><span>${naira(t.serviceFee)}</span></div>
@@ -126,6 +135,8 @@
   });
 
   summary.addEventListener('click', async (event) => {
+    const choose = event.target.closest('#choose-pickup, #change-pickup');
+    if (choose) return picker?.focus();
     const button = event.target.closest('#checkout');
     if (!button) return;
     const cart = getCart();
@@ -160,11 +171,31 @@
 
   window.addEventListener('korastore:cart', refresh);
   watchFeeSettings((data) => { fees = data; render(); });
+
+  // The pickup chooser: picking a station saves it on the profile, so checkout charges
+  // (and the order records) exactly the station the customer chose here.
+  picker = mountPickupPicker(document.querySelector('#pickup-picker'), {
+    onSelect: async (station) => {
+      if (!user) return setNotice('warn', 'Sign in to save this station', 'Sign in, then choose your pickup station again.');
+      try {
+        await savePickupStation(user.uid, station);
+        setNotice('ok', 'Pickup station saved', `${stationShortName(station.name, 60)} · ${station.address || station.state}`);
+      } catch (problem) {
+        setNotice('error', 'Could not save the station', problem.message || 'Check your connection and try again.');
+      }
+    }
+  });
+
   onAuthStateChanged(auth, (current) => {
     user = current;
     if (!current) return render();
-    // The profile document holds both the delivery location and the server-managed wallet balance.
-    watchProfile(current.uid, (data) => { profile = data; wallet = Number(data.balance || 0); render(); });
+    // The profile document holds the pickup station and the server-managed wallet balance.
+    watchProfile(current.uid, (data) => {
+      profile = data;
+      wallet = Number(data.balance || 0);
+      render();
+      picker?.refresh(data.pickup?.stationId || '');
+    });
   });
   refresh();
 </script>

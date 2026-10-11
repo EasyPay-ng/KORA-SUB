@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Pickup stations — KORASTORE Admin</title>
+  <link rel="stylesheet" href="store.css">
+  <link rel="icon" href="assets/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png"><meta name="theme-color" content="#0b2545">
+</head>
+<body>
+<div id="gate" class="gate"><div class="gate-card"><span class="gate-mark">K</span><h2>Checking admin access…</h2><p>Verifying your account before any store data loads.</p></div></div>
+<div class="admin-shell" id="admin-content" hidden>
+  <aside class="admin-side" id="admin-sidebar"></aside>
+  <main class="admin-main">
+    <div class="page-head"><div><span class="eyebrow">Checkout</span><h1>Pickup stations</h1><p>Customers collect their orders at a pickup station: they choose their state, then the station closest to them. This page publishes the station list (from the store's bundled <b>data/jumia-pickup-stations.json</b>, a snapshot of Jumia's own station data) into the database that checkout and the security rules read. <b>Publish before customers can check out.</b></p></div></div>
+
+    <div id="notice"></div>
+
+    <section class="stats">
+      <div class="stat"><small>Stations in the file</small><strong id="s-file">—</strong><em id="s-file-states">—</em></div>
+      <div class="stat"><small>Published (active)</small><strong id="s-active">—</strong><em id="s-hidden">—</em></div>
+      <div class="stat"><small>Last published</small><strong id="s-synced" style="font-size:18px">—</strong><em>from this console</em></div>
+    </section>
+
+    <section class="card">
+      <div class="card-head"><div><h2>Publish the list</h2><small>Adds new stations, refreshes names, addresses and coordinates</small></div></div>
+      <p class="small muted" style="margin:-6px 0 14px">Publishing never re-activates a station you hid here, and stations missing from the file are offered for hiding instead of being deleted (orders keep pointing at them).</p>
+      <div id="publish-summary" class="small muted" style="margin-bottom:12px">Loading…</div>
+      <div class="row"><button class="btn btn-gold" id="publish" type="button" disabled>Publish stations</button><button class="btn btn-ghost" id="hide-missing" type="button" disabled>Hide stations missing from the file</button></div>
+      <div id="publish-error" class="error-text" role="alert" style="margin-top:8px"></div>
+    </section>
+
+    <section class="card" style="margin-top:20px">
+      <div class="card-head"><div><h2>Station list</h2><small id="list-count">Loading…</small></div></div>
+      <div class="field-row">
+        <label class="field">State<select class="select" id="filter-state"><option value="">All states</option></select></label>
+        <label class="field">Search<input class="input" id="filter-text" placeholder="Station, address or landmark" autocomplete="off"></label>
+      </div>
+      <div class="table-wrap"><table class="table"><thead><tr><th>Station</th><th>State</th><th>Address</th><th>Status</th><th></th></tr></thead><tbody id="rows"><tr><td colspan="5">Loading…</td></tr></tbody></table></div>
+    </section>
+  </main>
+</div>
+<script type="module">
+  import { mountAdminSidebar, requireAdmin, fetchEveryPickupStation, publishPickupStations, savePickupCatalog, watchPickupCatalog, formatDateTime, esc, stationShortName } from './store.js';
+  mountAdminSidebar('admin-pickup.html');
+  const $ = (id) => document.querySelector(id);
+
+  let file = [];            // the bundled snapshot: data/jumia-pickup-stations.json
+  let live = new Map();     // stationId → published document
+  let catalog = null;       // settings/pickupStations summary
+  const filter = { state: '', text: '' };
+
+  function setNotice(kind, title, text) {
+    $('#notice').innerHTML = `<div class="notice ${kind}"><span class="notice-icon">${kind === 'ok' ? '✓' : '!'}</span><div><b>${esc(title)}</b>${esc(text)}</div></div>`;
+  }
+
+  // The same text the picker shows, so the admin sees what a customer sees.
+  const shortName = (station) => stationShortName(station.name, 60);
+
+  function fileRow(station) {
+    return {
+      name: String(station.name || '').slice(0, 120),
+      state: String(station.state || '').slice(0, 40),
+      address: String(station.address || '').slice(0, 300),
+      landmark: String(station.landmark || '').slice(0, 120),
+      latitude: Number(station.latitude),
+      longitude: Number(station.longitude)
+    };
+  }
+
+  function fileIds() {
+    return new Set(file.map((station) => station.id));
+  }
+
+  function counts() {
+    const inFile = fileIds();
+    const publishedActive = [...live.values()].filter((row) => row.active === true).length;
+    const hidden = live.size - publishedActive;
+    const missing = [...live.values()].filter((row) => row.active === true && !inFile.has(row.id));
+    const newOnes = file.filter((station) => !live.has(station.id));
+    const stale = file.filter((station) => live.has(station.id));
+    return { inFile, publishedActive, hidden, missing, newOnes, stale };
+  }
+
+  function render() {
+    const { publishedActive, hidden, missing, newOnes, stale } = counts();
+    $('#s-file').textContent = file.length.toLocaleString('en-NG');
+    $('#s-file-states').textContent = `${new Set(file.map((s) => s.state)).size} states`;
+    $('#s-active').textContent = publishedActive.toLocaleString('en-NG');
+    $('#s-hidden').textContent = hidden ? `${hidden} hidden` : 'none hidden';
+    $('#s-synced').textContent = catalog?.updatedAt ? formatDateTime(catalog.updatedAt) : 'not yet';
+    $('#publish-summary').innerHTML = file.length
+      ? `${newOnes.length} new station${newOnes.length === 1 ? '' : 's'} · ${stale.length} already published (refreshed on publish)`
+        + (missing.length ? ` · <b style="color:var(--bad)">${missing.length} published station${missing.length === 1 ? '' : 's'} no longer in the file</b>` : '')
+      : 'Reading <b>data/jumia-pickup-stations.json</b>…';
+    $('#publish').disabled = !file.length;
+    $('#hide-missing').disabled = !missing.length;
+    $('#hide-missing').textContent = missing.length
+      ? `Hide ${missing.length} station${missing.length === 1 ? '' : 's'} missing from the file`
+      : 'Hide stations missing from the file';
+
+    const states = [...new Set([...live.values()].map((row) => row.state))].sort((a, b) => a.localeCompare(b));
+    const keepState = $('#filter-state').value;
+    $('#filter-state').innerHTML = '<option value="">All states</option>' + states.map((state) => `<option value="${esc(state)}">${esc(state)}</option>`).join('');
+    if (states.includes(keepState)) $('#filter-state').value = keepState;
+
+    const text = filter.text.trim().toLowerCase();
+    const rows = [...live.values()]
+      .filter((row) => (!filter.state || row.state === filter.state))
+      .filter((row) => !text || [row.name, row.address, row.landmark].filter(Boolean).join(' ').toLowerCase().includes(text))
+      .sort((a, b) => String(a.state).localeCompare(String(b.state)) || String(a.name).localeCompare(String(b.name)));
+
+    $('#list-count').textContent = `${rows.length} station${rows.length === 1 ? '' : 's'} shown · ${live.size} published`;
+    $('#rows').innerHTML = rows.length ? rows.map((row) => {
+      const inFile = fileIds().has(row.id);
+      return `<tr>
+        <td><b>${esc(shortName(row))}</b><small class="mono">${esc(row.id.slice(0, 12))}…</small></td>
+        <td>${esc(row.state)}</td>
+        <td><small>${esc(row.address || '')}${row.landmark ? ` · near ${esc(row.landmark)}` : ''}</small></td>
+        <td><span class="badge ${row.active === true ? 'ok' : ''}">${row.active === true ? 'Live' : 'Hidden'}</span>${inFile ? '' : '<small class="muted">not in the file</small>'}</td>
+        <td><div class="table-actions"><button class="btn btn-sm btn-ghost" data-station="${esc(row.id)}" data-next="${row.active === true ? 'hide' : 'show'}">${row.active === true ? 'Hide' : 'Show'}</button></div></td>
+      </tr>`;
+    }).join('') : '<tr><td colspan="5">No stations match.</td></tr>';
+  }
+
+  $('#filter-state').addEventListener('change', (event) => { filter.state = event.target.value; render(); });
+  $('#filter-text').addEventListener('input', (event) => { filter.text = event.target.value; render(); });
+
+  async function loadLive() {
+    const rows = await fetchEveryPickupStation();
+    live = new Map(rows.map((row) => [row.id, row]));
+    render();
+  }
+
+  $('#rows').addEventListener('click', async (event) => {
+    const button = event.target.closest('[data-station]');
+    if (!button) return;
+    const id = button.dataset.station;
+    const hide = button.dataset.next === 'hide';
+    button.disabled = true;
+    try {
+      await publishPickupStations({ upserts: [{ id, data: { active: !hide } }] });
+      await loadLive();
+      await refreshCatalog();
+      setNotice('ok', hide ? 'Station hidden' : 'Station shown', hide
+        ? 'Customers can no longer choose it; past orders keep their details.'
+        : 'Customers can choose it again.');
+    } catch (problem) {
+      setNotice('error', 'Could not update the station', problem.message || 'Check your connection and try again.');
+      button.disabled = false;
+    }
+  });
+
+  $('#publish').addEventListener('click', async (event) => {
+    const button = event.currentTarget;
+    const { newOnes, stale } = counts();
+    button.disabled = true;
+    button.textContent = `Publishing ${file.length} stations…`;
+    $('#publish-error').textContent = '';
+    try {
+      const total = await publishPickupStations({
+        // Existing stations keep whatever visibility the admin set here; new ones start live.
+        upserts: file.map((station) => ({ id: station.id, data: { ...fileRow(station), ...(newOnes.includes(station) ? { active: true } : {}) } })),
+        hideIds: []
+      });
+      await loadLive();
+      await refreshCatalog();
+      setNotice('ok', 'Stations published', `${total} station${total === 1 ? '' : 's'} written (${stale.length} refreshed). Customers can now pick their station at checkout.`);
+    } catch (problem) {
+      $('#publish-error').textContent = problem.message || 'Could not publish the station list.';
+    } finally {
+      button.disabled = false;
+      button.textContent = 'Publish stations';
+    }
+  });
+
+  $('#hide-missing').addEventListener('click', async (event) => {
+    const button = event.currentTarget;
+    const { missing } = counts();
+    if (!missing.length) return;
+    if (!confirm(`Hide ${missing.length} published station${missing.length === 1 ? '' : 's'} that are no longer in the file?\n\nPast orders keep their station details; only new orders lose the option.`)) return;
+    button.disabled = true;
+    try {
+      await publishPickupStations({ hideIds: missing.map((row) => row.id) });
+      await loadLive();
+      await refreshCatalog();
+      setNotice('ok', 'Stations hidden', `${missing.length} station${missing.length === 1 ? '' : 's'} can no longer be chosen.`);
+    } catch (problem) {
+      setNotice('error', 'Could not hide those stations', problem.message || 'Check your connection and try again.');
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  // The summary document drives the customer picker's state dropdown.
+  async function refreshCatalog() {
+    const active = [...live.values()].filter((row) => row.active === true);
+    const byState = new Map();
+    for (const row of active) byState.set(row.state, (byState.get(row.state) || 0) + 1);
+    const states = [...byState.entries()]
+      .map(([state, stations]) => ({ state, stations }))
+      .sort((a, b) => a.state.localeCompare(b.state));
+    await savePickupCatalog({ states, total: active.length });
+  }
+
+  if (await requireAdmin('admin-pickup.html')) {
+    watchPickupCatalog((data) => { catalog = data; render(); });
+
+    try {
+      file = (await (await fetch('data/jumia-pickup-stations.json')).json()).filter((row) => row.is_active !== false);
+    } catch (problem) {
+      file = [];
+      $('#publish-summary').innerHTML = `<b style="color:var(--bad)">Could not read data/jumia-pickup-stations.json</b> — ${esc(problem.message || 'check the file is deployed')}.`;
+    }
+
+    try {
+      await loadLive();
+    } catch (problem) {
+      $('#rows').innerHTML = `<tr><td colspan="5">Could not load the published stations: ${esc(problem.message || 'check the rules are published')}</td></tr>`;
+    }
+    render();
+  }
+</script>
+</body>
+</html>
