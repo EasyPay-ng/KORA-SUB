@@ -12,6 +12,10 @@ rules_version = '2';
 //  - A customer's wallet can never go UP. Funding is credited by the admin only.
 //  - Stock can go DOWN only in a batch that creates the order that includes that product.
 //  - Orders are created once (create-only), so a retried checkout can't double-charge.
+//  - Boost orders are paid the same way: the total must be the plan's price per unit ×
+//    quantity. A plan may price a unit at a fraction of ₦1 (₦0.10 minimum), so the money
+//    is worked out in kobo and rounded to whole naira (never below ₦1) — the wallet holds
+//    no kobo.
 //  - Checkout fees are fixed by the fee schedule in /settings/fees (admin-edited), with
 //    built-in defaults: ₦2,000 platform service fee, ₦2,500 delivery inside the store's
 //    local state, ₦6,000 delivery anywhere else.
@@ -60,6 +64,15 @@ service cloud.firestore {
         + (list.size() > 2 && list[2].productId == productId ? list[2].quantity : 0)
         + (list.size() > 3 && list[3].productId == productId ? list[3].quantity : 0)
         + (list.size() > 4 && list[4].productId == productId ? list[4].quantity : 0);
+    }
+
+    // What a boost order costs: the plan's price per unit × quantity, worked out in
+    // kobo (a plan may price a unit at a fraction of ₦1, e.g. ₦0.10) and rounded to
+    // whole naira because the wallet only ever holds whole naira — never below ₦1.
+    // Mirrors boostOrderTotal() in store.js.
+    function boostOrderTotal(unitPrice, quantity) {
+      let total = math.round(math.round(unitPrice * 100.0) * quantity / 100.0);
+      return total < 1 ? 1 : total;
     }
 
     // Checkout fee schedule. The admin edits /settings/fees; before it exists the
@@ -355,10 +368,11 @@ service cloud.firestore {
 
     // Subcategories — the plans shoppers order, each with its own price per unit,
     // optional order limits (minQuantity, maxQuantity where 0/blank means no
-    // maximum) and an average delivery time. The limits are enforced in the
-    // app's order transaction, which re-reads the plan; the rules below still
-    // pin the price, names and wallet debit, so bypassing a limit cannot change
-    // what is charged (unit price × quantity).
+    // maximum) and an average delivery time. The price may be a fraction of ₦1
+    // (as low as ₦0.10, in kobo steps) — the order total is rounded to whole
+    // naira there. The limits are enforced in the app's order transaction, which
+    // re-reads the plan; the rules below still pin the price, names and wallet
+    // debit, so bypassing a limit cannot change what is charged.
     match /boostSubcategories/{subcategoryId} {
       allow read: if resource.data.active == true || isAdmin();
       allow create: if isAdmin()
@@ -368,8 +382,8 @@ service cloud.firestore {
         && request.resource.data.description is string
         && request.resource.data.description.size() <= 500
         && isText(request.resource.data.unit, 60)
-        && request.resource.data.price is int
-        && request.resource.data.price >= 1
+        && request.resource.data.price is number
+        && request.resource.data.price >= 0.1
         && (!('minQuantity' in request.resource.data) || (request.resource.data.minQuantity is int && request.resource.data.minQuantity >= 1))
         && (!('maxQuantity' in request.resource.data) || (request.resource.data.maxQuantity is int && request.resource.data.maxQuantity >= 0))
         && (!('averageTime' in request.resource.data) || (request.resource.data.averageTime is string && request.resource.data.averageTime.size() <= 120))
@@ -380,7 +394,8 @@ service cloud.firestore {
 
     // Boost orders: /boostOrders/{uid}_{requestId} — one service, paid from the wallet.
     // No delivery and no checkout fees: the total is the catalogue's unit price × the
-    // quantity. The id is "<uid>_<requestId>" so retries reuse the same id.
+    // quantity, rounded to whole naira (the plan price may be a fraction of ₦1). The
+    // id is "<uid>_<requestId>" so retries reuse the same id.
     match /boostOrders/{orderId} {
       allow read: if (signedIn() && resource.data.uid == request.auth.uid) || isAdmin();
 
@@ -407,10 +422,11 @@ service cloud.firestore {
         && request.resource.data.link.size() <= 300
         && request.resource.data.quantity is int
         && request.resource.data.quantity >= 1
-        && request.resource.data.unitPrice is int
-        && request.resource.data.unitPrice >= 1
+        && request.resource.data.unitPrice is number
+        && request.resource.data.unitPrice >= 0.1
         && request.resource.data.total is int
-        && request.resource.data.total == request.resource.data.unitPrice * request.resource.data.quantity
+        && request.resource.data.total
+             == boostOrderTotal(request.resource.data.unitPrice, request.resource.data.quantity)
         // The catalogue as it is now decides the price and the names on the order.
         && get(/databases/$(database)/documents/boostSubcategories/$(request.resource.data.subcategoryId)).data.price == request.resource.data.unitPrice
         && get(/databases/$(database)/documents/boostSubcategories/$(request.resource.data.subcategoryId)).data.name == request.resource.data.subcategoryName

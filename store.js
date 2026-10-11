@@ -860,6 +860,10 @@ export const BOOST_ID_PATTERN = /^[A-Za-z0-9_-]{2,40}$/;
 // Hard ceiling for any boost quantity. A plan can narrow it with minQuantity /
 // maxQuantity (maxQuantity 0 or missing means "no maximum").
 export const BOOST_MAX_QUANTITY = 100000;
+// Smallest price per unit the admin can set: ₦0.10 (cheap units such as views).
+// The wallet only ever holds whole naira, so all boost money is worked out in
+// kobo (exact integers) and an order total is rounded to the nearest naira.
+export const BOOST_MIN_UNIT_PRICE = 0.1;
 
 // Effective order limits for a plan, honouring the catalogue fields when set.
 export function boostServiceLimits(service = {}) {
@@ -886,6 +890,47 @@ export function formatBoostLimits(service = {}) {
   const { min, max } = boostServiceLimits(service);
   const low = `Min: ${min.toLocaleString('en-NG')}`;
   return max >= BOOST_MAX_QUANTITY ? low : `${low} | Max: ${max.toLocaleString('en-NG')}`;
+}
+
+// A plan's price per unit, as whole kobo (₦1 = 100). Working in kobo keeps the
+// maths exact for the cheap fractional prices (₦0.1, ₦0.15, …) the admin can set.
+// Returns 0 when the price is unusable.
+export function boostPriceKobo(price) {
+  const amount = Number(price);
+  if (!Number.isFinite(amount)) return 0;
+  const kobo = Math.round(amount * 100);
+  return Number.isSafeInteger(kobo) && kobo >= 1 ? kobo : 0;
+}
+
+// Reads an admin-typed price ("17", "0.5", "12.30") as a number, or null when it
+// is not a valid boost price (at least ₦0.10, at most two decimals).
+export function parseBoostPrice(value) {
+  const text = String(value ?? '').trim();
+  if (!/^(?:\d+(?:\.\d{1,2})?|\.\d{1,2})$/.test(text)) return null;
+  const kobo = boostPriceKobo(text);
+  if (!kobo || kobo < boostPriceKobo(BOOST_MIN_UNIT_PRICE)) return null;
+  return kobo / 100;
+}
+
+// What a boost order costs: price per unit × quantity, in kobo, rounded to the
+// nearest naira because the wallet is whole naira — never below ₦1. Returns 0
+// when the price or the quantity is unusable (so callers can reject the order).
+export function boostOrderTotal(price, quantity) {
+  const kobo = boostPriceKobo(price);
+  const units = Number(quantity);
+  if (!kobo || kobo < boostPriceKobo(BOOST_MIN_UNIT_PRICE)) return 0;
+  if (!Number.isSafeInteger(units) || units < 1 || units > BOOST_MAX_QUANTITY) return 0;
+  const total = Math.round((kobo * units) / 100);
+  return total < 1 ? 1 : total;
+}
+
+// "₦0.10" for a sub-₦1 price, "₦17" when the price is a whole naira amount.
+export function formatBoostPrice(price) {
+  const kobo = boostPriceKobo(price);
+  if (!kobo) return naira(0);
+  const whole = Math.floor(kobo / 100);
+  const rest = kobo % 100;
+  return rest ? `₦${whole.toLocaleString('en-NG')}.${String(rest).padStart(2, '0')}` : naira(whole);
 }
 const BOOST_COLLECTIONS = {
   platform: "boostPlatforms",
@@ -963,13 +1008,14 @@ export async function placeBoostOrder(requestId, { subcategoryId, quantity, link
     if (!platform || platform.active !== true) throw new Error("This service is not available right now.");
 
     const unitPrice = Number(service.price);
-    if (!Number.isInteger(unitPrice) || unitPrice < 1) throw new Error("This service has no valid price.");
+    if (!boostPriceKobo(unitPrice) || unitPrice < BOOST_MIN_UNIT_PRICE) throw new Error("This service has no valid price.");
     // The plan's own limits, read inside the transaction so they cannot be stale.
     const { min, max } = boostServiceLimits(service);
     if (amount < min) throw new Error(`This plan needs a quantity of at least ${min.toLocaleString('en-NG')}.`);
     if (amount > max) throw new Error(`This plan allows a quantity of at most ${max.toLocaleString('en-NG')}.`);
-    const total = unitPrice * amount;
-    if (!Number.isSafeInteger(total) || total < 1) throw new Error("That quantity is too large.");
+    // Price × quantity in kobo, rounded to whole naira (the wallet holds no kobo).
+    const total = boostOrderTotal(unitPrice, amount);
+    if (!total) throw new Error("That quantity is too large.");
 
     const profileSnap = await tx.get(userRef);
     if (!profileSnap.exists()) throw new Error("Your profile is not ready yet. Sign out and back in.");

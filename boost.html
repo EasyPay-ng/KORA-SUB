@@ -25,7 +25,7 @@
 </main>
 <div id="site-footer"></div>
 <script type="module">
-  import { mountHeader, mountFooter, watchBoostPlatforms, watchBoostCategories, watchBoostSubcategories, placeBoostOrder, newRequestId, auth, onAuthStateChanged, watchProfile, naira, esc, readParam, showToast, boostCategoryTitle, formatBoostLimits, boostServiceLimits, BOOST_MAX_QUANTITY } from './store.js';
+  import { mountHeader, mountFooter, watchBoostPlatforms, watchBoostCategories, watchBoostSubcategories, placeBoostOrder, newRequestId, auth, onAuthStateChanged, watchProfile, naira, esc, readParam, showToast, boostCategoryTitle, formatBoostLimits, boostServiceLimits, boostOrderTotal, boostPriceKobo, formatBoostPrice, BOOST_MAX_QUANTITY } from './store.js';
   mountHeader('boost.html');
   mountFooter();
 
@@ -47,7 +47,7 @@
   const categoryTitle = (cat) => boostCategoryTitle(platformOf(cat?.platformId), cat);
   const servicesOf = (catId) => subcategories.filter(s => s.categoryId === catId && s.active === true);
   const currentService = () => subcategories.find(s => s.id === serviceId && s.active === true) || null;
-  const serviceLabel = (s) => `${s.name} - ${naira(s.price)}${s.unit ? ` per ${s.unit}` : ''}`;
+  const serviceLabel = (s) => `${s.name} - ${formatBoostPrice(s.price)}${s.unit ? ` per ${s.unit}` : ''}`;
 
   function showCatalogueError() {
     const failures = Object.entries(catalogueErrors).map(([key, message]) => `${catalogueLabels[key] || key}: ${message}`);
@@ -125,7 +125,7 @@
       <div class="info-box" id="boost-info" style="margin-bottom:16px"></div>
       <label class="field">Link: <span class="req" aria-hidden="true">*</span><input class="input" id="boost-link" maxlength="300" placeholder="Enter Link:" autocomplete="off"></label>
       <label class="field">Quantity <span class="req" aria-hidden="true">*</span><input class="input" id="boost-qty" type="number" min="1" step="1" value="1"></label>
-      <label class="field">Amount (₦)<input class="input" id="boost-amount" disabled></label>
+      <label class="field">Amount (₦)<input class="input" id="boost-amount" disabled><small id="boost-price-note"></small></label>
       <div id="boost-error" class="error-text" role="alert"></div>
       <div id="pay-area" style="margin-top:12px">
         <div id="pay-signed-in" hidden>
@@ -176,8 +176,10 @@
     const limitsEl = host.querySelector('#boost-limits');
     const infoEl = host.querySelector('#boost-info');
     const qtyInput = host.querySelector('#boost-qty');
+    const priceNote = host.querySelector('#boost-price-note');
     if (!service) {
       limitsEl.textContent = '';
+      priceNote.textContent = '';
       infoEl.innerHTML = '<div>This category has no plans yet — pick another category.</div>';
       qtyInput.disabled = true;
       paintAmount();
@@ -186,6 +188,12 @@
     qtyInput.disabled = false;
     const { min, max } = boostServiceLimits(service);
     limitsEl.textContent = formatBoostLimits(service);
+    // A plan can price a unit at a fraction of ₦1 (e.g. ₦0.10); the wallet only
+    // holds whole naira, so say so where the buyer picks the quantity.
+    const fractional = boostPriceKobo(service.price) % 100 !== 0;
+    priceNote.textContent = fractional
+      ? `${formatBoostPrice(service.price)} per ${String(service.unit || 'unit').trim() || 'unit'} · your wallet is whole naira, so the amount is rounded to the nearest ₦ (never below ₦1).`
+      : '';
     const avg = String(service.averageTime || '').trim();
     const desc = String(service.description || '').trim();
     infoEl.innerHTML = `<div>Average time: <b>${esc(avg || 'Varies')}</b></div>${desc ? `<div>${esc(desc)}</div>` : ''}`;
@@ -216,7 +224,7 @@
       return;
     }
     const qty = orderQty() || boostServiceLimits(service).min;
-    amountInput.value = naira(Number(service.price || 0) * qty);
+    amountInput.value = naira(boostOrderTotal(service.price, qty));
     paintPayArea();
   }
 
@@ -235,7 +243,7 @@
       payButton.textContent = 'Pay';
       return;
     }
-    const total = Number(service.price || 0) * (orderQty() || boostServiceLimits(service).min);
+    const total = boostOrderTotal(service.price, orderQty() || boostServiceLimits(service).min);
     payButton.disabled = false;
     payButton.textContent = `Pay ${naira(total)} from wallet`;
   }
