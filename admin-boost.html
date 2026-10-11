@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Boosting — KORASTORE Admin</title>
+  <link rel="stylesheet" href="store.css">
+  <link rel="icon" href="assets/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png"><meta name="theme-color" content="#0b2545">
+</head>
+<body>
+<div id="gate" class="gate"><div class="gate-card"><span class="gate-mark">K</span><h2>Checking admin access…</h2><p>Verifying your account before any store data loads.</p></div></div>
+<div class="admin-shell" id="admin-content" hidden>
+  <aside class="admin-side" id="admin-sidebar"></aside>
+  <main class="admin-main">
+    <div class="page-head"><div><span class="eyebrow">Social media marketing</span><h1>Boosting services</h1><p>Platforms (Facebook, TikTok, YouTube, …) → categories (Followers, Likes, Views, …) → subcategories: the service listings with their prices. Shoppers see the platform descriptions on the public boost pages and order from there.</p></div></div>
+
+    <section class="card">
+      <div class="card-head"><div><h2>Platforms</h2><small id="platform-count">Loading…</small></div></div>
+      <div class="table-wrap"><table class="table"><thead><tr><th>ID</th><th>Name</th><th>Description</th><th>Status</th><th></th></tr></thead><tbody id="platform-rows"><tr><td colspan="5">Loading…</td></tr></tbody></table></div>
+      <form id="platform-form" class="panel-form" style="margin-top:16px" novalidate>
+        <b id="platform-form-title">Add platform</b>
+        <div class="field-row">
+          <label class="field">Platform ID <small>2–40 letters, numbers, – or _ · cannot change later</small><input class="input" id="platform-id" maxlength="40" placeholder="e.g. facebook"></label>
+          <label class="field">Name <small>shown to shoppers</small><input class="input" id="platform-name" maxlength="80" placeholder="e.g. Facebook"></label>
+        </div>
+        <label class="field">Platform description <small>appears on the platform's boost page</small><textarea class="textarea" id="platform-description" maxlength="2000" placeholder="What this platform is and what boosting it achieves…"></textarea></label>
+        <label class="toggle"><input type="checkbox" id="platform-active" checked> Visible in the store</label>
+        <div id="platform-error" class="error-text" role="alert" style="margin-top:8px"></div>
+        <div class="row" style="margin-top:10px"><button class="btn btn-gold" type="submit">Save platform</button><button class="btn btn-ghost" type="button" id="platform-clear">Clear</button></div>
+      </form>
+    </section>
+
+    <section class="card" style="margin-top:20px">
+      <div class="card-head"><div><h2>Categories</h2><small id="category-count">Loading…</small></div></div>
+      <div class="table-wrap"><table class="table"><thead><tr><th>ID</th><th>Platform</th><th>Name</th><th>Status</th><th></th></tr></thead><tbody id="category-rows"><tr><td colspan="5">Loading…</td></tr></tbody></table></div>
+      <form id="category-form" class="panel-form" style="margin-top:16px" novalidate>
+        <b id="category-form-title">Add category</b>
+        <div class="field-row">
+          <label class="field">Category ID <small>2–40 letters, numbers, – or _</small><input class="input" id="category-id" maxlength="40" placeholder="e.g. fb-followers"></label>
+          <label class="field">Platform<select class="select" id="category-platform"></select></label>
+        </div>
+        <div class="field-row">
+          <label class="field">Name <small>e.g. Followers, Likes, Views</small><input class="input" id="category-name" maxlength="80"></label>
+          <label class="field">Short description <small>optional</small><input class="input" id="category-description" maxlength="500"></label>
+        </div>
+        <label class="toggle"><input type="checkbox" id="category-active" checked> Visible in the store</label>
+        <div id="category-error" class="error-text" role="alert" style="margin-top:8px"></div>
+        <div class="row" style="margin-top:10px"><button class="btn btn-gold" type="submit">Save category</button><button class="btn btn-ghost" type="button" id="category-clear">Clear</button></div>
+      </form>
+    </section>
+
+    <section class="card" style="margin-top:20px">
+      <div class="card-head"><div><h2>Services &amp; prices</h2><small id="service-count">Loading…</small></div></div>
+      <div class="table-wrap"><table class="table"><thead><tr><th>ID</th><th>Category</th><th>Service</th><th>Unit</th><th>Price</th><th>Status</th><th></th></tr></thead><tbody id="service-rows"><tr><td colspan="7">Loading…</td></tr></tbody></table></div>
+      <form id="service-form" class="panel-form" style="margin-top:16px" novalidate>
+        <b id="service-form-title">Add service</b>
+        <div class="field-row">
+          <label class="field">Service ID <small>2–40 letters, numbers, – or _</small><input class="input" id="service-id" maxlength="40" placeholder="e.g. tiktok-followers-real"></label>
+          <label class="field">Category<select class="select" id="service-category"></select></label>
+        </div>
+        <div class="field-row">
+          <label class="field">Service name <small>what the shopper is buying</small><input class="input" id="service-name" maxlength="120" placeholder="e.g. Real followers"></label>
+          <label class="field">Unit <small>what one quantity buys</small><input class="input" id="service-unit" maxlength="60" placeholder="e.g. 1,000 followers"></label>
+        </div>
+        <div class="field-row">
+          <label class="field">Price per unit (₦)<input class="input" id="service-price" type="number" min="1" step="1"></label>
+          <label class="field">Short description <small>optional</small><input class="input" id="service-description" maxlength="500"></label>
+        </div>
+        <label class="toggle"><input type="checkbox" id="service-active" checked> Visible in the store</label>
+        <div id="service-error" class="error-text" role="alert" style="margin-top:8px"></div>
+        <div class="row" style="margin-top:10px"><button class="btn btn-gold" type="submit">Save service</button><button class="btn btn-ghost" type="button" id="service-clear">Clear</button></div>
+      </form>
+    </section>
+
+    <section class="card" style="margin-top:20px">
+      <div class="card-head"><div><h2>Boost orders</h2><small id="order-count">Loading…</small></div></div>
+      <div class="table-wrap"><table class="table"><thead><tr><th>Order</th><th>Service</th><th>Quantity</th><th>Target</th><th>Total</th><th>Status</th><th></th></tr></thead><tbody id="order-rows"><tr><td colspan="7">Loading…</td></tr></tbody></table></div>
+    </section>
+  </main>
+</div>
+<script type="module">
+  import { mountAdminSidebar, requireAdmin, watchBoostPlatforms, watchBoostCategories, watchBoostSubcategories, watchAllBoostOrders, saveBoostItem, setBoostOrderStatus, BOOST_ID_PATTERN, NEXT_BOOST_ACTIONS, naira, esc, formatDateTime, STATUS_LABEL, statusClass } from './store.js';
+  mountAdminSidebar('admin-boost.html');
+  const $ = (id) => document.querySelector(id);
+
+  let platforms = [], categories = [], subcategories = [], orders = [];
+  const editing = { platform: '', category: '', subcategory: '' };
+
+  const platformName = (id) => platforms.find(p => p.id === id)?.name || id;
+  const categoryLabel = (id) => {
+    const c = categories.find(x => x.id === id);
+    return c ? `${platformName(c.platformId)} · ${c.name}` : id;
+  };
+
+  // ---------- Lists ----------
+  function render() {
+    $('#platform-count').textContent = `${platforms.length} platform${platforms.length === 1 ? '' : 's'}`;
+    $('#platform-rows').innerHTML = platforms.length ? platforms.sort((a, b) => a.name.localeCompare(b.name)).map(p => `
+      <tr>
+        <td class="mono"><b>${esc(p.id)}</b></td>
+        <td><b>${esc(p.name)}</b></td>
+        <td><small class="muted">${esc(String(p.description || '').slice(0, 80))}${String(p.description || '').length > 80 ? '…' : ''}</small></td>
+        <td><span class="badge ${p.active ? 'ok' : ''}">${p.active ? 'Visible' : 'Hidden'}</span></td>
+        <td><div class="table-actions"><button class="btn btn-sm btn-ghost" data-pedit="${esc(p.id)}">Edit</button><button class="btn btn-sm btn-ghost" data-ptoggle="${esc(p.id)}">${p.active ? 'Hide' : 'Show'}</button></div></td>
+      </tr>`).join('') : '<tr><td colspan="5">No platforms yet. Add Facebook, TikTok, YouTube…</td></tr>';
+
+    $('#category-count').textContent = `${categories.length} categor${categories.length === 1 ? 'y' : 'ies'}`;
+    $('#category-rows').innerHTML = categories.length ? categories.sort((a, b) => a.name.localeCompare(b.name)).map(c => `
+      <tr>
+        <td class="mono"><b>${esc(c.id)}</b></td>
+        <td>${esc(platformName(c.platformId))}</td>
+        <td><b>${esc(c.name)}</b></td>
+        <td><span class="badge ${c.active ? 'ok' : ''}">${c.active ? 'Visible' : 'Hidden'}</span></td>
+        <td><div class="table-actions"><button class="btn btn-sm btn-ghost" data-cedit="${esc(c.id)}">Edit</button><button class="btn btn-sm btn-ghost" data-ctoggle="${esc(c.id)}">${c.active ? 'Hide' : 'Show'}</button></div></td>
+      </tr>`).join('') : '<tr><td colspan="5">No categories yet.</td></tr>';
+
+    $('#service-count').textContent = `${subcategories.length} service${subcategories.length === 1 ? '' : 's'}`;
+    $('#service-rows').innerHTML = subcategories.length ? subcategories.sort((a, b) => a.name.localeCompare(b.name)).map(s => `
+      <tr>
+        <td class="mono"><b>${esc(s.id)}</b></td>
+        <td>${esc(categoryLabel(s.categoryId))}</td>
+        <td><b>${esc(s.name)}</b></td>
+        <td><small>${esc(s.unit || '—')}</small></td>
+        <td class="mono"><b>${naira(s.price)}</b></td>
+        <td><span class="badge ${s.active ? 'ok' : ''}">${s.active ? 'Visible' : 'Hidden'}</span></td>
+        <td><div class="table-actions"><button class="btn btn-sm btn-ghost" data-sedit="${esc(s.id)}">Edit</button><button class="btn btn-sm btn-ghost" data-stoggle="${esc(s.id)}">${s.active ? 'Hide' : 'Show'}</button></div></td>
+      </tr>`).join('') : '<tr><td colspan="7">No services yet.</td></tr>';
+
+    $('#order-count').textContent = `${orders.length} order${orders.length === 1 ? '' : 's'}`;
+    $('#order-rows').innerHTML = orders.length ? orders.map(o => `
+      <tr>
+        <td><b class="mono">${esc(o.id.slice(-8).toUpperCase())}</b><small>${esc(formatDateTime(o.createdAt))}</small></td>
+        <td><b>${esc(o.subcategoryName)}</b><small>${esc(categoryLabel(o.categoryId))}</small></td>
+        <td class="mono">${Number(o.quantity || 0)}${o.unit ? ` <small class="muted">${esc(o.unit)}</small>` : ''}</td>
+        <td><small class="mono">${esc(o.link || '')}</small></td>
+        <td class="mono"><b>${naira(o.total)}</b></td>
+        <td><span class="badge ${statusClass(o.status)}">${esc(STATUS_LABEL[o.status] || o.status)}</span></td>
+        <td><div class="table-actions">${(NEXT_BOOST_ACTIONS[o.status] || []).map(([next, label]) => `<button class="btn btn-sm btn-ghost" data-boost="${esc(o.id)}" data-next="${next}">${esc(label)}</button>`).join('') || '<small class="muted">Closed</small>'}</div></td>
+      </tr>`).join('') : '<tr><td colspan="7">No boost orders yet.</td></tr>';
+
+    // Selects for the category and service forms
+    $('#category-platform').innerHTML = platforms.map(p => `<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('') || '<option value="">Add a platform first</option>';
+    $('#service-category').innerHTML = categories.map(c => `<option value="${esc(c.id)}">${esc(categoryLabel(c.id))}</option>`).join('') || '<option value="">Add a category first</option>';
+  }
+
+  // ---------- Forms ----------
+  function fill(kind, item) {
+    editing[kind] = item?.id || '';
+    const pfx = kind === 'subcategory' ? 'service' : kind;
+    $(`#${pfx}-form-title`).textContent = item ? `Edit: ${item.name}` : `Add ${kind}`;
+    $(`#${pfx}-id`).value = item?.id || '';
+    $(`#${pfx}-id`).disabled = Boolean(item);
+    $(`#${pfx}-name`).value = item?.name || '';
+    if (kind === 'platform') {
+      $('#platform-description').value = item?.description || '';
+    } else if (kind === 'category') {
+      $('#category-description').value = item?.description || '';
+      if (item) $('#category-platform').value = item.platformId;
+    } else {
+      $('#service-description').value = item?.description || '';
+      $('#service-unit').value = item?.unit || '';
+      $('#service-price').value = item?.price ?? '';
+      if (item) $('#service-category').value = item.categoryId;
+    }
+    $(`#${pfx}-active`).checked = item ? item.active === true : true;
+    $(`#${pfx}-error`).textContent = '';
+  }
+
+  async function save(kind, event) {
+    event.preventDefault();
+    const pfx = kind === 'subcategory' ? 'service' : kind;
+    const error = $(`#${pfx}-error`);
+    error.textContent = '';
+    const isNew = !editing[kind];
+    const id = $(`#${pfx}-id`).value.trim();
+    const name = $(`#${pfx}-name`).value.trim();
+    const active = $(`#${pfx}-active`).checked;
+
+    const list = kind === 'platform' ? platforms : kind === 'category' ? categories : subcategories;
+    if (!BOOST_ID_PATTERN.test(id)) return error.textContent = 'ID must be 2–40 letters, numbers, dashes or underscores.';
+    if (isNew && list.some(x => x.id === id)) return error.textContent = `ID “${id}” is already used. Pick another one.`;
+    if (!name) return error.textContent = 'Enter a name.';
+
+    const data = { name, active };
+    if (kind === 'platform') {
+      data.description = $('#platform-description').value.trim().slice(0, 2000);
+    } else if (kind === 'category') {
+      data.platformId = $('#category-platform').value;
+      if (!data.platformId) return error.textContent = 'Add a platform first.';
+      data.description = $('#category-description').value.trim().slice(0, 500);
+    } else {
+      data.categoryId = $('#service-category').value;
+      if (!data.categoryId) return error.textContent = 'Add a category first.';
+      data.unit = $('#service-unit').value.trim().slice(0, 60);
+      if (!data.unit) return error.textContent = 'Enter the unit, e.g. “1,000 followers”.';
+      const price = Math.round(Number($('#service-price').value));
+      if (!Number.isFinite(price) || price < 1) return error.textContent = 'Price must be at least ₦1 per unit.';
+      data.price = price;
+      data.description = $('#service-description').value.trim().slice(0, 500);
+    }
+
+    const saveButton = $(`#${pfx}-form`).querySelector('button[type="submit"]');
+    saveButton.disabled = true;
+    try {
+      await saveBoostItem(kind, id, data, { isNew });
+      fill(kind, null);
+    } catch (problem) {
+      error.textContent = problem.message || 'Could not save.';
+    } finally {
+      saveButton.disabled = false;
+    }
+  }
+
+  $('#platform-form').addEventListener('submit', (e) => save('platform', e));
+  $('#category-form').addEventListener('submit', (e) => save('category', e));
+  $('#service-form').addEventListener('submit', (e) => save('subcategory', e));
+  $('#platform-clear').addEventListener('click', () => fill('platform', null));
+  $('#category-clear').addEventListener('click', () => fill('category', null));
+  $('#service-clear').addEventListener('click', () => fill('subcategory', null));
+
+  // ---------- List actions ----------
+  $('#platform-rows').addEventListener('click', async (event) => {
+    const edit = event.target.closest('[data-pedit]');
+    const toggle = event.target.closest('[data-ptoggle]');
+    if (edit) return fill('platform', platforms.find(p => p.id === edit.dataset.pedit));
+    if (toggle) {
+      const p = platforms.find(x => x.id === toggle.dataset.ptoggle);
+      try { await saveBoostItem('platform', p.id, { name: p.name, description: p.description || '', active: !p.active }); }
+      catch (problem) { alert(problem.message); }
+    }
+  });
+  $('#category-rows').addEventListener('click', async (event) => {
+    const edit = event.target.closest('[data-cedit]');
+    const toggle = event.target.closest('[data-ctoggle]');
+    if (edit) return fill('category', categories.find(c => c.id === edit.dataset.cedit));
+    if (toggle) {
+      const c = categories.find(x => x.id === toggle.dataset.ctoggle);
+      try { await saveBoostItem('category', c.id, { name: c.name, description: c.description || '', platformId: c.platformId, active: !c.active }); }
+      catch (problem) { alert(problem.message); }
+    }
+  });
+  $('#service-rows').addEventListener('click', async (event) => {
+    const edit = event.target.closest('[data-sedit]');
+    const toggle = event.target.closest('[data-stoggle]');
+    if (edit) return fill('subcategory', subcategories.find(s => s.id === edit.dataset.sedit));
+    if (toggle) {
+      const s = subcategories.find(x => x.id === toggle.dataset.stoggle);
+      try { await saveBoostItem('subcategory', s.id, { name: s.name, description: s.description || '', unit: s.unit || '', price: Number(s.price) || 1, categoryId: s.categoryId, active: !s.active }); }
+      catch (problem) { alert(problem.message); }
+    }
+  });
+  $('#order-rows').addEventListener('click', async (event) => {
+    const button = event.target.closest('[data-boost]');
+    if (!button) return;
+    button.disabled = true;
+    try { await setBoostOrderStatus(button.dataset.boost, button.dataset.next); }
+    catch (problem) { alert(problem.message); button.disabled = false; }
+  });
+
+  if (await requireAdmin('admin-boost.html')) {
+    watchBoostPlatforms((rows) => { platforms = rows; render(); }, () => {});
+    watchBoostCategories((rows) => { categories = rows; render(); }, () => {});
+    watchBoostSubcategories((rows) => { subcategories = rows; render(); }, () => {});
+    watchAllBoostOrders((rows) => { orders = rows; render(); }, () => {});
+  }
+</script>
+</body>
+</html>

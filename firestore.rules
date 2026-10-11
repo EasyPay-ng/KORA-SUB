@@ -84,27 +84,25 @@ service cloud.firestore {
     }
 
     // One order line: must match the product as it is now in /products, including the
-    // chosen size/colour for clothing variants.
+    // chosen variation for clothing products.
     function lineMatchesProduct(line) {
       let product = get(/databases/$(database)/documents/products/$(line.productId)).data;
-      return line.keys().hasOnly(['productId', 'name', 'price', 'quantity', 'lineTotal', 'size', 'color', 'variantIndex'])
+      return line.keys().hasOnly(['productId', 'name', 'price', 'quantity', 'lineTotal', 'variant', 'variantIndex'])
         && line.productId is string
         && line.name == product.name
         && line.variantIndex is int && line.variantIndex >= -1
+        && line.variant is string && line.variant.size() <= 40
         && line.price is int
-        && ((line.variantIndex == -1 && line.price == product.price
-              && product.get('variantPrices', []).size() == 0)
+        && ((line.variantIndex == -1
+              && line.variant == ''
+              && line.price == product.price
+              && product.get('variations', []).size() == 0)
           || (line.variantIndex >= 0
-              && line.variantIndex < product.get('variantPrices', []).size()
-              && product.variantPrices[line.variantIndex].size == line.size
-              && product.variantPrices[line.variantIndex].color == line.color
-              && product.variantPrices[line.variantIndex].price == line.price))
+              && line.variantIndex < product.get('variations', []).size()
+              && product.variations[line.variantIndex].name == line.variant
+              && product.variations[line.variantIndex].price == line.price))
         && line.quantity is int && line.quantity >= product.get('minOrderQuantity', 1)
         && line.lineTotal == line.price * line.quantity
-        && line.size is string && line.size.size() <= 40
-        && line.color is string && line.color.size() <= 40
-        && (line.size == '' || ('sizes' in product && line.size in product.sizes))
-        && (line.color == '' || ('colors' in product && line.color in product.colors))
         && product.active == true
         && product.stock >= line.quantity;
     }
@@ -144,6 +142,18 @@ service cloud.firestore {
         && getAfter(/databases/$(database)/documents/orders/$(request.resource.data.lastOrderId)).data.total
              == resource.data.get('balance', 0) - request.resource.data.balance;
 
+      // Boost purchase debit: the wallet goes down, and only for the boost order
+      // created in this batch.
+      allow update: if isOwner(uid)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['balance', 'lastBoostOrderId', 'updatedAt'])
+        && request.resource.data.balance is int
+        && request.resource.data.balance >= 0
+        && request.resource.data.balance < resource.data.get('balance', 0)
+        && request.resource.data.lastBoostOrderId is string
+        && getAfter(/databases/$(database)/documents/boostOrders/$(request.resource.data.lastBoostOrderId)).data.uid == uid
+        && getAfter(/databases/$(database)/documents/boostOrders/$(request.resource.data.lastBoostOrderId)).data.total
+             == resource.data.get('balance', 0) - request.resource.data.balance;
+
       // Admin: funding credits, refunds and corrections.
       allow update: if isAdmin();
 
@@ -157,6 +167,10 @@ service cloud.firestore {
           && request.resource.data.type == 'purchase'
           && getAfter(/databases/$(database)/documents/orders/$(request.resource.data.orderId)).data.uid == uid
           && request.resource.data.amount == -getAfter(/databases/$(database)/documents/orders/$(request.resource.data.orderId)).data.total;
+        allow create: if isOwner(uid)
+          && request.resource.data.type == 'boost'
+          && getAfter(/databases/$(database)/documents/boostOrders/$(request.resource.data.orderId)).data.uid == uid
+          && request.resource.data.amount == -getAfter(/databases/$(database)/documents/boostOrders/$(request.resource.data.orderId)).data.total;
         allow create: if isAdmin();
         allow update, delete: if isAdmin();
       }
@@ -177,8 +191,8 @@ service cloud.firestore {
         && request.resource.data.stock >= 0
         && request.resource.data.get('minOrderQuantity', 1) is int
         && request.resource.data.get('minOrderQuantity', 1) >= 1
-        && request.resource.data.get('variantPrices', []) is list
-        && request.resource.data.get('variantPrices', []).size() <= 400
+        && request.resource.data.get('variations', []) is list
+        && request.resource.data.get('variations', []).size() <= 40
         && request.resource.data.active is bool
         && (!('compareAtPrice' in request.resource.data)
           || (request.resource.data.compareAtPrice is int
@@ -199,10 +213,6 @@ service cloud.firestore {
                 || (request.resource.data.images[4] is string && request.resource.data.images[4].size() <= 250000)))))
         && (!('keywords' in request.resource.data)
           || (request.resource.data.keywords is list && request.resource.data.keywords.size() <= 20))
-        && (!('sizes' in request.resource.data)
-          || (request.resource.data.sizes is list && request.resource.data.sizes.size() <= 20))
-        && (!('colors' in request.resource.data)
-          || (request.resource.data.colors is list && request.resource.data.colors.size() <= 20))
         && (!('recommended' in request.resource.data) || request.resource.data.recommended is bool);
 
       allow update: if isAdmin()
@@ -212,8 +222,8 @@ service cloud.firestore {
         && request.resource.data.stock >= 0
         && request.resource.data.get('minOrderQuantity', 1) is int
         && request.resource.data.get('minOrderQuantity', 1) >= 1
-        && request.resource.data.get('variantPrices', []) is list
-        && request.resource.data.get('variantPrices', []).size() <= 400
+        && request.resource.data.get('variations', []) is list
+        && request.resource.data.get('variations', []).size() <= 40
         && (!('compareAtPrice' in request.resource.data)
           || (request.resource.data.compareAtPrice is int
             && (request.resource.data.compareAtPrice == 0
@@ -254,9 +264,9 @@ service cloud.firestore {
       allow read: if (signedIn() && resource.data.uid == request.auth.uid) || isAdmin();
 
       // A customer creates an order once. Every line must match current prices and
-      // variants, the total must be items + platform service fee + delivery fee from the
-      // fee schedule, the wallet must go down by exactly the total, and the id must be
-      // "<uid>_<requestId>" so retries reuse the same id.
+      // variations, the total must be items + platform service fee + delivery fee from
+      // the fee schedule, the wallet must go down by exactly the total, and the id must
+      // be "<uid>_<requestId>" so retries reuse the same id.
       allow create: if signedIn()
         && orderId == request.auth.uid + '_' + request.resource.data.requestId
         && request.resource.data.keys().hasOnly([
@@ -312,6 +322,115 @@ service cloud.firestore {
     }
 
     // ---------------------------------------------------------------
+    // Social media boosting: catalogue and orders
+    // ---------------------------------------------------------------
+
+    // Platforms (Facebook, TikTok, YouTube, …) — the description shoppers see on the
+    // platform's boost page is stored here.
+    match /boostPlatforms/{platformId} {
+      allow read: if resource.data.active == true || isAdmin();
+      allow create: if isAdmin()
+        && platformId.matches('^[A-Za-z0-9_-]{2,40}$')
+        && isText(request.resource.data.name, 80)
+        && request.resource.data.description is string
+        && request.resource.data.description.size() <= 2000
+        && request.resource.data.active is bool;
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Categories inside a platform (Followers, Likes, Views, …).
+    match /boostCategories/{categoryId} {
+      allow read: if resource.data.active == true || isAdmin();
+      allow create: if isAdmin()
+        && categoryId.matches('^[A-Za-z0-9_-]{2,40}$')
+        && isText(request.resource.data.platformId, 40)
+        && isText(request.resource.data.name, 80)
+        && request.resource.data.description is string
+        && request.resource.data.description.size() <= 500
+        && request.resource.data.active is bool;
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Subcategories — the service listings, each with its own price per unit.
+    match /boostSubcategories/{subcategoryId} {
+      allow read: if resource.data.active == true || isAdmin();
+      allow create: if isAdmin()
+        && subcategoryId.matches('^[A-Za-z0-9_-]{2,40}$')
+        && isText(request.resource.data.categoryId, 40)
+        && isText(request.resource.data.name, 120)
+        && request.resource.data.description is string
+        && request.resource.data.description.size() <= 500
+        && isText(request.resource.data.unit, 60)
+        && request.resource.data.price is int
+        && request.resource.data.price >= 1
+        && request.resource.data.active is bool;
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Boost orders: /boostOrders/{uid}_{requestId} — one service, paid from the wallet.
+    // No delivery and no checkout fees: the total is the catalogue's unit price × the
+    // quantity. The id is "<uid>_<requestId>" so retries reuse the same id.
+    match /boostOrders/{orderId} {
+      allow read: if (signedIn() && resource.data.uid == request.auth.uid) || isAdmin();
+
+      allow create: if signedIn()
+        && orderId == request.auth.uid + '_' + request.resource.data.requestId
+        && request.resource.data.keys().hasOnly([
+          'uid', 'requestId', 'platformId', 'platformName', 'categoryId', 'categoryName',
+          'subcategoryId', 'subcategoryName', 'unit', 'unitPrice', 'quantity', 'total',
+          'link', 'status', 'createdAt', 'updatedAt'
+        ])
+        && request.resource.data.uid == request.auth.uid
+        && isText(request.resource.data.requestId, 80)
+        && request.resource.data.requestId.size() >= 8
+        && request.resource.data.status == 'paid'
+        && isText(request.resource.data.platformId, 40)
+        && isText(request.resource.data.categoryId, 40)
+        && isText(request.resource.data.subcategoryId, 40)
+        && request.resource.data.platformName is string && request.resource.data.platformName.size() <= 80
+        && request.resource.data.categoryName is string && request.resource.data.categoryName.size() <= 80
+        && request.resource.data.subcategoryName is string && request.resource.data.subcategoryName.size() <= 120
+        && request.resource.data.unit is string && request.resource.data.unit.size() <= 60
+        && request.resource.data.link is string
+        && request.resource.data.link.size() >= 1
+        && request.resource.data.link.size() <= 300
+        && request.resource.data.quantity is int
+        && request.resource.data.quantity >= 1
+        && request.resource.data.unitPrice is int
+        && request.resource.data.unitPrice >= 1
+        && request.resource.data.total is int
+        && request.resource.data.total == request.resource.data.unitPrice * request.resource.data.quantity
+        // The catalogue as it is now decides the price and the names on the order.
+        && get(/databases/$(database)/documents/boostSubcategories/$(request.resource.data.subcategoryId)).data.price == request.resource.data.unitPrice
+        && get(/databases/$(database)/documents/boostSubcategories/$(request.resource.data.subcategoryId)).data.name == request.resource.data.subcategoryName
+        && get(/databases/$(database)/documents/boostSubcategories/$(request.resource.data.subcategoryId)).data.unit == request.resource.data.unit
+        && get(/databases/$(database)/documents/boostSubcategories/$(request.resource.data.subcategoryId)).data.categoryId == request.resource.data.categoryId
+        && get(/databases/$(database)/documents/boostSubcategories/$(request.resource.data.subcategoryId)).data.active == true
+        && get(/databases/$(database)/documents/boostCategories/$(request.resource.data.categoryId)).data.name == request.resource.data.categoryName
+        && get(/databases/$(database)/documents/boostCategories/$(request.resource.data.categoryId)).data.platformId == request.resource.data.platformId
+        && get(/databases/$(database)/documents/boostCategories/$(request.resource.data.categoryId)).data.active == true
+        && get(/databases/$(database)/documents/boostPlatforms/$(request.resource.data.platformId)).data.name == request.resource.data.platformName
+        && get(/databases/$(database)/documents/boostPlatforms/$(request.resource.data.platformId)).data.active == true
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.updatedAt is timestamp
+        && getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.balance
+             == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('balance', 0) - request.resource.data.total
+        && getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.balance >= 0;
+
+      // Admin starts the work, delivers it, or cancels and refunds (the client does
+      // the wallet refund in the same batch).
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt', 'cancelledAt'])
+        && ((resource.data.status == 'paid' && request.resource.data.status in ['processing', 'cancelled'])
+          || (resource.data.status == 'processing' && request.resource.data.status in ['delivered', 'cancelled']));
+
+      allow delete: if false;
+    }
+
+    // ---------------------------------------------------------------
     // Funding requests: /fundingRequests/{requestId}
     // ---------------------------------------------------------------
     match /fundingRequests/{requestId} {
@@ -362,6 +481,11 @@ service cloud.firestore {
         && request.resource.data.uid == request.auth.uid
         && getAfter(/databases/$(database)/documents/orders/$(request.resource.data.reference)).data.uid == request.auth.uid
         && request.resource.data.amount == -getAfter(/databases/$(database)/documents/orders/$(request.resource.data.reference)).data.total;
+      allow create: if signedIn()
+        && request.resource.data.type == 'boost'
+        && request.resource.data.uid == request.auth.uid
+        && getAfter(/databases/$(database)/documents/boostOrders/$(request.resource.data.reference)).data.uid == request.auth.uid
+        && request.resource.data.amount == -getAfter(/databases/$(database)/documents/boostOrders/$(request.resource.data.reference)).data.total;
       allow create, update, delete: if isAdmin();
     }
 

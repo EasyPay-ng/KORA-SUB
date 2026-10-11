@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Boost — KORASTORE</title>
+  <link rel="stylesheet" href="store.css">
+  <link rel="icon" href="assets/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png"><meta name="theme-color" content="#0b2545">
+</head>
+<body>
+<div id="site-header"></div>
+<main class="wrap page">
+  <a class="link small" href="boost.html">← All platforms</a>
+  <div id="detail" style="margin-top:18px"><div class="empty"><b>Loading platform…</b></div></div>
+  <div id="order-panel" style="margin-top:20px"></div>
+</main>
+<div id="site-footer"></div>
+<script type="module">
+  import { mountHeader, mountFooter, watchBoostPlatforms, watchBoostCategories, watchBoostSubcategories, placeBoostOrder, newRequestId, auth, onAuthStateChanged, watchProfile, naira, esc, readParam, showToast } from './store.js';
+  mountHeader('boost.html');
+  mountFooter();
+
+  const id = readParam('id');
+  const detail = document.querySelector('#detail');
+  const panel = document.querySelector('#order-panel');
+  let platforms = [], categories = [], subcategories = [];
+  let user = null, balance = 0;
+  let selected = null;   // subcategory being ordered
+  let quantity = 1;
+
+  onAuthStateChanged(auth, (u) => {
+    user = u;
+    if (u) watchProfile(u.uid, (profile) => { balance = Number(profile.balance || 0); paintOrder(); });
+    paintOrder();
+  });
+
+  function paint() {
+    const platform = platforms.find(p => p.id === id);
+    if (!platform) {
+      detail.innerHTML = '<div class="empty"><b>This platform is not available</b>It may have been removed or hidden.<br><a class="btn btn-ghost" href="boost.html" style="margin-top:12px">Browse platforms</a></div>';
+      return;
+    }
+    document.title = `${platform.name} boosting — KORASTORE`;
+    const cats = categories.filter(c => c.platformId === platform.id).sort((a, b) => a.name.localeCompare(b.name));
+    detail.innerHTML = `
+      <div class="card" style="max-width:860px">
+        <div class="row"><span class="product-cat">Platform</span><span class="badge gold">${esc(platform.name)}</span></div>
+        <h1 style="margin:8px 0 4px">${esc(platform.name)} boosting</h1>
+        <p class="desc">${esc(platform.description || 'Services for ' + platform.name + '.')}</p>
+      </div>
+      ${cats.length ? cats.map(cat => {
+        const services = subcategories.filter(s => s.categoryId === cat.id).sort((a, b) => a.name.localeCompare(b.name));
+        return `<section class="card" style="max-width:860px;margin-top:20px">
+          <div class="card-head"><div><h2>${esc(cat.name)}</h2><small>${esc(cat.description || 'Choose a service below')}</small></div></div>
+          ${services.length ? services.map(s => `
+            <div class="spread" style="padding:12px 0;border-top:1px solid #e6ebf3">
+              <div style="min-width:0">
+                <b>${esc(s.name)}</b>
+                <div class="small muted">${esc(s.description || '')}${s.unit ? ` · per ${esc(s.unit)}` : ''}</div>
+                <div class="price" style="margin-top:6px"><span>${naira(s.price)}${s.unit ? ` <small class="muted">per ${esc(s.unit)}</small>` : ''}</span></div>
+              </div>
+              <button class="btn btn-sm btn-gold" data-order="${esc(s.id)}">Order</button>
+            </div>`).join('') : '<p class="muted small">No services listed here yet.</p>'}
+        </section>`;
+      }).join('') : '<div class="empty" style="margin-top:20px"><b>No categories yet</b>Services for this platform are coming soon.</div>'}
+    `;
+
+    detail.querySelectorAll('[data-order]').forEach(btn => btn.addEventListener('click', () => {
+      selected = subcategories.find(s => s.id === btn.dataset.order) || null;
+      quantity = 1;
+      paintOrder();
+      panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }));
+  }
+
+  function paintOrder() {
+    if (!selected) { panel.innerHTML = ''; return; }
+    const total = Number(selected.price || 0) * quantity;
+    const next = encodeURIComponent(`boost-platform.html?id=${id}`);
+    panel.innerHTML = `
+      <section class="card" style="max-width:860px">
+        <div class="card-head"><div><h2>Order: ${esc(selected.name)}</h2><small>${esc(selected.unit ? `Per ${selected.unit}` : 'Per unit')} · ${naira(selected.price)} each</small></div></div>
+        ${user ? `
+          <label class="field">Link or username to boost <small>the profile, post or video</small><input class="input" id="boost-link" maxlength="300" placeholder="e.g. https://tiktok.com/@yourname"></label>
+          <div class="field-row">
+            <label class="field">Quantity <small>number of ${esc(selected.unit || 'units')}</small><input class="input" id="boost-qty" type="number" min="1" step="1" value="${quantity}"></label>
+            <label class="field">Total to pay<small>from your wallet · balance ${naira(balance)}</small><input class="input" id="boost-total" value="${naira(total)}" disabled></label>
+          </div>
+          <div id="boost-error" class="error-text" role="alert"></div>
+          <div class="row" style="margin-top:12px">
+            <button class="btn btn-gold" id="boost-pay">Pay ${naira(total)} from wallet</button>
+            <a class="btn btn-ghost" href="wallet.html">Fund wallet</a>
+            <button class="btn btn-ghost" type="button" id="boost-cancel">Close</button>
+          </div>
+          <p class="small muted" style="margin:12px 0 0">Paid from your KORASTORE wallet. We start the work once payment lands — track it under <a class="link" href="orders.html">Orders</a>.</p>
+        ` : `
+          <p class="muted">Sign in to order this service and pay from your wallet.</p>
+          <div class="row"><a class="btn btn-gold" href="login.html?next=${next}">Sign in to order</a><a class="btn btn-ghost" href="register.html">Create account</a></div>
+        `}
+      </section>`;
+
+    if (!user) return;
+    const qtyInput = panel.querySelector('#boost-qty');
+    qtyInput.addEventListener('input', () => {
+      quantity = Math.max(1, Math.round(Number(qtyInput.value) || 1));
+      panel.querySelector('#boost-total').value = naira(Number(selected.price || 0) * quantity);
+      panel.querySelector('#boost-pay').textContent = `Pay ${naira(Number(selected.price || 0) * quantity)} from wallet`;
+    });
+    panel.querySelector('#boost-cancel').addEventListener('click', () => { selected = null; paintOrder(); });
+    panel.querySelector('#boost-pay').addEventListener('click', async (event) => {
+      const error = panel.querySelector('#boost-error');
+      error.textContent = '';
+      const link = panel.querySelector('#boost-link').value.trim();
+      const button = event.currentTarget;
+      button.disabled = true;
+      button.textContent = 'Processing…';
+      try {
+        // Reuse the same request ID for retries of the same order, so a lost response never double-charges.
+        const signature = JSON.stringify({ subcategoryId: selected.id, quantity, link });
+        const pendingKey = 'korastore-boost-pending';
+        let pending = null;
+        try { pending = JSON.parse(sessionStorage.getItem(pendingKey) || 'null'); } catch {}
+        const requestId = pending && pending.signature === signature ? pending.requestId : newRequestId();
+        sessionStorage.setItem(pendingKey, JSON.stringify({ requestId, signature }));
+        const result = await placeBoostOrder(requestId, { subcategoryId: selected.id, quantity, link });
+        sessionStorage.removeItem(pendingKey);
+        showToast('Boost ordered', `${selected.name} × ${quantity}`);
+        panel.innerHTML = `
+          <section class="card" style="max-width:860px">
+            <div class="notice ok"><span class="notice-icon">✓</span><div><b>Order placed</b>Reference ${esc(result.orderId.slice(-8).toUpperCase())}. ${naira(result.total)} was paid from your wallet — we'll start the work shortly.</div></div>
+            <div class="row" style="margin-top:14px"><a class="btn btn-gold" href="orders.html">Track this order</a><button class="btn btn-ghost" type="button" id="boost-again">Order something else</button></div>
+          </section>`;
+        panel.querySelector('#boost-again').addEventListener('click', () => { selected = null; paintOrder(); });
+      } catch (problem) {
+        error.textContent = problem.message || 'Could not place the order.';
+        button.disabled = false;
+        button.textContent = `Pay ${naira(Number(selected.price || 0) * quantity)} from wallet`;
+      }
+    });
+  }
+
+  if (!id) {
+    detail.innerHTML = '<div class="empty"><b>No platform selected</b>Open a platform from the <a class="link" href="boost.html">boost page</a>.</div>';
+  } else {
+    watchBoostPlatforms((rows) => { platforms = rows; paint(); });
+    watchBoostCategories((rows) => { categories = rows; paint(); });
+    watchBoostSubcategories((rows) => { subcategories = rows; paint(); });
+  }
+</script>
+</body>
+</html>

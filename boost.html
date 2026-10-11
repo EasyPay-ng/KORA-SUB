@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Boost your socials — KORASTORE</title>
+  <link rel="stylesheet" href="store.css">
+  <link rel="icon" href="assets/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png"><meta name="theme-color" content="#0b2545">
+</head>
+<body>
+<div id="site-header"></div>
+<main class="wrap page">
+  <div class="page-head"><div><span class="eyebrow">Social media marketing</span><h1>Boost your socials</h1><p>Followers, likes, views and more for Facebook, TikTok, YouTube and the rest. Pick a platform to see its services and prices, then order and pay from your KORASTORE wallet.</p></div></div>
+  <div id="platforms"><div class="empty"><b>Loading platforms…</b></div></div>
+  <div class="card" style="margin-top:24px;max-width:760px">
+    <div class="card-head"><div><h2>How it works</h2><small>Simple, wallet-paid boosts</small></div></div>
+    <ol style="margin:0;padding-left:20px;line-height:2" class="muted">
+      <li>Pick your platform and the service you want (e.g. TikTok followers).</li>
+      <li>Enter the link or username to boost and how many units you want.</li>
+      <li>Pay from your wallet — fund it first if your balance is low.</li>
+      <li>We start the work and mark it delivered when done. Track everything under <a class="link" href="orders.html">Orders</a>.</li>
+    </ol>
+  </div>
+</main>
+<div id="site-footer"></div>
+<script type="module">
+  import { mountHeader, mountFooter, watchBoostPlatforms, esc } from './store.js';
+  mountHeader('boost.html');
+  mountFooter();
+  const host = document.querySelector('#platforms');
+
+  watchBoostPlatforms((platforms) => {
+    if (!platforms.length) {
+      host.innerHTML = '<div class="empty"><b>No platforms yet</b>Boosting services are coming soon. Check back shortly.</div>';
+      return;
+    }
+    host.innerHTML = `<div class="products">${platforms.sort((a, b) => a.name.localeCompare(b.name)).map(p => `
+      <article class="product">
+        <div class="product-body">
+          <span class="product-cat">Platform</span>
+          <a class="product-name" href="boost-platform.html?id=${encodeURIComponent(p.id)}">${esc(p.name)}</a>
+          <p class="small muted" style="margin:8px 0 12px">${esc(String(p.description || '').slice(0, 160))}${String(p.description || '').length > 160 ? '…' : ''}</p>
+          <div class="product-actions">
+            <a class="btn btn-sm btn-gold" href="boost-platform.html?id=${encodeURIComponent(p.id)}">View services</a>
+          </div>
+        </div>
+      </article>`).join('')}</div>`;
+  }, (problem) => {
+    host.innerHTML = `<div class="empty"><b>Could not load platforms</b>${esc(problem.message)}</div>`;
+  });
+</script>
+</body>
+</html>

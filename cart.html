@@ -50,9 +50,11 @@
     for (const item of getCart()) {
       const product = products.get(item.productId);
       if (!product || product.active !== true) { problem = true; continue; }
-      subtotal += productPrice(product, item) * item.quantity;
+      subtotal += productPrice(product, item.variant) * item.quantity;
       count += item.quantity;
       if (item.quantity > Number(product.stock || 0) || item.quantity < Math.max(1, Number(product.minOrderQuantity || 1))) problem = true;
+      const variations = Array.isArray(product.variations) ? product.variations : [];
+      if (variations.length && !variations.some(v => String(v?.name || '') === (item.variant || ''))) problem = true;
     }
     const feeParts = checkoutFees(subtotal, profile, fees);
     return { ...feeParts, count, problem };
@@ -67,7 +69,7 @@
       const variant = variantLabel(item);
       if (!p || p.active !== true) return `<div class="cart-line"><div class="cart-thumb" style="--tone:#8a94a6">?</div><div><b>No longer available</b><small class="muted" style="display:block">Remove this line to continue.${variant ? ` (${esc(variant)})` : ''}</small></div><button class="btn btn-sm btn-danger" data-remove="${index}">Remove</button></div>`;
       const stock = Number(p.stock || 0);
-      const unitPrice = productPrice(p, item);
+      const unitPrice = productPrice(p, item.variant);
       const minimum = Math.max(1, Number(p.minOrderQuantity || 1));
       return `<div class="cart-line">
         ${productMedia(p, 'cart-thumb')}
@@ -127,7 +129,7 @@
     const button = event.target.closest('#checkout');
     if (!button) return;
     const cart = getCart();
-    const items = cart.map(i => ({ productId: i.productId, quantity: i.quantity, size: i.size || '', color: i.color || '' }));
+    const items = cart.map(i => ({ productId: i.productId, quantity: i.quantity, variant: i.variant || '' }));
     // Reuse the same request ID for retries of the same basket, so a lost response never double-charges.
     const signature = JSON.stringify(items);
     let pending = null;

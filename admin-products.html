@@ -26,7 +26,7 @@
             <label class="field">Name<input class="input" id="name" maxlength="120" required></label>
           </div>
           <div class="field-row">
-            <label class="field">Quantity available <small>counts every size and colour</small><input class="input" id="stock" type="number" min="0" step="1" required></label>
+            <label class="field">Quantity available <small>counts every variation</small><input class="input" id="stock" type="number" min="0" step="1" required></label>
             <label class="field">Minimum order quantity <small>least number a customer can buy · no fixed maximum</small><input class="input" id="minOrderQuantity" type="number" min="1" step="1" value="1" required></label>
             <label class="field">Category <small>e.g. Clothes, Electronics</small><input class="input" id="category" maxlength="60" placeholder="e.g. Clothes" list="cat-list"><datalist id="cat-list"><option>Clothes</option><option>Shoes</option><option>Electronics</option><option>Accessories</option><option>Home</option><option>Beauty</option></datalist></label>
           </div>
@@ -45,14 +45,16 @@
             </div>
           </div>
 
-          <label class="toggle"><input type="checkbox" id="variants"> Clothing product — offer size &amp; colour options</label>
+          <label class="toggle"><input type="checkbox" id="variants"> Clothing product — offer variations &amp; prices</label>
           <div id="variant-fields" hidden style="margin:12px 0 4px">
-            <div class="field-row">
-              <label class="field">Sizes <small>comma separated</small><input class="input" id="sizes" maxlength="300" placeholder="S, M, L, XL"></label>
-              <label class="field">Colours <small>comma separated</small><input class="input" id="colors" maxlength="300" placeholder="Black, White, Navy"></label>
+            <div class="field"><b>Variations</b><small>Name each variation and give it its own price — no more size or colour. Leave a price blank to charge the base selling price.</small>
+              <div id="variant-rows" class="variant-rows"></div>
+              <div class="row" style="margin-top:10px">
+                <button class="btn btn-sm btn-ghost" type="button" id="add-variation">+ Add variation</button>
+                <small class="muted" id="variationInfo">No variations yet.</small>
+              </div>
             </div>
-            <small class="muted">Shoppers pick a size and colour on the product page before adding to cart.</small>
-            <div id="variant-prices" style="margin-top:14px"></div>
+            <small class="muted">Shoppers pick a variation on the product page before adding to cart.</small>
           </div>
 
           <label class="field">Description<textarea class="textarea" id="description" maxlength="2000"></textarea></label>
@@ -72,7 +74,7 @@
   let products = [];
   let images = [];          // base64 data URLs, max 5
   let editing = null;       // product currently being edited (for recommended detection)
-  let savedVariantPrices = [];
+  let variationRows = [];   // { name, price } while editing — price '' means base price
 
   // ---------- Image upload → compressed base64 ----------
   const MAX_IMAGES = 5;
@@ -150,24 +152,51 @@
     renderThumbs();
   });
 
-  // ---------- Variants ----------
+  // ---------- Variations (clothing products) ----------
+  const parseList = (value) => [...new Set(String(value || '').split(',').map(s => s.trim()).filter(Boolean))].slice(0, 20);
+
+  function renderVariationRows() {
+    $('#variant-rows').innerHTML = variationRows.map((v, i) => `
+      <div class="variant-row">
+        <input class="input" data-vname="${i}" maxlength="40" placeholder="e.g. Plain, Ankara, Long sleeve" value="${esc(v.name)}">
+        <input class="input" type="number" min="1" step="1" data-vprice="${i}" placeholder="Base price" value="${esc(v.price)}">
+        <button type="button" class="btn btn-sm btn-ghost" data-vdrop="${i}" aria-label="Remove variation ${i + 1}">×</button>
+      </div>`).join('');
+    $('#variationInfo').textContent = variationRows.length
+      ? `${variationRows.length} variation${variationRows.length === 1 ? '' : 's'} · up to 40`
+      : 'No variations yet.';
+    $('#add-variation').disabled = variationRows.length >= 40;
+  }
+
+  function syncVariationRows() {
+    variationRows = [...document.querySelectorAll('.variant-row')].map(row => ({
+      name: row.querySelector('[data-vname]').value,
+      price: row.querySelector('[data-vprice]').value
+    }));
+  }
+
   $('#variants').addEventListener('change', () => {
     $('#variant-fields').hidden = !$('#variants').checked;
-    renderVariantPrices();
+    if ($('#variants').checked && !variationRows.length) {
+      variationRows = [{ name: '', price: '' }];
+      renderVariationRows();
+    }
   });
 
-  // ---------- Form ----------
-  function renderVariantPrices() {
-    const sizes = parseList($('#sizes').value);
-    const colors = parseList($('#colors').value);
-    const combos = (sizes.length ? sizes : ['']).flatMap(size => (colors.length ? colors : ['']).map(color => ({ size, color })));
-    const previous = new Map(savedVariantPrices.map(v => [`${v.size}\u0000${v.color}`, v.price]));
-    $('#variant-prices').innerHTML = $('#variants').checked && combos.length ? `<div class="field"><b>Price by option</b><small>Leave blank to use the base selling price.</small><div class="variant-price-grid">${combos.map((v, i) => `<label><span>${esc([v.size, v.color].filter(Boolean).join(' · '))}</span><input class="input" type="number" min="1" step="1" data-vprice="${i}" data-size="${esc(v.size)}" data-color="${esc(v.color)}" value="${previous.get(`${v.size}\u0000${v.color}`) ?? ''}" placeholder="Base price"></label>`).join('')}</div></div>` : '';
-  }
-  $('#sizes').addEventListener('change', renderVariantPrices);
-  $('#colors').addEventListener('change', renderVariantPrices);
+  $('#add-variation').addEventListener('click', () => {
+    syncVariationRows();
+    variationRows.push({ name: '', price: '' });
+    renderVariationRows();
+    document.querySelector(`[data-vname="${variationRows.length - 1}"]`)?.focus();
+  });
 
-  const parseList = (value) => [...new Set(String(value || '').split(',').map(s => s.trim()).filter(Boolean))].slice(0, 20);
+  $('#variant-rows').addEventListener('click', (event) => {
+    const drop = event.target.closest('[data-vdrop]');
+    if (!drop) return;
+    syncVariationRows();
+    variationRows.splice(Number(drop.dataset.vdrop), 1);
+    renderVariationRows();
+  });
 
   function fill(p) {
     editing = p || null;
@@ -184,13 +213,20 @@
     $('#minOrderQuantity').value = p?.minOrderQuantity ?? 1;
     $('#description').value = p?.description || '';
     images = Array.isArray(p?.images) ? [...p.images] : [];
-    const variantOn = Boolean(p?.sizes?.length || p?.colors?.length);
+    // Products saved before variations existed may still carry size/colour prices —
+    // seed the variation rows from them so re-saving converts them cleanly.
+    const legacyVariations = Array.isArray(p?.variantPrices)
+      ? p.variantPrices.map((v, index) => ({
+          name: [v?.size, v?.color].filter(Boolean).join(' · ') || `Option ${index + 1}`,
+          price: v?.price
+        }))
+      : [];
+    const source = Array.isArray(p?.variations) ? p.variations : legacyVariations;
+    variationRows = source.map(v => ({ name: String(v?.name || ''), price: v?.price != null ? String(v.price) : '' }));
+    const variantOn = variationRows.length > 0;
     $('#variants').checked = variantOn;
     $('#variant-fields').hidden = !variantOn;
-    $('#sizes').value = (p?.sizes || []).join(', ');
-    $('#colors').value = (p?.colors || []).join(', ');
-    savedVariantPrices = Array.isArray(p?.variantPrices) ? p.variantPrices : [];
-    renderVariantPrices();
+    renderVariationRows();
     $('#recommended').checked = p?.recommended === true;
     $('#active').checked = p ? p.active === true : true;
     $('#error').textContent = '';
@@ -236,10 +272,12 @@
     const stock = Math.round(Number($('#stock').value));
     const minOrderQuantity = Number($('#minOrderQuantity').value);
     const keywords = parseList($('#keywords').value);
-    const sizes = $('#variants').checked ? parseList($('#sizes').value) : [];
-    const colors = $('#variants').checked ? parseList($('#colors').value) : [];
     const recommended = $('#recommended').checked;
-    const variantPrices = [...document.querySelectorAll('[data-vprice]')].map(input => ({ size: input.dataset.size, color: input.dataset.color, price: input.value.trim() ? Math.round(Number(input.value)) : price }));
+    syncVariationRows();
+    const useVariations = $('#variants').checked;
+    const cleaned = variationRows
+      .map(v => ({ name: v.name.trim(), price: v.price.trim() }))
+      .filter(v => v.name !== '' || v.price !== '');
 
     if (!PRODUCT_ID_PATTERN.test(productId)) return error.textContent = 'Product ID must be 3–40 letters, numbers, dashes or underscores.';
     if (isNew && products.some(p => p.id === productId)) return error.textContent = `Product ID “${productId}” is already used. Pick another one.`;
@@ -249,9 +287,21 @@
     if (compareAtPrice && compareAtPrice <= price) return error.textContent = 'The slashed original price must be higher than the selling price (or empty).';
     if (!Number.isFinite(stock) || stock < 0) return error.textContent = 'Quantity must be zero or more.';
     if (!Number.isSafeInteger(minOrderQuantity) || minOrderQuantity < 1) return error.textContent = 'Minimum order quantity must be a positive whole number.';
-    if (variantPrices.some(v => !Number.isInteger(v.price) || v.price < 1)) return error.textContent = 'Every option price must be at least ₦1.';
-    if ($('#variants').checked && !sizes.length && !colors.length) return error.textContent = 'Add at least one size or colour, or untick the clothing option.';
+    if (useVariations) {
+      if (!cleaned.length) return error.textContent = 'Add at least one variation, or untick the clothing option.';
+      if (cleaned.some(v => !v.name)) return error.textContent = 'Every variation needs a name.';
+      if (new Set(cleaned.map(v => v.name.toLowerCase())).size !== cleaned.length) return error.textContent = 'Give each variation a different name.';
+      for (const v of cleaned) {
+        if (v.price === '') continue;
+        const value = Math.round(Number(v.price));
+        if (!Number.isFinite(value) || value < 1) return error.textContent = 'Every variation price must be at least ₦1.';
+      }
+    }
     if (totalImageBytes() > 750000) return error.textContent = 'These photos are too heavy together. Remove one, or pick smaller images.';
+
+    const variations = useVariations
+      ? cleaned.map(v => ({ name: v.name, price: v.price === '' ? price : Math.round(Number(v.price)) }))
+      : [];
 
     const data = {
       name,
@@ -262,9 +312,7 @@
       minOrderQuantity,
       keywords,
       images,
-      sizes,
-      colors,
-      variantPrices: $('#variants').checked ? variantPrices : [],
+      variations,
       recommended,
       description: $('#description').value.trim(),
       active: $('#active').checked

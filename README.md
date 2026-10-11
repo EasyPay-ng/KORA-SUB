@@ -8,7 +8,7 @@ There is no server. The site is static files plus Firebase (Auth and Firestore).
 
 ## Roles
 
-- **Administrators**: `beniwealth70@gmail.com` and `okogbagideon28@gmail.com`, each with a verified email. Either admin can list, price, stock and hide products; upload up to 5 photos per product; set search keywords, slashed original prices, size/colour variants and the "Recommended" flag; publish the deposit bank account; set the checkout fee schedule; approve funding; and move orders through packing, shipping and delivery.
+- **Administrators**: `beniwealth70@gmail.com` and `okogbagideon28@gmail.com`, each with a verified email. Either admin can list, price, stock and hide products; upload up to 5 photos per product; set search keywords, slashed original prices, clothing variations with their own prices and the "Recommended" flag; publish the deposit bank account; set the checkout fee schedule; approve funding; and move orders through packing, shipping and delivery. They also run the **social media boosting** catalogue: platforms, categories, subcategories and prices.
 - **Customers**: anyone who registers. They browse, add to cart, fund their wallet, check out, set delivery location and track orders. They cannot list products, change their own balance upward, or edit other people's data.
 - **Visitors**: can browse the shop without an account. Checkout and funding require sign-in.
 
@@ -18,19 +18,29 @@ Every product has an **admin-chosen product ID** (3–40 letters, numbers, `-`, 
 
 - a photo gallery (up to **5 images**, uploaded by the admin and stored **compressed as base64 in Firestore** — no image host or URL needed),
 - the **discounted price** with the **original price slashed through** (and the % off),
-- quantity available (stock, shared across all variants),
+- quantity available (stock, shared across all variations),
 - the admin-set **minimum order quantity** (any positive whole number, with no fixed 50-item cap),
-- **size and colour options** for clothing products (set by the admin; shoppers must pick them before adding to cart),
+- **variations with prices** for clothing products (the admin names each variation — e.g. different styles — and sets its price; shoppers must pick one before adding to cart),
 - **search keywords** set by the admin, so search finds the product even by words not in its name,
 - the product ID and the "Recommended" badge where applicable.
 
 The **Recommended** section sits at the top of the shop. The admin flags a product as recommended when creating (or editing) it, and every shopper's browser raises a **notification** for it: live while the site is open, and a catch-up the next time they visit (Notification API, with an in-page toast fallback; shoppers opt in via the "Turn on alerts" button).
 
+## Social media boosting
+
+Alongside the product catalogue, the store sells **social media boosting services** (Facebook, TikTok, YouTube and more). The catalogue has three levels, all managed under **Admin → Boosting** (`admin-boost.html`):
+
+- **Platforms** — e.g. Facebook, TikTok, YouTube. Each has a **description** that appears on its public page (`boost-platform.html?id=<platformId>`), together with its services and prices.
+- **Categories** — e.g. Followers, Likes, Views — grouping the services inside a platform.
+- **Services (subcategories)** — the listings themselves, each with a **name, a unit** (e.g. "1,000 followers") **and a price per unit**.
+
+Shoppers browse `boost.html` (all platforms with their descriptions) or a platform page, pick a service, enter the link/username to boost and the quantity, and pay **from their KORASTORE wallet**. A boost order is `boostOrders/<uid>_<requestId>`: the total is **unit price × quantity** — no checkout fees and no delivery. The security rules re-read the catalogue at purchase time, so the price charged is always the admin's current price. The admin moves orders through **paid → processing → delivered**, and cancelling refunds the wallet in one transaction. Boost orders appear on `orders.html` next to product orders.
+
 ## Money flow
 
 1. **Fund** (`wallet.html`): the customer pays into the bank account the admin published, then submits the amount and transfer reference. The request is `pending`.
 2. **Approve** (`admin-funding.html`): the admin approves once the transfer lands. One transaction marks the request `approved`, credits the wallet, and writes a transaction and a ledger entry.
-3. **Buy** (`cart.html` → `placeOrder` in `store.js`): one transaction re-reads each product's price, stock and variants, checks the delivery location, debits the wallet, decrements stock, and creates the order. The charged amount is **items + platform service fee + delivery fee**. The order ID is `<uid>_<requestId>`, so a retried checkout returns the original order instead of charging twice.
+3. **Buy** (`cart.html` → `placeOrder` in `store.js`): one transaction re-reads each product's price, stock and variations, checks the delivery location, debits the wallet, decrements stock, and creates the order. The charged amount is **items + platform service fee + delivery fee**. The order ID is `<uid>_<requestId>`, so a retried checkout returns the original order instead of charging twice.
 4. **Track and refund** (`admin-orders.html`, `orders.html`): paid → processing → shipped → delivered. Cancelling refunds the full total (items and fees) to the wallet and restocks the items, in one transaction.
 
 No card or payment gateway is integrated. All deposits are manual bank transfers approved by the admin.
@@ -51,11 +61,11 @@ The admin can change the amounts and which state counts as "local" under **Admin
 
 - A customer's wallet can **go down only** in the same batch that creates their own order, and only by exactly the order total (items + service fee + delivery fee).
 - A customer's wallet **never goes up**. Only approved admins credit funding and refunds.
-- Prices, stock and size/colour choices can only be used as they are in `/products` at checkout. An order must meet each product's admin-set minimum quantity and cannot exceed available stock; there is no fixed 50-item cap. The browser's totals are checked against them.
+- Prices, stock and variation choices can only be used as they are in `/products` at checkout. An order must meet each product's admin-set minimum quantity and cannot exceed available stock; there is no fixed 50-item cap. The browser's totals are checked against them.
 - The **service fee and delivery fee** on an order must equal the fee schedule (admin-edited `settings/fees`, defaults ₦2,000 / ₦2,500 / ₦6,000), and the total must be exactly items + those fees.
 - Stock can **go down only** in the same batch that creates an order containing that product, and only by the ordered quantity.
 - Orders are **create-only**. Customers can't edit or delete them.
-- Product documents use the admin's product ID as their id, and only approved admins can create/edit them (including photos, keywords, variants and the recommended flag).
+- Product documents use the admin's product ID as their id, and only approved admins can create/edit them (including photos, keywords, variations and the recommended flag).
 - Either approved admin account (email plus verified email) can approve funding, change order status, edit any user's balance, or post recommended-product announcements.
 
 ## Limitations of this design
@@ -71,10 +81,10 @@ The admin can change the amounts and which state counts as "local" under **Admin
 
 ## Pages
 
-- Storefront: `index.html` (home), `shop.html` (catalogue with search, categories and sorting), `product.html`, `cart.html`
+- Storefront: `index.html` (home), `shop.html` (catalogue with search, categories and sorting), `product.html`, `boost.html` (boosting platforms), `boost-platform.html` (platform description + services), `cart.html`
 - Accounts: `login.html`, `register.html`
 - Customer: `dashboard.html` (overview), `wallet.html` (fund), `orders.html`, `profile.html` (delivery location)
-- Admin: `admin.html` (overview), `admin-products.html`, `admin-funding.html`, `admin-orders.html`, `admin-fees.html` (checkout fees), `admin-settings.html` (deposit bank details)
+- Admin: `admin.html` (overview), `admin-products.html`, `admin-boost.html` (boosting platforms, categories, services, orders), `admin-funding.html`, `admin-orders.html`, `admin-fees.html` (checkout fees), `admin-settings.html` (deposit bank details)
 
 Shared client code is in `store.js`, styles in `store.css`. Nigerian states and LGAs are in `data/ng-locations.json` (from the MIT-licensed `nigeria-state-lga-data` package, 37 entries, 777 LGAs). Non-Nigerian addresses use free text for state and area.
 
@@ -84,7 +94,11 @@ Shared client code is in `store.js`, styles in `store.css`. Nigerian states and 
 |---|---|---|
 | `users/{uid}` | customer (name, delivery location, one wallet decrease per order); admin (`balance`) | owner, admin |
 | `users/{uid}/transactions/{id}` | customer (purchase record only); admin (funding, refund) | owner, admin |
-| `products/{productId}` | admin (listing, prices, stock, photos, keywords, variants, recommended); customer (stock and `sold` on purchase only) | anyone (active only); admin (all) |
+| `products/{productId}` | admin (listing, prices, stock, photos, keywords, variations, recommended); customer (stock and `sold` on purchase only) | anyone (active only); admin (all) |
+| `boostPlatforms/{id}` | admin (platform name + description, visibility) | anyone (active only); admin (all) |
+| `boostCategories/{id}` | admin (category inside a platform) | anyone (active only); admin (all) |
+| `boostSubcategories/{id}` | admin (service listing: name, unit, price) | anyone (active only); admin (all) |
+| `boostOrders/{uid}_{requestId}` | customer (create once); admin (status) | owner, admin |
 | `settings/payment` | admin | signed-in users |
 | `settings/fees` | admin (checkout fee schedule) | signed-in users |
 | `fundingRequests/{id}` | customer (create); admin (review) | owner, admin |
@@ -92,7 +106,7 @@ Shared client code is in `store.js`, styles in `store.css`. Nigerian states and 
 | `notifications/{id}` | admin (recommended-product announcements) | everyone |
 | `ledger/{id}` | customer (purchase entries only); admin (all) | admin |
 
-Money is stored as whole naira (integers). Product documents hold the admin-chosen `productId` as their id plus `name`, `category`, `price` (selling), `compareAtPrice` (slashed original, optional), `stock`, `minOrderQuantity`, `sold`, `description`, `keywords[]`, `images[]` (base64), `sizes[]`, `colors[]`, `recommended`, `active`. Orders hold `items[]` (with quantity and optional `size`/`color` per line), `subtotal`, `serviceFee`, `deliveryFee`, `total` and the `delivery` snapshot.
+Money is stored as whole naira (integers). Product documents hold the admin-chosen `productId` as their id plus `name`, `category`, `price` (selling), `compareAtPrice` (slashed original, optional), `stock`, `minOrderQuantity`, `sold`, `description`, `keywords[]`, `images[]` (base64), `variations[]` (each `{name, price}` — clothing options with their own prices), `recommended`, `active`. Orders hold `items[]` (with quantity and optional `variant` name and `variantIndex` per line), `subtotal`, `serviceFee`, `deliveryFee`, `total` and the `delivery` snapshot. Boosting: `boostPlatforms` (`name`, `description`, `active`), `boostCategories` (`platformId`, `name`, `description`, `active`), `boostSubcategories` (`categoryId`, `name`, `description`, `unit`, `price`, `active`) and `boostOrders` (`uid`, `requestId`, platform/category/service names and ids, `unit`, `unitPrice`, `quantity`, `total`, `link`, `status`).
 
 ## Setup and deployment
 
