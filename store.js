@@ -847,21 +847,63 @@ export function requireAdmin(activePage, gateSelector = "#gate", contentSelector
   return new Promise((resolve) => {
     const gate = document.querySelector(gateSelector);
     const content = document.querySelector(contentSelector);
-    const deny = (title, detail) => {
-      if (gate) { gate.hidden = false; gate.innerHTML = `<div class="gate-card"><span class="gate-mark">!</span><h2>${esc(title)}</h2><p>${esc(detail)}</p><a class="btn" href="index.html">Back to store</a></div>`; }
+    let unsubscribe = null;
+    let unsubscribeWhenReady = false;
+    let settled = false;
+    let authTimeout;
+
+    const finish = (user) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(authTimeout);
+      if (unsubscribe) unsubscribe();
+      else unsubscribeWhenReady = true;
+      resolve(user);
     };
-    const stop = onAuthStateChanged(auth, async (user) => {
-      stop();
-      if (!user) { location.replace(`login.html?next=${encodeURIComponent(activePage)}`); resolve(null); return; }
-      if (!ADMIN_EMAILS.includes((user.email || "").trim().toLowerCase())) {
-        deny("Admins only", "This area is restricted to approved KORASTORE administrators.");
-        resolve(null);
+
+    const deny = (title, detail, canRetry = false) => {
+      if (!gate) return;
+      gate.hidden = false;
+      gate.innerHTML = `<div class="gate-card"><span class="gate-mark">!</span><h2>${esc(title)}</h2><p>${esc(detail)}</p>${canRetry ? `<a class="btn" href="${esc(activePage)}">Try again</a>` : ""}<a class="btn" href="index.html">Back to store</a></div>`;
+    };
+
+    const failCheck = () => {
+      if (settled) return;
+      deny("Could not check admin access", "We couldn't verify your sign-in session. Check your connection and try again.", true);
+      finish(null);
+    };
+
+    const handleUser = async (user) => {
+      if (settled) return;
+      if (!user) {
+        finish(null);
+        location.replace(`login.html?next=${encodeURIComponent(activePage)}`);
         return;
       }
-      try { await user.reload(); } catch { /* fall back to cached profile */ }
+      if (!ADMIN_EMAILS.includes((user.email || "").trim().toLowerCase())) {
+        deny("Admins only", "This area is restricted to approved KORASTORE administrators.");
+        finish(null);
+        return;
+      }
+
+      // A stalled profile refresh must not leave the gate spinning forever. If it
+      // times out or fails, use the cached profile; Firestore rules still enforce
+      // the verified-admin check on every read and write.
+      let reloadTimeout;
+      try {
+        await Promise.race([
+          user.reload(),
+          new Promise((_, reject) => {
+            reloadTimeout = setTimeout(() => reject(new Error("Profile refresh timed out.")), 8000);
+          })
+        ]);
+      } catch { /* fall back to cached profile */ }
+      finally { clearTimeout(reloadTimeout); }
+
+      if (settled) return;
       if (!user.emailVerified) {
         deny("Verify your email first", "Administrator accounts must have a verified email address. Check your inbox for the verification link, then sign in again.");
-        resolve(null);
+        finish(null);
         return;
       }
       if (gate) gate.hidden = true;
@@ -869,8 +911,22 @@ export function requireAdmin(activePage, gateSelector = "#gate", contentSelector
       document.querySelectorAll("[data-signout]").forEach((button) => {
         button.addEventListener("click", async () => { await signOut(auth); location.replace("index.html"); });
       });
-      resolve(user);
-    });
+      finish(user);
+    };
+
+    authTimeout = setTimeout(() => {
+      deny("Could not check admin access", "The sign-in check is taking too long. Check your connection and try again.", true);
+      finish(null);
+    }, 12000);
+
+    try {
+      unsubscribe = onAuthStateChanged(auth, (user) => {
+        handleUser(user).catch(failCheck);
+      }, failCheck);
+      if (unsubscribeWhenReady) unsubscribe();
+    } catch {
+      failCheck();
+    }
   });
 }
 
