@@ -267,15 +267,14 @@ export async function placeOrder(requestId, items) {
   for (const item of items || []) {
     const quantity = Number(item?.quantity);
     const productId = String(item?.productId || "");
-    const size = String(item?.size || "").slice(0, 40);
-    const color = String(item?.color || "").slice(0, 40);
+    const variant = String(item?.variant || "").slice(0, 40);
     if (!productId || !ID_PATTERN.test(productId)) throw new Error("Product is invalid.");
     if (!Number.isSafeInteger(quantity) || quantity < 1) {
       throw new Error("Quantity must be a positive whole number.");
     }
-    // Lines merge only when product AND variant match, so two sizes stay separate lines.
-    const key = `${productId}|${size}|${color}`;
-    const found = merged.get(key) || { productId, size, color, quantity: 0 };
+    // Lines merge only when product AND variation match, so two variations stay separate lines.
+    const key = `${productId}|${variant}`;
+    const found = merged.get(key) || { productId, variant, quantity: 0 };
     const combinedQuantity = found.quantity + quantity;
     if (!Number.isSafeInteger(combinedQuantity)) {
       throw new Error("The combined quantity is too large.");
@@ -316,27 +315,29 @@ export async function placeOrder(requestId, items) {
       if (!product || product.active !== true) {
         throw new Error("An item in your order is no longer available. Review your cart.");
       }
-      const variantPrices = Array.isArray(product.variantPrices) ? product.variantPrices : [];
-      const variantIndex = variantPrices.findIndex(v => String(v?.size || '') === entry.size && String(v?.color || '') === entry.color);
-      const price = Number(variantIndex >= 0 ? variantPrices[variantIndex].price : product.price);
+      const variations = Array.isArray(product.variations) ? product.variations : [];
+      const variantIndex = variations.findIndex(v => String(v?.name || "") === entry.variant);
+      const price = Number(variantIndex >= 0 ? variations[variantIndex].price : product.price);
       const stock = Number(product.stock || 0);
       if (!Number.isInteger(price) || price <= 0) throw new Error(`${product.name} has no valid price.`);
       if (stock < entry.quantity) {
         throw new Error(stock > 0 ? `Only ${stock} left of ${product.name}.` : `${product.name} is out of stock.`);
       }
-      // Clothing variants must be one of the sizes/colours the admin listed.
-      const sizes = Array.isArray(product.sizes) ? product.sizes.map(String) : [];
-      const colors = Array.isArray(product.colors) ? product.colors.map(String) : [];
-      if (entry.size && !sizes.includes(entry.size)) throw new Error(`Size ${entry.size} is not available for ${product.name}.`);
-      if (entry.color && !colors.includes(entry.color)) throw new Error(`Colour ${entry.color} is not available for ${product.name}.`);
-      if (variantPrices.length && variantIndex < 0) throw new Error(`The selected option is not available for ${product.name}.`);
+      // Clothing variations must be one the admin listed; products without variations
+      // sell at the base price and any leftover label in the cart is ignored.
+      if (variations.length && variantIndex < 0) {
+        throw new Error(entry.variant
+          ? `The selected variation is not available for ${product.name}.`
+          : `Pick a variation for ${product.name} before buying.`);
+      }
+      const lineVariant = variantIndex >= 0 ? entry.variant : "";
       const minimum = Math.max(1, Number(product.minOrderQuantity || 1));
       if (entry.quantity < minimum) throw new Error(`${product.name} has a minimum order of ${minimum}.`);
       const lineTotal = price * entry.quantity;
       subtotal += lineTotal;
       lines.push({
         productId: entry.productId, name: String(product.name || "Product"), price,
-        quantity: entry.quantity, lineTotal, size: entry.size, color: entry.color, variantIndex
+        quantity: entry.quantity, lineTotal, variant: lineVariant, variantIndex
       });
       stockChanges.push({ ref: productRef, stock, sold: Number(product.sold || 0), quantity: entry.quantity });
     }
@@ -393,8 +394,9 @@ export function getCart() {
           && Number.isSafeInteger(Number(i.quantity)) && Number(i.quantity) > 0).map((i) => ({
         productId: i.productId,
         quantity: Number(i.quantity),
-        size: cleanVariant(i.size),
-        color: cleanVariant(i.color)
+        // Carts saved before variations existed stored size/colour — keep those lines
+        // separate by turning them into a label instead of merging their quantities.
+        variant: cleanVariant(i.variant) || [cleanVariant(i.size), cleanVariant(i.color)].filter(Boolean).join(" · ").slice(0, 40)
       }))
       : [];
   } catch {
@@ -405,18 +407,17 @@ export function setCart(items) {
   localStorage.setItem(CART_KEY, JSON.stringify(items));
   window.dispatchEvent(new CustomEvent("korastore:cart"));
 }
-export function addToCart(productId, quantity = 1, variant = {}) {
+export function addToCart(productId, quantity = 1, variantName = "") {
   const amount = Number(quantity);
   if (!Number.isSafeInteger(amount) || amount < 1) throw new Error("Quantity must be a positive whole number.");
   const items = getCart();
-  const size = cleanVariant(variant.size);
-  const color = cleanVariant(variant.color);
-  const found = items.find((i) => i.productId === productId && i.size === size && i.color === color);
+  const variant = cleanVariant(variantName);
+  const found = items.find((i) => i.productId === productId && i.variant === variant);
   if (found) {
     const combinedQuantity = found.quantity + amount;
     if (!Number.isSafeInteger(combinedQuantity)) throw new Error("The combined quantity is too large.");
     found.quantity = combinedQuantity;
-  } else items.push({ productId, quantity: amount, size, color });
+  } else items.push({ productId, quantity: amount, variant });
   setCart(items);
 }
 
@@ -424,6 +425,7 @@ export function addToCart(productId, quantity = 1, variant = {}) {
 let alertsStarted = false;
 const NAV = [
   ["shop.html", "Shop"],
+  ["boost.html", "Boost"],
   ["cart.html", "Cart"],
   ["dashboard.html", "Account"]
 ];
@@ -462,7 +464,7 @@ export function mountFooter() {
     <footer class="footer">
       <div class="wrap footer-inner">
         <div><b>KORASTORE</b><p>Find it. Fund it. Own it.</p></div>
-        <div class="footer-links"><a href="shop.html">Shop</a><a href="wallet.html">Fund wallet</a><a href="orders.html">Orders</a><a href="mailto:beniwealth70@gmail.com">Contact</a></div>
+        <div class="footer-links"><a href="shop.html">Shop</a><a href="boost.html">Boost</a><a href="wallet.html">Fund wallet</a><a href="orders.html">Orders</a><a href="mailto:beniwealth70@gmail.com">Contact</a></div>
         <small>© ${new Date().getFullYear()} KORASTORE</small>
       </div>
     </footer>`;
@@ -535,6 +537,7 @@ export function requireAdmin(activePage, gateSelector = "#gate", contentSelector
 const ADMIN_LINKS = [
   ["admin.html", "Overview", "◎"],
   ["admin-products.html", "Products", "▣"],
+  ["admin-boost.html", "Boosting", "↗"],
   ["admin-funding.html", "Funding", "＋"],
   ["admin-orders.html", "Orders", "▤"],
   ["admin-fees.html", "Checkout fees", "₦"],
@@ -585,16 +588,16 @@ export function productMedia(product, extraClass = "", index = 0) {
     : `<span class="mono-mark" aria-hidden="true">${esc(initials(product.name).slice(0, 2))}</span>`}</div>`;
 }
 
-// Returns the admin-set price for a chosen size/colour, or the base price.
-export function productPrice(product, variant = {}) {
-  const options = Array.isArray(product?.variantPrices) ? product.variantPrices : [];
-  const match = options.find(v => String(v?.size || '') === String(variant.size || '') && String(v?.color || '') === String(variant.color || ''));
+// Returns the admin-set price for a chosen variation, or the base price.
+export function productPrice(product, variantName = "") {
+  const options = Array.isArray(product?.variations) ? product.variations : [];
+  const match = options.find(v => String(v?.name || "") === String(variantName || ""));
   return Math.round(Number(match?.price ?? product?.price) || 0);
 }
 
 // Selling price, with the original price slashed through when a discount is set.
 export function priceHTML(product, extraClass = "product-price") {
-  const optionPrices = (Array.isArray(product?.variantPrices) ? product.variantPrices : []).map(v => Math.round(Number(v.price) || 0)).filter(v => v > 0);
+  const optionPrices = (Array.isArray(product?.variations) ? product.variations : []).map(v => Math.round(Number(v.price) || 0)).filter(v => v > 0);
   const price = optionPrices.length ? Math.min(...optionPrices) : Math.round(Number(product?.price) || 0);
   const high = optionPrices.length ? Math.max(...optionPrices) : price;
   const compare = Math.round(Number(product?.compareAtPrice) || 0);
@@ -604,11 +607,12 @@ export function priceHTML(product, extraClass = "product-price") {
     ? ` <s class="price-was">${naira(compare)}</s> <span class="price-off">−${off}%</span>` : ""}</div>`;
 }
 
-export const hasVariants = (product) =>
-  Boolean((Array.isArray(product?.sizes) && product.sizes.length) || (Array.isArray(product?.colors) && product.colors.length));
+export const hasVariations = (product) =>
+  Boolean(Array.isArray(product?.variations) && product.variations.length);
 
+// The chosen variation label, with a fallback for orders saved before variations existed.
 export function variantLabel(item) {
-  return [item?.size, item?.color].filter(Boolean).join(" · ");
+  return String(item?.variant || [item?.size, item?.color].filter(Boolean).join(" · ") || "");
 }
 
 export function stockBadge(product) {
@@ -633,8 +637,8 @@ export function productCard(product) {
         <a class="product-name" href="${link}">${esc(product.name)}</a>
         ${priceHTML(product)}
         <div class="product-actions">
-          ${hasVariants(product)
-    ? `<a class="btn btn-sm btn-gold" href="${link}">Choose options</a>`
+          ${hasVariations(product)
+    ? `<a class="btn btn-sm btn-gold" href="${link}">Choose variation</a>`
     : `<button class="btn btn-sm btn-gold" data-add="${esc(product.id)}" data-min="${minimum}" ${out ? "disabled" : ""}>${out ? (stock <= 0 ? "Sold out" : "Unavailable") : "Add to cart"}</button>`}
           <a class="btn btn-sm btn-ghost" href="${link}">View</a>
         </div>
@@ -844,3 +848,191 @@ export const NEXT_ORDER_ACTIONS = {
   delivered: [],
   cancelled: []
 };
+
+// ---------- Social media boosting ----------
+// The admin runs a boosting catalogue: platforms (Facebook, TikTok, YouTube, …) with
+// descriptions, categories (Followers, Likes, Views, …), and subcategories — the
+// actual service listings, each with its own price per unit. Customers order from a
+// platform page and pay from the wallet; there is no delivery and no checkout fee on
+// boost orders.
+export const BOOST_ID_PATTERN = /^[A-Za-z0-9_-]{2,40}$/;
+const BOOST_COLLECTIONS = {
+  platform: "boostPlatforms",
+  category: "boostCategories",
+  subcategory: "boostSubcategories"
+};
+
+export function watchBoostPlatforms(callback, onError = noop, { includeInactive = false } = {}) {
+  const ref = includeInactive ? collection(db, "boostPlatforms") : query(collection(db, "boostPlatforms"), where("active", "==", true));
+  return onSnapshot(ref, (snap) => callback(rows(snap)), onError);
+}
+
+export function watchBoostCategories(callback, onError = noop, { includeInactive = false } = {}) {
+  const ref = includeInactive ? collection(db, "boostCategories") : query(collection(db, "boostCategories"), where("active", "==", true));
+  return onSnapshot(ref, (snap) => callback(rows(snap)), onError);
+}
+
+export function watchBoostSubcategories(callback, onError = noop, { includeInactive = false } = {}) {
+  const ref = includeInactive ? collection(db, "boostSubcategories") : query(collection(db, "boostSubcategories"), where("active", "==", true));
+  return onSnapshot(ref, (snap) => callback(rows(snap)), onError);
+}
+
+// kind is "platform", "category" or "subcategory". The admin-chosen id is the
+// Firestore document id.
+export function saveBoostItem(kind, id, data, { isNew = false } = {}) {
+  const collectionName = BOOST_COLLECTIONS[kind];
+  if (!collectionName) throw new Error("Unknown boosting item.");
+  if (typeof id !== "string" || !BOOST_ID_PATTERN.test(id)) {
+    throw new Error("ID must be 2–40 letters, numbers, dashes or underscores.");
+  }
+  const payload = { ...data, updatedAt: serverTimestamp() };
+  if (isNew) return setDoc(doc(db, collectionName, id), { ...payload, createdAt: serverTimestamp() });
+  return updateDoc(doc(db, collectionName, id), payload);
+}
+
+// Buys one boosting service: the catalogue's price × quantity, paid from the wallet.
+// The order id is "<uid>_<requestId>", so a retried checkout returns the original
+// order instead of charging twice.
+export async function placeBoostOrder(requestId, { subcategoryId, quantity, link }) {
+  const user = auth.currentUser;
+  if (!user) throw new Error("Sign in to continue.");
+  if (typeof requestId !== "string" || requestId.length < 8 || requestId.length > 80 || !ID_PATTERN.test(requestId)) {
+    throw new Error("Request ID is invalid.");
+  }
+  const amount = Number(quantity);
+  if (!Number.isSafeInteger(amount) || amount < 1 || amount > 100000) {
+    throw new Error("Quantity must be a positive whole number (up to 100,000 units).");
+  }
+  const target = String(link || "").trim().slice(0, 300);
+  if (!target) throw new Error("Enter the link or username to boost.");
+  if (typeof subcategoryId !== "string" || !BOOST_ID_PATTERN.test(subcategoryId)) {
+    throw new Error("Service is invalid.");
+  }
+
+  const uid = user.uid;
+  const orderId = `${uid}_${requestId}`;
+  const orderRef = doc(db, "boostOrders", orderId);
+  const userRef = doc(db, "users", uid);
+
+  return runTransaction(db, async (tx) => {
+    const existing = await tx.get(orderRef);
+    if (existing.exists()) {
+      const order = existing.data();
+      return { orderId, status: order.status, total: order.total, duplicate: true };
+    }
+
+    const serviceSnap = await tx.get(doc(db, "boostSubcategories", subcategoryId));
+    const service = serviceSnap.exists() ? serviceSnap.data() : null;
+    if (!service || service.active !== true) throw new Error("This service is not available right now.");
+    const categorySnap = await tx.get(doc(db, "boostCategories", String(service.categoryId || "")));
+    const category = categorySnap.exists() ? categorySnap.data() : null;
+    if (!category || category.active !== true) throw new Error("This service is not available right now.");
+    const platformSnap = await tx.get(doc(db, "boostPlatforms", String(category.platformId || "")));
+    const platform = platformSnap.exists() ? platformSnap.data() : null;
+    if (!platform || platform.active !== true) throw new Error("This service is not available right now.");
+
+    const unitPrice = Number(service.price);
+    if (!Number.isInteger(unitPrice) || unitPrice < 1) throw new Error("This service has no valid price.");
+    const total = unitPrice * amount;
+    if (!Number.isSafeInteger(total) || total < 1) throw new Error("That quantity is too large.");
+
+    const profileSnap = await tx.get(userRef);
+    if (!profileSnap.exists()) throw new Error("Your profile is not ready yet. Sign out and back in.");
+    const balance = Number(profileSnap.data().balance || 0);
+    if (balance < total) {
+      throw new Error(`Your wallet has ${naira(balance)} but this order costs ${naira(total)}. Fund your wallet first.`);
+    }
+    const newBalance = balance - total;
+
+    tx.update(userRef, { balance: newBalance, lastBoostOrderId: orderId, updatedAt: serverTimestamp() });
+    tx.set(orderRef, {
+      uid, requestId,
+      platformId: platformSnap.id, platformName: String(platform.name || "Platform").slice(0, 80),
+      categoryId: categorySnap.id, categoryName: String(category.name || "Category").slice(0, 80),
+      subcategoryId: serviceSnap.id, subcategoryName: String(service.name || "Service").slice(0, 120),
+      unit: String(service.unit || "").slice(0, 60),
+      unitPrice, quantity: amount, total,
+      link: target, status: "paid",
+      createdAt: serverTimestamp(), updatedAt: serverTimestamp()
+    });
+    tx.set(doc(db, "users", uid, "transactions", `boost_${orderId}`), {
+      type: "boost", title: `Boost · ${String(service.name || "Service").slice(0, 60)}`, amount: -total,
+      status: "paid", orderId, balanceAfter: newBalance, createdAt: serverTimestamp()
+    });
+    tx.set(doc(db, "ledger", `boost_${orderId}`), {
+      type: "boost", uid, amount: -total, balanceAfter: newBalance,
+      reference: orderId, actor: uid, createdAt: serverTimestamp()
+    });
+    return {
+      orderId, status: "paid", unitPrice, quantity: amount,
+      total, balance: newBalance, duplicate: false
+    };
+  });
+}
+
+const BOOST_ORDER_TRANSITIONS = {
+  paid: ["processing", "cancelled"],
+  processing: ["delivered", "cancelled"],
+  delivered: [],
+  cancelled: []
+};
+export const NEXT_BOOST_ACTIONS = {
+  paid: [["processing", "Start work"], ["cancelled", "Cancel & refund"]],
+  processing: [["delivered", "Mark delivered"], ["cancelled", "Cancel & refund"]],
+  delivered: [],
+  cancelled: []
+};
+
+// Admin moves a boost order forward, or cancels it (refunding the wallet in the
+// same transaction). Digital service: paid → processing → delivered.
+export async function setBoostOrderStatus(orderId, status) {
+  if (!["processing", "delivered", "cancelled"].includes(status)) {
+    throw new Error("Status must be processing, delivered or cancelled.");
+  }
+  const admin = auth.currentUser?.email || "admin";
+  const orderRef = doc(db, "boostOrders", orderId);
+
+  return runTransaction(db, async (tx) => {
+    const orderSnap = await tx.get(orderRef);
+    if (!orderSnap.exists()) throw new Error("Boost order not found.");
+    const order = orderSnap.data();
+    if (!BOOST_ORDER_TRANSITIONS[order.status]?.includes(status)) {
+      throw new Error(`A boost order that is ${order.status} cannot be changed to ${status}.`);
+    }
+
+    if (status !== "cancelled") {
+      tx.update(orderRef, { status, updatedAt: serverTimestamp() });
+      return { orderId, status };
+    }
+
+    const refund = Number(order.total || 0);
+    const userRef = doc(db, "users", order.uid);
+    const profileSnap = await tx.get(userRef);
+    if (!profileSnap.exists()) throw new Error("The customer profile for this order does not exist.");
+    const newBalance = Number(profileSnap.data().balance || 0) + refund;
+
+    tx.update(userRef, { balance: newBalance, updatedAt: serverTimestamp() });
+    tx.update(orderRef, { status: "cancelled", cancelledAt: serverTimestamp(), updatedAt: serverTimestamp() });
+    tx.set(doc(db, "users", order.uid, "transactions", `boostrefund_${orderId}`), {
+      type: "refund", title: `Refund · Boost ${orderId.slice(-6).toUpperCase()}`, amount: refund,
+      status: "refunded", orderId, balanceAfter: newBalance, createdAt: serverTimestamp()
+    });
+    tx.set(doc(db, "ledger", `boostrefund_${orderId}`), {
+      type: "refund", uid: order.uid, amount: refund, balanceAfter: newBalance,
+      reference: orderId, actor: admin, createdAt: serverTimestamp()
+    });
+    return { orderId, status: "cancelled", refunded: refund, balance: newBalance };
+  });
+}
+
+export function watchMyBoostOrders(uid, callback, onError = noop) {
+  return onSnapshot(query(collection(db, "boostOrders"), where("uid", "==", uid)), (snap) => {
+    callback(rows(snap).sort((a, b) => (toDate(b.createdAt)?.getTime() || 0) - (toDate(a.createdAt)?.getTime() || 0)));
+  }, onError);
+}
+
+export function watchAllBoostOrders(callback, onError = noop) {
+  return onSnapshot(collection(db, "boostOrders"), (snap) => {
+    callback(rows(snap).sort((a, b) => (toDate(b.createdAt)?.getTime() || 0) - (toDate(a.createdAt)?.getTime() || 0)));
+  }, onError);
+}

@@ -14,7 +14,7 @@
 </main>
 <div id="site-footer"></div>
 <script type="module">
-  import { mountHeader, mountFooter, getProduct, productMedia, productImages, priceHTML, productPrice, stockBadge, addToCart, esc, readParam, showToast } from './store.js';
+  import { mountHeader, mountFooter, getProduct, productMedia, productImages, priceHTML, productPrice, stockBadge, addToCart, esc, naira, readParam, showToast } from './store.js';
   mountHeader('shop.html');
   mountFooter();
   const host = document.querySelector('#detail');
@@ -22,13 +22,10 @@
   let quantity = 1;
   let product = null;
   let galleryIndex = 0;
-  let chosenSize = '';
-  let chosenColor = '';
+  let chosenVariant = '';
 
   function pickReady() {
-    const needsSize = (product.sizes || []).length > 0;
-    const needsColor = (product.colors || []).length > 0;
-    return (!needsSize || chosenSize) && (!needsColor || chosenColor);
+    return !(product.variations || []).length || Boolean(chosenVariant);
   }
 
   function paint() {
@@ -53,20 +50,15 @@
           </div>
           <h1>${esc(product.name)}</h1>
           <div class="row">${stockBadge(product)}<span class="badge gold">Sold ${Number(product.sold || 0)}</span></div>
-          ${(chosenSize || chosenColor) && ready ? `<div class="price detail-price"><span>${new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', maximumFractionDigits: 0 }).format(productPrice(product, { size: chosenSize, color: chosenColor }))}</span></div>` : priceHTML(product, 'price detail-price')}
+          ${chosenVariant && ready ? `<div class="price detail-price"><span>${naira(productPrice(product, chosenVariant))}</span></div>` : priceHTML(product, 'price detail-price')}
           <p class="desc">${esc(product.description || 'Details will be shared by the store admin.')}</p>
           ${(product.keywords || []).length ? `<div class="tags">${product.keywords.map(k => `<span class="tag">#${esc(k)}</span>`).join('')}</div>` : ''}
           <div class="small muted" style="margin-top:12px">Product ID: <span class="mono" style="color:var(--navy)">${esc(product.id)}</span></div>
 
-          ${(product.sizes || []).length ? `
+          ${(product.variations || []).length ? `
             <div class="variant-block">
-              <div class="small muted" style="margin-bottom:8px">Size${chosenSize ? '' : ' — pick one'}</div>
-              <div class="variant-opts">${product.sizes.map(s => `<button type="button" class="variant-opt ${s === chosenSize ? 'on' : ''}" data-size="${esc(s)}">${esc(s)}</button>`).join('')}</div>
-            </div>` : ''}
-          ${(product.colors || []).length ? `
-            <div class="variant-block">
-              <div class="small muted" style="margin-bottom:8px">Colour${chosenColor ? '' : ' — pick one'}</div>
-              <div class="variant-opts">${product.colors.map(c => `<button type="button" class="variant-opt ${c === chosenColor ? 'on' : ''}" data-color="${esc(c)}">${esc(c)}</button>`).join('')}</div>
+              <div class="small muted" style="margin-bottom:8px">Variation${chosenVariant ? '' : ' — pick one'}</div>
+              <div class="variant-opts">${product.variations.map(v => `<button type="button" class="variant-opt ${v.name === chosenVariant ? 'on' : ''}" data-variant="${esc(v.name)}">${esc(v.name)} <small>${naira(v.price)}</small></button>`).join('')}</div>
             </div>` : ''}
 
           <div class="buy-box">
@@ -74,7 +66,7 @@
               <div class="qty"><button type="button" data-q="-1" aria-label="Decrease" ${out ? 'disabled' : ''}>−</button><span>${quantity}</span><button type="button" data-q="1" aria-label="Increase" ${out ? 'disabled' : ''}>+</button></div>
             </div>
             <div class="row">
-              <button class="btn btn-gold btn-lg" id="add" ${out || !ready ? 'disabled' : ''}>${out ? 'Currently unavailable' : (ready ? 'Add to cart' : 'Pick the options above')}</button>
+              <button class="btn btn-gold btn-lg" id="add" ${out || !ready ? 'disabled' : ''}>${out ? 'Currently unavailable' : (ready ? 'Add to cart' : 'Pick a variation above')}</button>
               <a class="btn btn-ghost btn-lg" href="cart.html">View cart</a>
             </div>
             <p class="small muted" style="margin:0">Pay from your KORASTORE wallet at checkout — the items price plus a platform service fee and delivery. Fund your wallet first if your balance is low.</p>
@@ -86,12 +78,8 @@
       galleryIndex = Number(btn.dataset.img);
       paint();
     }));
-    host.querySelectorAll('[data-size]').forEach(btn => btn.addEventListener('click', () => {
-      chosenSize = btn.dataset.size;
-      paint();
-    }));
-    host.querySelectorAll('[data-color]').forEach(btn => btn.addEventListener('click', () => {
-      chosenColor = btn.dataset.color;
+    host.querySelectorAll('[data-variant]').forEach(btn => btn.addEventListener('click', () => {
+      chosenVariant = btn.dataset.variant;
       paint();
     }));
     host.querySelectorAll('[data-q]').forEach(btn => btn.addEventListener('click', () => {
@@ -99,9 +87,9 @@
       paint();
     }));
     host.querySelector('#add')?.addEventListener('click', (event) => {
-      addToCart(product.id, quantity, { size: chosenSize, color: chosenColor });
+      addToCart(product.id, quantity, chosenVariant);
       event.currentTarget.textContent = 'Added to cart ✓';
-      showToast('Added to cart', `${product.name}${chosenSize || chosenColor ? ` · ${[chosenSize, chosenColor].filter(Boolean).join(' · ')}` : ''}`);
+      showToast('Added to cart', `${product.name}${chosenVariant ? ` · ${chosenVariant}` : ''}`);
     });
   }
 

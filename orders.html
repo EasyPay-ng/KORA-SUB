@@ -13,10 +13,12 @@
   <div id="account-tabs"></div>
   <div id="notice"></div>
   <div id="orders"><div class="empty">Loading orders…</div></div>
+  <h2 style="margin:30px 0 12px">Boosting orders</h2>
+  <div id="boost-orders"><div class="empty">Loading boost orders…</div></div>
 </main>
 <div id="site-footer"></div>
 <script type="module">
-  import { mountHeader, mountFooter, mountAccountTabs, requireCustomer, watchMyOrders, naira, esc, formatDateTime, formatDate, readParam, ORDER_STEPS, STATUS_LABEL, statusClass } from './store.js';
+  import { mountHeader, mountFooter, mountAccountTabs, requireCustomer, watchMyOrders, watchMyBoostOrders, naira, esc, formatDateTime, formatDate, readParam, ORDER_STEPS, STATUS_LABEL, statusClass, variantLabel } from './store.js';
   mountHeader('orders.html');
   mountFooter();
   mountAccountTabs('orders.html');
@@ -49,12 +51,34 @@
             <div class="row"><span class="badge ${statusClass(o.status)}">${esc(STATUS_LABEL[o.status] || o.status)}</span><b class="mono" style="color:var(--navy)">${naira(o.total)}</b></div>
           </div>
           ${track}
-          <ul class="order-items">${(o.items || []).map(i => `<li><span>${esc(i.name)}${(i.size || i.color) ? ` · <small class="muted">${esc([i.size, i.color].filter(Boolean).join(' · '))}</small>` : ''} × ${i.quantity}</span><span>${naira(i.lineTotal)}</span></li>`).join('')}${feeRows}</ul>
+          <ul class="order-items">${(o.items || []).map(i => `<li><span>${esc(i.name)}${variantLabel(i) ? ` · <small class="muted">${esc(variantLabel(i))}</small>` : ''} × ${i.quantity}</span><span>${naira(i.lineTotal)}</span></li>`).join('')}${feeRows}</ul>
           <p class="small muted" style="margin:12px 0 0">Deliver to: ${esc([d.address, d.lga, d.state, d.country].filter(Boolean).join(', '))}${cancelled ? ' · Refunded to your wallet' : ''}</p>
         </article>`;
     }).join('');
   }, (error) => {
     document.querySelector('#orders').innerHTML = `<div class="empty"><b>Orders unavailable</b>${esc(error.message)}</div>`;
+  });
+
+  watchMyBoostOrders(user.uid, (rows) => {
+    const host = document.querySelector('#boost-orders');
+    if (!rows.length) {
+      host.innerHTML = '<div class="empty"><b>No boost orders yet</b>Order a boost from the <a class="link" href="boost.html">boost page</a> and it will appear here.</div>';
+      return;
+    }
+    host.innerHTML = rows.map(o => `
+      <article class="order">
+        <div class="order-head">
+          <div><b>Boost ${esc(o.id.slice(-8).toUpperCase())}</b><div class="small muted">${esc(formatDateTime(o.createdAt))}</div></div>
+          <div class="row"><span class="badge ${statusClass(o.status)}">${esc(STATUS_LABEL[o.status] || o.status)}</span><b class="mono" style="color:var(--navy)">${naira(o.total)}</b></div>
+        </div>
+        <ul class="order-items">
+          <li><span>${esc(o.subcategoryName)}${o.unit ? ` <small class="muted">per ${esc(o.unit)}</small>` : ''} × ${o.quantity}</span><span>${naira(o.total)}</span></li>
+          <li><span class="muted">Target</span><span class="small mono">${esc(o.link || '')}</span></li>
+        </ul>
+        <p class="small muted" style="margin:12px 0 0">${esc(o.platformName || '')}${o.categoryName ? ` · ${esc(o.categoryName)}` : ''}${o.status === 'cancelled' ? ' · Refunded to your wallet' : ''}</p>
+      </article>`).join('');
+  }, (error) => {
+    document.querySelector('#boost-orders').innerHTML = `<div class="empty"><b>Boost orders unavailable</b>${esc(error.message)}</div>`;
   });
 </script>
 </body>
