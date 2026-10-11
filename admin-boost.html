@@ -47,7 +47,7 @@
           <label class="field">Unit <small>what one quantity buys</small><input class="input" id="service-unit" maxlength="60" placeholder="e.g. followers"></label>
         </div>
         <div class="field-row">
-          <label class="field">Price per unit (₦) <small>whole naira</small><input class="input" id="service-price" type="number" min="1" step="1" placeholder="e.g. 17"></label>
+          <label class="field">Price per unit (₦) <small>e.g. 17, or as little as 0.1 — shoppers pay whole naira, so the amount is rounded to the nearest ₦</small><input class="input" id="service-price" type="number" min="0.1" step="0.01" placeholder="e.g. 17 or 0.1"></label>
           <label class="field">Average time <small>optional · e.g. 1 minute</small><input class="input" id="service-average" maxlength="120" placeholder="e.g. 1 minute"></label>
         </div>
         <div class="field-row">
@@ -84,7 +84,7 @@
   </main>
 </div>
 <script type="module">
-  import { mountAdminSidebar, requireAdmin, watchBoostPlatforms, watchBoostCategories, watchBoostSubcategories, watchAllBoostOrders, saveBoostItem, setBoostOrderStatus, BOOST_ID_PATTERN, NEXT_BOOST_ACTIONS, naira, esc, formatDateTime, STATUS_LABEL, statusClass, boostCategoryTitle, formatBoostLimits, boostServiceLimits } from './store.js';
+  import { mountAdminSidebar, requireAdmin, watchBoostPlatforms, watchBoostCategories, watchBoostSubcategories, watchAllBoostOrders, saveBoostItem, setBoostOrderStatus, BOOST_ID_PATTERN, BOOST_MIN_UNIT_PRICE, NEXT_BOOST_ACTIONS, naira, esc, formatDateTime, STATUS_LABEL, statusClass, boostCategoryTitle, formatBoostLimits, boostServiceLimits, parseBoostPrice, formatBoostPrice } from './store.js';
   mountAdminSidebar('admin-boost.html');
   const $ = (id) => document.querySelector(id);
 
@@ -191,7 +191,7 @@
         <td>${esc(categoryLabel(s.categoryId))}</td>
         <td><b>${esc(s.name)}</b>${s.averageTime ? `<small>Avg: ${esc(s.averageTime)}</small>` : ''}</td>
         <td><small>${esc(s.unit || '—')}</small></td>
-        <td class="mono"><b>${naira(s.price)}</b></td>
+        <td class="mono"><b>${formatBoostPrice(s.price)}</b></td>
         <td><small class="mono">${esc(formatBoostLimits(s))}</small></td>
         <td><span class="badge ${s.active ? 'ok' : ''}">${s.active ? 'Visible' : 'Hidden'}</span></td>
         <td><div class="table-actions"><button class="btn btn-sm btn-ghost" data-sedit="${esc(s.id)}">Edit</button><button class="btn btn-sm btn-ghost" data-stoggle="${esc(s.id)}">${s.active ? 'Hide' : 'Show'}</button></div></td>
@@ -309,8 +309,10 @@
       if (!data.categoryId) return error.textContent = 'Add a category first.';
       data.unit = $('#service-unit').value.trim().slice(0, 60);
       if (!data.unit) return error.textContent = 'Enter the unit, e.g. “followers”.';
-      const price = Math.round(Number($('#service-price').value));
-      if (!Number.isFinite(price) || price < 1) return error.textContent = 'Price must be at least ₦1 per unit.';
+      const price = parseBoostPrice($('#service-price').value);
+      if (price === null) {
+        return error.textContent = `Price per unit must be at least ${formatBoostPrice(BOOST_MIN_UNIT_PRICE)} (e.g. 17 or 0.1), with up to 2 decimals.`;
+      }
       data.price = price;
       const minRaw = $('#service-min').value.trim();
       const min = minRaw === '' ? 1 : Math.round(Number(minRaw));

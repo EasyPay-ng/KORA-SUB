@@ -1,0 +1,172 @@
+[
+  {
+    "state": "Lagos",
+    "stations": 74,
+    "active": 74
+  },
+  {
+    "state": "Delta",
+    "stations": 36,
+    "active": 36
+  },
+  {
+    "state": "Ogun",
+    "stations": 35,
+    "active": 35
+  },
+  {
+    "state": "Oyo",
+    "stations": 30,
+    "active": 30
+  },
+  {
+    "state": "Federal Capital Territory",
+    "stations": 28,
+    "active": 28
+  },
+  {
+    "state": "Rivers",
+    "stations": 28,
+    "active": 28
+  },
+  {
+    "state": "Edo",
+    "stations": 23,
+    "active": 23
+  },
+  {
+    "state": "Anambra",
+    "stations": 19,
+    "active": 19
+  },
+  {
+    "state": "Ondo",
+    "stations": 18,
+    "active": 18
+  },
+  {
+    "state": "Osun",
+    "stations": 18,
+    "active": 18
+  },
+  {
+    "state": "Kano",
+    "stations": 14,
+    "active": 14
+  },
+  {
+    "state": "Akwa Ibom",
+    "stations": 13,
+    "active": 13
+  },
+  {
+    "state": "Kaduna",
+    "stations": 12,
+    "active": 12
+  },
+  {
+    "state": "Imo",
+    "stations": 10,
+    "active": 10
+  },
+  {
+    "state": "Abia",
+    "stations": 9,
+    "active": 9
+  },
+  {
+    "state": "Enugu",
+    "stations": 9,
+    "active": 9
+  },
+  {
+    "state": "Kwara",
+    "stations": 9,
+    "active": 9
+  },
+  {
+    "state": "Niger",
+    "stations": 9,
+    "active": 9
+  },
+  {
+    "state": "Cross River",
+    "stations": 8,
+    "active": 8
+  },
+  {
+    "state": "Kogi",
+    "stations": 8,
+    "active": 8
+  },
+  {
+    "state": "Ekiti",
+    "stations": 7,
+    "active": 7
+  },
+  {
+    "state": "Benue",
+    "stations": 5,
+    "active": 5
+  },
+  {
+    "state": "Bayelsa",
+    "stations": 4,
+    "active": 4
+  },
+  {
+    "state": "Borno",
+    "stations": 3,
+    "active": 3
+  },
+  {
+    "state": "Ebonyi",
+    "stations": 3,
+    "active": 3
+  },
+  {
+    "state": "Nasarawa",
+    "stations": 3,
+    "active": 3
+  },
+  {
+    "state": "Sokoto",
+    "stations": 3,
+    "active": 3
+  },
+  {
+    "state": "Adamawa",
+    "stations": 2,
+    "active": 2
+  },
+  {
+    "state": "Bauchi",
+    "stations": 2,
+    "active": 2
+  },
+  {
+    "state": "Katsina",
+    "stations": 2,
+    "active": 2
+  },
+  {
+    "state": "Kebbi",
+    "stations": 2,
+    "active": 2
+  },
+  {
+    "state": "Plateau",
+    "stations": 2,
+    "active": 2
+  },
+  {
+    "state": "Yobe",
+    "stations": 2,
+    "active": 2
+  },
+  {
+    "state": "Gombe",
+    "stations": 1,
+    "active": 1
+  }
+]
