@@ -1,0 +1,4512 @@
+[
+  {
+    "id": "b6b05f1c-70af-4532-9add-8e8cd1afcddf",
+    "name": "Jumia Pickup Station Aba",
+    "state": "Abia",
+    "address": "179 Azikwe road Aba",
+    "landmark": "Close to Methodist church",
+    "latitude": 5.1079645,
+    "longitude": 7.3764171,
+    "is_active": true
+  },
+  {
+    "id": "f1f7f6c9-ac2c-4725-8d47-7614a9c9d1e4",
+    "name": "Jumia Pickup Station Aba Road",
+    "state": "Abia",
+    "address": "Bethelliland fuel stations No-180 Aba road Opposite madona catholic hospital",
+    "landmark": "Madonna Hospital",
+    "latitude": 5.1282196,
+    "longitude": 7.4097125,
+    "is_active": true
+  },
+  {
+    "id": "4cd1c774-4753-42e5-a9c5-bccd7de3d3e0",
+    "name": "Jumia Pickup Station Abayi",
+    "state": "Abia",
+    "address": "Ejinaka Plaza, Adjacent Girls' Secondary School Abayi - Umuocham, Aba",
+    "landmark": "Adjacent Girls' Secondary School Abayi",
+    "latitude": 5.1411125,
+    "longitude": 7.3473281,
+    "is_active": true
+  },
+  {
+    "id": "9bf50d0d-5e3d-4d20-a88f-950659275d24",
+    "name": "Jumia Pickup Station Ariaria",
+    "state": "Abia",
+    "address": "Ukwumango, 247 Faulks Rd, Aba, 450272, Abia, NG",
+    "landmark": "Opposite Assemblies Of God Church, Ariaria.",
+    "latitude": 5.108768,
+    "longitude": 7.3346034,
+    "is_active": true
+  },
+  {
+    "id": "fc157b3f-de65-4ded-85bf-6fedb6da99a8",
+    "name": "Jumia Pickup Station Ihie Ndume",
+    "state": "Abia",
+    "address": "No 101 Ikot Ekpene Road, Ihie ndume.",
+    "landmark": "By Winners Chapel Area. Amara Jane Hospital.",
+    "latitude": 5.5156625,
+    "longitude": 7.5159531,
+    "is_active": true
+  },
+  {
+    "id": "441a463a-b02f-4f6a-921c-e4705ebb0edc",
+    "name": "Jumia Pickup Station Mission Hill",
+    "state": "Abia",
+    "address": "DOUBLE POLE JUNCTION OPPOSITE METHODIST CHURCH NIGERIA (All Saints MCN) BY EZIAMA OSSAH COMMUNITY PRIMARY SCHOOL.UMUAHIA NORTH LGA. ABIA STATE.",
+    "landmark": "METHODIST CHURCH NIGERIA",
+    "latitude": 5.5363008,
+    "longitude": 7.4699172,
+    "is_active": true
+  },
+  {
+    "id": "96380b61-37b2-4a14-b051-a73c11443629",
+    "name": "Jumia Pickup Station Ogbor Hill",
+    "state": "Abia",
+    "address": "168 Ikot Ekpene Road, Ogbor hill, opposite Isico filling Station, before Opobo Junction",
+    "landmark": "Close to Shalon Medical laboratory",
+    "latitude": 5.113675,
+    "longitude": 7.386775,
+    "is_active": true
+  },
+  {
+    "id": "a1cf7752-e182-40c1-ba5a-3187e273e884",
+    "name": "Jumia Pickup Station Umuahia",
+    "state": "Abia",
+    "address": "No.13 Ohafia Street, Umuahia Abia State",
+    "landmark": "Behind Slot house",
+    "latitude": 5.5330117,
+    "longitude": 7.4952755,
+    "is_active": true
+  },
+  {
+    "id": "efcc8ad2-e60f-4e3b-94c4-05e7b581466a",
+    "name": "Jumia Pickup Station Umudike Rd",
+    "state": "Abia",
+    "address": "One Kingdom Plaza, Opposite Chukwu Avenue//Opposite Beck With Fueling station, along Umudike road.",
+    "landmark": "Opposite Beckywhite Fueling Station by Timber Market",
+    "latitude": 5.4800614,
+    "longitude": 7.5436801,
+    "is_active": true
+  },
+  {
+    "id": "f4dbf9b9-1d68-4e39-9aaa-8ca869d20c98",
+    "name": "Jumia Pickup Station Kofar Bayi",
+    "state": "Adamawa",
+    "address": "Shop 5 Lumel Kessel Plaza Kofar Bayi, Near Lamido Palace Yola Town",
+    "landmark": "Lamido Palace",
+    "latitude": 9.2034963,
+    "longitude": 12.4953899,
+    "is_active": true
+  },
+  {
+    "id": "697b1b98-45cc-4c2b-bd03-56051ccf45db",
+    "name": "Jumia Pickup Station Numan Rd",
+    "state": "Adamawa",
+    "address": "Shop No 5 Damilu Numan Road, Opp NAF Base Gate",
+    "landmark": "Jimetta axis of Yola, Adamawa State",
+    "latitude": 9.2708698,
+    "longitude": 12.421894,
+    "is_active": true
+  },
+  {
+    "id": "5e5e2417-078a-4ee4-b5c9-5d113fb04569",
+    "name": "Jumia Pick Up Station Ibiakpan",
+    "state": "Akwa Ibom",
+    "address": "No. 87 Uyo rd, opp. Nkanta filling Station",
+    "landmark": "Opposite Nkanta filling Station",
+    "latitude": 5.1650046,
+    "longitude": 7.7301651,
+    "is_active": true
+  },
+  {
+    "id": "2af81042-0a28-420b-b111-54a57209ce57",
+    "name": "Jumia Pickup Station Abak",
+    "state": "Akwa Ibom",
+    "address": "Shop 15 Abak Stadium, Ikot Ekpene Express Road, Abak LGA",
+    "landmark": "Opposite Fire Service Station",
+    "latitude": 4.9898414,
+    "longitude": 7.782794,
+    "is_active": true
+  },
+  {
+    "id": "819474a0-cc8d-41a1-b88c-6dcd5cd1135b",
+    "name": "Jumia Pickup Station Dgalvo Plaza",
+    "state": "Akwa Ibom",
+    "address": "No 6, Apostolic Road, off RCC Road (DGALVO Plaza,) Eket, Akwa Ibom state.",
+    "landmark": "DGALVO Plaza,",
+    "latitude": 4.6550994,
+    "longitude": 7.9289833,
+    "is_active": true
+  },
+  {
+    "id": "6c56c9b3-1c9a-4dc6-807c-85c97652748b",
+    "name": "Jumia Pickup Station Eket",
+    "state": "Akwa Ibom",
+    "address": "79 Hospital road, along Oron - Ikot Abasi rd, Eket, Akwa Ibom.",
+    "landmark": "Opp Ecobank",
+    "latitude": 4.6371077,
+    "longitude": 7.9189848,
+    "is_active": true
+  },
+  {
+    "id": "b4ea10c4-aa26-46bb-bd8d-d09e34240bd0",
+    "name": "Jumia Pickup Station Goodluck Jonathan Boulevard",
+    "state": "Akwa Ibom",
+    "address": "NO 9 GOODLUCK JONATHAN BOULEVARD OR FORMER STADIUM ROAD OPPOSITE APOSTLE CHURCH, AKWA IMA ESTATE ASSEMBLY, AFTER MBIEREBE JUNCTION. UYO",
+    "landmark": "AKWA IMA ESTATE ASSEMBLY",
+    "latitude": 4.9996008,
+    "longitude": 7.9042535,
+    "is_active": true
+  },
+  {
+    "id": "4e2e2adc-befa-423a-a971-3ad694dac64c",
+    "name": "Jumia Pickup Station Idoro Road",
+    "state": "Akwa Ibom",
+    "address": "No 10 Idoro road,by Atiku flyover, Uyo.",
+    "landmark": "Opposite Apostolic Church",
+    "latitude": 5.0433922,
+    "longitude": 7.8933218,
+    "is_active": true
+  },
+  {
+    "id": "ecac5dae-ab62-491d-87ed-790ed21d1024",
+    "name": "Jumia Pickup Station Ikot Mbonde Rd",
+    "state": "Akwa Ibom",
+    "address": "No. 67 Urua Ekpa Road, Ikot Mbode Road, Uyo, Akwa Ibom State, Nigeria.",
+    "landmark": "High Tension lane",
+    "latitude": 5.0610359,
+    "longitude": 7.9209145,
+    "is_active": true
+  },
+  {
+    "id": "f2fbedb0-9f43-48bc-8b78-41622ece83dd",
+    "name": "Jumia Pickup Station Nwaniba",
+    "state": "Akwa Ibom",
+    "address": "135b nwaniba road beside dalapharm pharmacy.",
+    "landmark": "Dalapharm pharmacy",
+    "latitude": 5.0268105,
+    "longitude": 7.9477017,
+    "is_active": true
+  },
+  {
+    "id": "af8ef234-47dd-41b3-8088-8be059174bc8",
+    "name": "Jumia Pickup Station Oron",
+    "state": "Akwa Ibom",
+    "address": "No 135,Oron road, Oron Akwa Ibom State.",
+    "landmark": "Ikot Abasi Road by Ecobank",
+    "latitude": 5.0238535,
+    "longitude": 7.9358871,
+    "is_active": true
+  },
+  {
+    "id": "e0f307c0-f76b-42a3-87e9-9fa55c1360e4",
+    "name": "Jumia Pickup Station Oron Road",
+    "state": "Akwa Ibom",
+    "address": "411 Oron Road, Opposite Elitok's Mall, by Obikason Filling Station, Uyo, Akwa Ibom State, Nigeria.",
+    "landmark": "opposite Gifty supermarket",
+    "latitude": 4.9951731,
+    "longitude": 7.9568545,
+    "is_active": true
+  },
+  {
+    "id": "e1ae6590-8dfa-42ec-b29d-2afcd1b89251",
+    "name": "Jumia Pickup Station Ring Road 3",
+    "state": "Akwa Ibom",
+    "address": "Shop2, Ground floor, Trinity plaza, Ring Road 3, Uyo",
+    "landmark": "Hensek Integrated Services",
+    "latitude": 4.9894076,
+    "longitude": 7.9405096,
+    "is_active": true
+  },
+  {
+    "id": "75c1bb04-c2d1-4732-833f-1255511ae3fe",
+    "name": "Jumia Pickup Station Shelter Afrique",
+    "state": "Akwa Ibom",
+    "address": "No 1 chief Udo Eno Street, Off Oron Road by Custom Office, Uyo, Akwa-Ibom State",
+    "landmark": "Mbiabo U-turn",
+    "latitude": 4.9854931,
+    "longitude": 7.9785846,
+    "is_active": true
+  },
+  {
+    "id": "7422f1f4-cc16-49a7-ab1d-a703abff08c6",
+    "name": "Jumia Pickup station Uyo",
+    "state": "Akwa Ibom",
+    "address": "No1,Dr Clement Isong, Abak Road Federal Housing. Uyo",
+    "landmark": "St. Athanasius Hospital, Uyo",
+    "latitude": 5.0258717,
+    "longitude": 7.9132358,
+    "is_active": true
+  },
+  {
+    "id": "8bfdd5cd-d877-4226-af25-6a36fb96e321",
+    "name": "Jumia Pickup Station Amunko Junction",
+    "state": "Anambra",
+    "address": "Christy Udemehi Plaza, Beside Organiser Fuel Station Amuko Junction, Old Oba Nnewi Road, Anambra State",
+    "landmark": "Beside Organiser Fuel Station Amuko Junction",
+    "latitude": 6.0343872,
+    "longitude": 6.9082731,
+    "is_active": true
+  },
+  {
+    "id": "6d8c1e83-1b6a-4b65-86bb-bad3563c3769",
+    "name": "Jumia Pickup Station Atani Road",
+    "state": "Anambra",
+    "address": "Peace plaza ,135 Atani road close to Deeper life junction after chioma hospital junction, ogbaru, Anambra state.",
+    "landmark": "Close to Deeper Life Junction After Chioma Hospital Junction, Ogbaru",
+    "latitude": 6.0993875,
+    "longitude": 6.7585781,
+    "is_active": true
+  },
+  {
+    "id": "e3942ea0-b2a3-4cf9-8cf6-a8f498613dc7",
+    "name": "Jumia Pickup Station Ekwulobia",
+    "state": "Anambra",
+    "address": "Jibeco Filling Station along Ekwulobia - Oko road",
+    "landmark": "Jibeco filling Station",
+    "latitude": 6.0256442,
+    "longitude": 7.0770727,
+    "is_active": true
+  },
+  {
+    "id": "8d75d2cd-6302-4290-9e5a-3f1e41b83987",
+    "name": "Jumia Pickup Station Five Star Onitsha-Owerri Rd",
+    "state": "Anambra",
+    "address": "KM 4/6 Onitsha Owerri Road, Anambra State.",
+    "landmark": "Verdict Of God Complex (VGC) shopping Mall.",
+    "latitude": 6.1119375,
+    "longitude": 6.7927344,
+    "is_active": true
+  },
+  {
+    "id": "1def6492-c5d2-4671-b686-9e9898b88cfb",
+    "name": "Jumia Pickup Station Ihiala",
+    "state": "Anambra",
+    "address": "Shop 104 LJO plaza opposite GUO transport company",
+    "landmark": "GUO transport company",
+    "latitude": 5.8587522,
+    "longitude": 6.8596315,
+    "is_active": true
+  },
+  {
+    "id": "0a2a63c0-b6b2-4844-b234-a1690f1aa850",
+    "name": "Jumia Pickup Station Nkisi Rd",
+    "state": "Anambra",
+    "address": "Santa Maria Plaza, 3-3, Trans Nkisi, Otuoucha Road, Anambra state.",
+    "landmark": "Beside MOTORCRAFT FILLING STATION",
+    "latitude": 6.2309188,
+    "longitude": 6.8243629,
+    "is_active": true
+  },
+  {
+    "id": "7402cbb7-c33b-48af-b3b4-59c87e885fb2",
+    "name": "Jumia Pickup Station Nkpor",
+    "state": "Anambra",
+    "address": "54, Limca Road, Nkpor, Anambra",
+    "landmark": "Alliance plaza, beside Pax pharmacy.",
+    "latitude": 6.1425554,
+    "longitude": 6.8233185,
+    "is_active": true
+  },
+  {
+    "id": "0b463303-d91e-4101-8a10-426043163df9",
+    "name": "Jumia Pickup station Nnewi",
+    "state": "Anambra",
+    "address": "K.M plaza,ibeto Avenue off Nnewi-Nnobi rd close to first bank Nnewi.",
+    "landmark": "Near First bank by roundabout nnewi",
+    "latitude": 6.0206165,
+    "longitude": 6.9172893,
+    "is_active": true
+  },
+  {
+    "id": "0081024e-8c4d-487a-a457-8b4ab39bb582",
+    "name": "Jumia Pickup Station Nnewi-Oba old rd",
+    "state": "Anambra",
+    "address": "St Stephen plaza, along Nnewi-oba old road, opposite Government Technical College Ichi",
+    "landmark": "Government Technical college",
+    "latitude": 6.0473943,
+    "longitude": 6.8810563,
+    "is_active": true
+  },
+  {
+    "id": "12b81ba2-95f8-400f-a029-9bedd00ba0cc",
+    "name": "Jumia Pickup Station Oba",
+    "state": "Anambra",
+    "address": "Oba new road,Kaima Plaza ,,Dessy shopping mall,, before new road junction",
+    "landmark": "Oba new road junction",
+    "latitude": 6.0467968,
+    "longitude": 6.8692585,
+    "is_active": true
+  },
+  {
+    "id": "ff4b6617-2c75-4089-b3ad-b7ef1a55ae33",
+    "name": "Jumia Pickup Station Obosi",
+    "state": "Anambra",
+    "address": "Shop 1&2 Ononye Building oppst Orbit Hotel, along Obosi road, Obosi. Land Mark; Orbit Hotel",
+    "landmark": "Orbit Hotel",
+    "latitude": 6.1055875,
+    "longitude": 6.8185469,
+    "is_active": true
+  },
+  {
+    "id": "f87613e9-efd2-493d-b5b8-27ff6dab7d97",
+    "name": "Jumia Pickup Station Ogidi",
+    "state": "Anambra",
+    "address": "Inside Jefstack filling station opposite first bank, Oye Olisa Market, along Old Enugu-Onitsha road, Ogidi, Anambra state.",
+    "landmark": "Jefstack filling station",
+    "latitude": 6.1573125,
+    "longitude": 6.8921875,
+    "is_active": true
+  },
+  {
+    "id": "f15de642-3b8b-4c13-bf79-1b3b988bc071",
+    "name": "Jumia Pickup Station Onitsha",
+    "state": "Anambra",
+    "address": "Onitsha-Owerri road, besides Patterson Grammar School. Onitsha",
+    "landmark": "Opp ASS Oil & Gas Ltd.",
+    "latitude": 6.1143826,
+    "longitude": 6.792241,
+    "is_active": true
+  },
+  {
+    "id": "bc9c0ff2-d3bf-49d7-94a7-cd3d7468717c",
+    "name": "Jumia Pickup Station Onitsha Old Market Rd",
+    "state": "Anambra",
+    "address": "DUBAI TOWER SHOPPING MALL PLAZA , CLOSE TO POST OFFICE , OPPOSITE UKWU FRUIT, 38/50 OLD MARKET ROAD ONITSHA , ANAMBRA STATE",
+    "landmark": "OPPOSITE UKWU FRUIT.",
+    "latitude": 6.1529863,
+    "longitude": 6.7818237,
+    "is_active": true
+  },
+  {
+    "id": "33189535-4ed9-41f7-a3c2-7edbfc001f3a",
+    "name": "Jumia Pickup Station Oraifite",
+    "state": "Anambra",
+    "address": "6 Ibolo oraifite, Onitsha Owerri Road, Ekwusigo, LGA, Oraifite 435115, Anambra.",
+    "landmark": "By Gasrite247 Services gas shop",
+    "latitude": 6.0182625,
+    "longitude": 6.8202344,
+    "is_active": true
+  },
+  {
+    "id": "df64627d-c7fe-473e-88ec-4f1cf9c3f49c",
+    "name": "Jumia Pickup Station Ozubulu",
+    "state": "Anambra",
+    "address": "Ichie Obinwelugo Plaza Opposite Ozuda Market Near Michael Junction Ozubulu",
+    "landmark": "Ozuda Market",
+    "latitude": 5.9588393,
+    "longitude": 6.8522793,
+    "is_active": true
+  },
+  {
+    "id": "a1c4e839-e804-4e5a-9cfe-fc1c3c0db6c7",
+    "name": "Jumia Pickup Station roundabout Amawbia/Awka",
+    "state": "Anambra",
+    "address": "Nicowas plaza Amawbia, Beside Anambra state Commission of police and Prison Amawbia",
+    "landmark": "BuildRight Supplies",
+    "latitude": 6.1999888,
+    "longitude": 7.0478064,
+    "is_active": true
+  },
+  {
+    "id": "acb8fc40-c6cd-47f7-8f12-bc7cf5b634a9",
+    "name": "Jumia Pickup Station Temp-Site",
+    "state": "Anambra",
+    "address": "4 lamitel crescent behind kings merit hotel temp site",
+    "landmark": "Behind Kings Merit hotel",
+    "latitude": 6.224503,
+    "longitude": 7.0627837,
+    "is_active": true
+  },
+  {
+    "id": "c23aa567-f622-45c1-88cf-022abccab8d9",
+    "name": "Jumia Pickup Station Uni Zik Junction",
+    "state": "Anambra",
+    "address": "Ezeokoye Chukwunonso Street, Crunchies Fast-food junction Awka, behind FCMB bank, along Enugu-Onitsha express road Awka, Anambra state.",
+    "landmark": "Crunchies Fast-food Awka",
+    "latitude": 6.2224375,
+    "longitude": 7.0681875,
+    "is_active": true
+  },
+  {
+    "id": "cbbce0fc-bc5b-4a3b-a134-282ccaa21855",
+    "name": "Jumia Pickup Station CBN roundabout",
+    "state": "Bauchi",
+    "address": "llelah shopping complex,CBN roundabout.",
+    "landmark": "CBN roundabout",
+    "latitude": 10.3057176,
+    "longitude": 9.8296698,
+    "is_active": true
+  },
+  {
+    "id": "94d6ff71-5a00-4932-b65d-d6ea2b24416d",
+    "name": "Jumia Pickup Station Darazo Road",
+    "state": "Bauchi",
+    "address": "Shop 1&2, Besides Wikki Filling Station and Oil Service, Adjacent Amdl Plaza, Opposite S. Mai Kano Gas, Maiduguri-Darazo Road, Bauchi, Bauchi State. Landmark: Besides Wikki Filling Station and Oil Service, Adjacent Amdl Plaza, Opposite S. Mai Kano Gas",
+    "landmark": "Besides Wikki Filling Station and Oil Service, Adjacent Amdl Plaza, Opposite S. Mai",
+    "latitude": 10.3059966,
+    "longitude": 9.8403959,
+    "is_active": true
+  },
+  {
+    "id": "7d14095b-c236-4c07-ac74-84e867f7236e",
+    "name": "Jumia Pickup Station Azikoro Rd",
+    "state": "Bayelsa",
+    "address": "No. 233 Creek Plaza, Mbiama Yenagoa Road, Imgbi Junction Opp. Heritage Bank, Amarata, Yenagoa. Bayelsa State.",
+    "landmark": "Imgbi Junction Opposite Union Bank",
+    "latitude": 4.9353679,
+    "longitude": 6.2846433,
+    "is_active": true
+  },
+  {
+    "id": "6d632103-382c-42e1-8c88-f168b5d78f0b",
+    "name": "Jumia Pickup Station Isaac Boro Rd",
+    "state": "Bayelsa",
+    "address": "Creek Plaza, Isaac Boro Road, After ADP junction, before Otiotio junction, Otiotio, Bayelsa",
+    "landmark": "After ADP junction.",
+    "latitude": 4.7719071,
+    "longitude": 6.0698526,
+    "is_active": true
+  },
+  {
+    "id": "8954d3a9-d55d-4bdf-83b9-b9719dcb8e8e",
+    "name": "Jumia Pickup Station Tombia",
+    "state": "Bayelsa",
+    "address": "Tombia Round About, IMIRINGI JUNCTION, YENAGOA, BAYELSA STATE",
+    "landmark": "IMIRINGI JUNCTION",
+    "latitude": 4.9538564,
+    "longitude": 6.3582142,
+    "is_active": true
+  },
+  {
+    "id": "e77a10b2-31e2-479e-b139-b3ec9ad295a4",
+    "name": "Jumia Pickup Station Yenagoa",
+    "state": "Bayelsa",
+    "address": "Boclapre Plaza,Okaka Road before the Express Junction, Yenagoa Bayelsa State",
+    "landmark": "eside Water board",
+    "latitude": 4.9172722,
+    "longitude": 6.3042017,
+    "is_active": true
+  },
+  {
+    "id": "daa05ed8-d8f0-4313-b365-5dd0892d5181",
+    "name": "Jumia Pickup Station Akume Way",
+    "state": "Benue",
+    "address": "Nos 172 George Akume way",
+    "landmark": "Beside Donasu Plaza",
+    "latitude": 7.7241373,
+    "longitude": 8.5363982,
+    "is_active": true
+  },
+  {
+    "id": "f01ab126-7a66-46eb-bec1-40d55d569991",
+    "name": "Jumia Pickup Station Aliade",
+    "state": "Benue",
+    "address": "Otukpo, Aliade Road",
+    "landmark": "Opposite Aliade Central Mosque",
+    "latitude": 7.2960688,
+    "longitude": 8.4726503,
+    "is_active": true
+  },
+  {
+    "id": "064090b9-a4cb-4c4d-b620-3a9f7d3d0333",
+    "name": "Jumia Pickup Station Gboko",
+    "state": "Benue",
+    "address": "No. 11 Gondo Alour Way Behind Central Police Station",
+    "landmark": "Ahmad Plaza",
+    "latitude": 7.3368424,
+    "longitude": 9.0018424,
+    "is_active": true
+  },
+  {
+    "id": "95178662-8049-4ac9-ba22-173d05e50ead",
+    "name": "Jumia Pickup Station Makurdi",
+    "state": "Benue",
+    "address": "TMT Plaza, Lydia Urban, beside former Afri Bank (now Salvation Ministry), opposite Pampers Clinic, Wurukum",
+    "landmark": "opposite state library iyorchia ayu road",
+    "latitude": 7.7261927,
+    "longitude": 8.5419596,
+    "is_active": true
+  },
+  {
+    "id": "6c4fd546-073a-4ad0-ab1f-f06f1d10276f",
+    "name": "Jumia Pickup Station Otukpo",
+    "state": "Benue",
+    "address": "20, Federal Road, Otukpo",
+    "landmark": "Opposite Access Bank",
+    "latitude": 7.1982133,
+    "longitude": 8.1393179,
+    "is_active": true
+  },
+  {
+    "id": "26c7ce9e-c5e4-4b1d-a5f0-b84f1dd53f53",
+    "name": "Jumia Pickup Maiduguri - Gombe rd",
+    "state": "Borno",
+    "address": "Address- Shop's 34, shopping complex opposite osinbajo orphanage adjacent BOGIS Maiduguri Biu road",
+    "landmark": "Mk Monguno filling Station",
+    "latitude": 11.8576558,
+    "longitude": 13.1306124,
+    "is_active": true
+  },
+  {
+    "id": "90e6dc81-d2fc-4574-9189-46c112c94a3c",
+    "name": "Jumia Pickup Station Bolori",
+    "state": "Borno",
+    "address": "Baga Road opposite Al-Ansar University Maiduguri, Borno State.",
+    "landmark": "Opposite Al-Ansar University",
+    "latitude": 11.9028183,
+    "longitude": 13.0789347,
+    "is_active": true
+  },
+  {
+    "id": "bb4aede0-82d0-4fab-b6b3-f0b5e83cb901",
+    "name": "Jumia Pickup Station Maiduguri",
+    "state": "Borno",
+    "address": "NO 27, MAIDALA PLAZA, LAGOS STREET, MAGARAM ROAD MAIDUGURI.",
+    "landmark": "close to LM BAKERY & RESTAURANT",
+    "latitude": 11.825311,
+    "longitude": 13.1554173,
+    "is_active": true
+  },
+  {
+    "id": "092c6594-01ad-4f6a-823f-c524c110a1a2",
+    "name": "Jumia Pickup Station Atimbo",
+    "state": "Cross River",
+    "address": "umia pickup station Shop 2 Opposite AA Rano station Atimbo 34 Atimbo Road Calabar, Cross River State",
+    "landmark": "AA RANO Filling Station",
+    "latitude": 4.968657,
+    "longitude": 8.3576577,
+    "is_active": true
+  },
+  {
+    "id": "5a2cd3ad-a0f9-4c8f-a134-2289f9aabfa3",
+    "name": "Jumia Pickup Station Ekpo-Abasi",
+    "state": "Cross River",
+    "address": "No84 main avenue by Ekpo-Abasi Beside traffic light, Calabar",
+    "landmark": "Loveth Beauty Care",
+    "latitude": 4.9365338,
+    "longitude": 8.3255743,
+    "is_active": true
+  },
+  {
+    "id": "68cd6f5a-95b4-4de8-9ffa-54afabbd3ac7",
+    "name": "Jumia Pickup Station Ettaagbo",
+    "state": "Cross River",
+    "address": "No: 36 etta-agbor opposite calculux park,calabar, cross River State.",
+    "landmark": "Opposite calculux park",
+    "latitude": 4.9673551,
+    "longitude": 8.3339868,
+    "is_active": true
+  },
+  {
+    "id": "7b6930ff-47d3-4ad1-a480-3777f1c54479",
+    "name": "Jumia Pickup Station M/Mohammed Hwy",
+    "state": "Cross River",
+    "address": "Muritala muhammed highway, in-between peniel sampet filling station and army junction, Calabar",
+    "landmark": "Adjacent Peniel Sampet Filling station",
+    "latitude": 5.0362537,
+    "longitude": 8.3530646,
+    "is_active": true
+  },
+  {
+    "id": "e7cc287a-58a8-4a71-aa8a-2f6a93dc03dd",
+    "name": "Jumia Pickup Station Marian",
+    "state": "Cross River",
+    "address": "65 Ndidem Usang Iso Road,Calabar,Cross River state.",
+    "landmark": "Close to Glo Office",
+    "latitude": 4.9722599,
+    "longitude": 8.3399676,
+    "is_active": true
+  },
+  {
+    "id": "241fd462-700c-4579-90c9-bd5e032e303d",
+    "name": "Jumia Pickup Station Mobil",
+    "state": "Cross River",
+    "address": "Fountain of Life Plaza, 45/47 Murtala Mohammed Highway, Opp. MCC Mobil Filling Station Calabar",
+    "landmark": "MCC Mobil Filling Station",
+    "latitude": 4.972162,
+    "longitude": 8.3295196,
+    "is_active": true
+  },
+  {
+    "id": "381a91ce-51e9-49bb-b09f-a984b3e105af",
+    "name": "Jumia Pickup Station Odukpani",
+    "state": "Cross River",
+    "address": "Scanobo Junction, Odukpani Rd, By Indomie Warehouse Immediately After Army Checkpoint",
+    "landmark": "By Indomie Warehouse Immediately After Army Checkpoint",
+    "latitude": 5.0784736,
+    "longitude": 8.3476343,
+    "is_active": true
+  },
+  {
+    "id": "c13bf77e-93ab-4284-bffc-bbff08733f6c",
+    "name": "Jumia Pickup Station Parliamentary Road",
+    "state": "Cross River",
+    "address": "Illuminate Plaza, Parliamentary Road By Ikorafer Junction",
+    "landmark": "By Ikorafer Junction",
+    "latitude": 5.0096389,
+    "longitude": 8.347162,
+    "is_active": true
+  },
+  {
+    "id": "b4af0efd-f725-47c6-9291-d898c3fac167",
+    "name": "Jumia Pickup Station Abraka",
+    "state": "Delta",
+    "address": "Bembo junction, opposite campus 3, beside NNPC filing station, off obiarouko expressway, Delta State, Abraka.",
+    "landmark": "Daughter of Zion restaurant",
+    "latitude": 5.7908047,
+    "longitude": 6.1229585,
+    "is_active": true
+  },
+  {
+    "id": "cccde44f-6f80-4612-bcd6-0a7b6edd2752",
+    "name": "Jumia Pickup Station Abraka Junction",
+    "state": "Delta",
+    "address": "Polwa Shopping Complex Abraka Asaba, Opposite Conoil Filing Station Nnebisi Road. Delta State",
+    "landmark": "Opposite Conoil Filling Station",
+    "latitude": 6.1736625,
+    "longitude": 6.7476094,
+    "is_active": true
+  },
+  {
+    "id": "8df7cfd2-41e9-4a19-9555-3bf5b09f69c5",
+    "name": "Jumia Pickup Station Agbarho",
+    "state": "Delta",
+    "address": "Suite 4 ,Otebele plaza,No 52, Old Ughelli Road, Agbarho,Delta State",
+    "landmark": "Beside Old Eco Bank",
+    "latitude": 5.4865942,
+    "longitude": 6.0064121,
+    "is_active": true
+  },
+  {
+    "id": "0ac36536-7b67-48e3-b2aa-c7cd8264b0db",
+    "name": "Jumia Pickup Station Amukpe",
+    "state": "Delta",
+    "address": "Shop 450, Opposite KB Rubber Factory, Amukpe, Amukpe, Sapele, Delta State",
+    "landmark": "Opposite KB Rubber Factory, Amukpe",
+    "latitude": 5.87497,
+    "longitude": 5.7036608,
+    "is_active": true
+  },
+  {
+    "id": "02f70472-1a43-4a84-856a-339287527653",
+    "name": "Jumia Pickup Station Asaba",
+    "state": "Delta",
+    "address": "No 5, Beatrice Iyamu Nwayindudu Street,Off Ogagifo street,Opposite former Deputy Governors Office ,DBS road, Asaba,Delta State",
+    "landmark": "Deputy Governor'S Office,Asaba",
+    "latitude": 6.2111375,
+    "longitude": 6.6910469,
+    "is_active": true
+  },
+  {
+    "id": "561ae580-0723-498b-964f-26ed1f704aed",
+    "name": "Jumia Pickup Station Asaba (Okpanam)",
+    "state": "Delta",
+    "address": "ECI plaza, Opposite Coca Cola Depot, Before Flower Gate,Okpanam, Asaba",
+    "landmark": "opposite Coca Cola Depot",
+    "latitude": 6.2271875,
+    "longitude": 6.6625625,
+    "is_active": true
+  },
+  {
+    "id": "152161ee-8ccc-4161-a321-0e8c206ad5f6",
+    "name": "Jumia Pickup Station CTC Plaza",
+    "state": "Delta",
+    "address": "Shop 10/12, CTC Plaza by Lagos Asaba Express Way, Agbor. Delta State.",
+    "landmark": "CTC Plaza",
+    "latitude": 6.1885825,
+    "longitude": 6.7521173,
+    "is_active": true
+  },
+  {
+    "id": "df3c7383-2d14-4a46-918c-d2c2fecb6297",
+    "name": "Jumia Pickup Station Effurun",
+    "state": "Delta",
+    "address": "Bungalow 1, Jefia Estate, No 156 PTI Road, Efurun Delta State",
+    "landmark": "Beside Rainoil Filling Station",
+    "latitude": 5.5627119,
+    "longitude": 5.7944458,
+    "is_active": true
+  },
+  {
+    "id": "2a200954-606a-474c-a183-c1179c8197fa",
+    "name": "Jumia Pickup Station Ekpan",
+    "state": "Delta",
+    "address": "Shop B3 IYE Plaza, kilometer 4 Refinery Road Ekpan, Delta state.",
+    "landmark": "Mega Praise Micro Finance bank",
+    "latitude": 5.5695506,
+    "longitude": 5.7468631,
+    "is_active": true
+  },
+  {
+    "id": "4f117392-ad5f-4c33-951f-3f9dbabdf2ca",
+    "name": "Jumia Pickup Station Enerhen",
+    "state": "Delta",
+    "address": "Shop 209, Isoken Plaza Warri, Enerhen Junction, Off Effurun-Warri Rd",
+    "landmark": "Adjacent Sterling Bank",
+    "latitude": 5.5274737,
+    "longitude": 5.7720404,
+    "is_active": true
+  },
+  {
+    "id": "82e7a430-5ffe-4ed0-ae07-bec90fab0a21",
+    "name": "Jumia Pickup Station Ibusa Rd",
+    "state": "Delta",
+    "address": "Suite 7 De-park plaza, Ibusa road Asaba, Delta State",
+    "landmark": "opp. Ministry of Justice",
+    "latitude": 6.1946477,
+    "longitude": 6.7190181,
+    "is_active": true
+  },
+  {
+    "id": "5d8ecd56-ae6b-400e-85e0-8f48b790c43c",
+    "name": "Jumia Pickup Station Igbuzor",
+    "state": "Delta",
+    "address": "Shop 10 F.M.A Plaza before School Boy first Gate Igbuzor Road Ibusa. Asaba, Delta State.",
+    "landmark": "Before School Boy first Gate Igbuzor Road",
+    "latitude": 6.1899375,
+    "longitude": 6.6932344,
+    "is_active": true
+  },
+  {
+    "id": "00ab4d4e-e17e-414f-838c-182fbd0f2941",
+    "name": "Jumia Pickup Station Interbau",
+    "state": "Delta",
+    "address": "Former ministry of women affairs along government house/Anwai Rd opp. FIRS office before roban stores Asaba, Delta State.",
+    "landmark": "Roban stores after Interbau Roundabout",
+    "latitude": 6.2174875,
+    "longitude": 6.7039219,
+    "is_active": true
+  },
+  {
+    "id": "bbb92014-b80a-4a7d-bdd8-7b6da1933fbe",
+    "name": "Jumia Pickup Station Jakpa Road",
+    "state": "Delta",
+    "address": "No 88 Jakpa Road Opposite New Era Junction, Effurun Delta state.",
+    "landmark": "Aka Avenue Junction",
+    "latitude": 5.5641537,
+    "longitude": 5.754648,
+    "is_active": true
+  },
+  {
+    "id": "fa32d3ef-2c35-4fd5-a51f-5e990e12f1a3",
+    "name": "Jumia Pickup Station Obiaruku",
+    "state": "Delta",
+    "address": "46, New Sapele/Agbor expressway, opposite Wetland Bank, Obiaruku.",
+    "landmark": "Opposite MNO & Sons Trading Stores",
+    "latitude": 5.8386689,
+    "longitude": 6.1580011,
+    "is_active": true
+  },
+  {
+    "id": "62b962ea-30b4-4bc1-b0c8-210834be8223",
+    "name": "Jumia Pickup Station Oghara",
+    "state": "Delta",
+    "address": "Along Sakpoba road, opposite Delta State Teaching Hospital Oghara Delta State",
+    "landmark": "Delta State Teaching Hospital Oghara",
+    "latitude": 5.9562125,
+    "longitude": 5.7025469,
+    "is_active": true
+  },
+  {
+    "id": "3c5fae76-afd0-4e2a-a566-69bd098bb43f",
+    "name": "Jumia Pickup Station Oghene-Sapele",
+    "state": "Delta",
+    "address": "Endurance UDJOH plaza Oghene junction by cemetery road sapele",
+    "landmark": "Cemetery road roundabout",
+    "latitude": 5.8750769,
+    "longitude": 5.6931356,
+    "is_active": true
+  },
+  {
+    "id": "a51994c7-3825-48c0-a438-a80322cf5705",
+    "name": "Jumia Pickup Station Ogunu",
+    "state": "Delta",
+    "address": "No. 58 Ogunu Road, Warri",
+    "landmark": "Inside Kenox Gas Station. Opposite Mopol Barracks before Shell Gate.",
+    "latitude": 5.5330075,
+    "longitude": 5.71445,
+    "is_active": true
+  },
+  {
+    "id": "12f41c20-38f1-45af-94f9-4df1d75e3ee4",
+    "name": "Jumia Pickup Station Orho Agbarho",
+    "state": "Delta",
+    "address": "Shop 1, Madegbe street, before Rotex Academy, through express road,Oghara agbarho.",
+    "landmark": "Rotex academy",
+    "latitude": 5.5903145,
+    "longitude": 5.8617632,
+    "is_active": true
+  },
+  {
+    "id": "a388c008-5888-44d2-8629-03ab870c6541",
+    "name": "Jumia Pickup Station Orhuwhorun",
+    "state": "Delta",
+    "address": "Address - Shop 9 and 10, Queen ogbabunor plaza",
+    "landmark": "opposite Iron Gate market",
+    "latitude": 5.5091625,
+    "longitude": 5.8257656,
+    "is_active": true
+  },
+  {
+    "id": "1fba6e3b-e8e2-4af3-9c53-fcb74c77fbb6",
+    "name": "Jumia Pickup Station Osubi",
+    "state": "Delta",
+    "address": "Shop 9 Lady 'A' Supermall Eku-Osubi Road, Osubi",
+    "landmark": "Dflash Lounge",
+    "latitude": 5.5959038,
+    "longitude": 5.8316545,
+    "is_active": true
+  },
+  {
+    "id": "d2a7e22b-bd2a-48ed-9246-d89b5041880a",
+    "name": "Jumia Pickup Station Oteri",
+    "state": "Delta",
+    "address": "House 2,Oteri new road by Benjones Filling Station",
+    "landmark": "Benjones Filling Station",
+    "latitude": 5.4911164,
+    "longitude": 5.9986734,
+    "is_active": true
+  },
+  {
+    "id": "c507b554-c6f2-438d-8990-95ed9894db77",
+    "name": "Jumia Pickup Station Otokutu",
+    "state": "Delta",
+    "address": "TC Double Plaza beside Total Filling Station. Otokutu Junction",
+    "landmark": "beside Total Filling Station. Otokutu Junction",
+    "latitude": 5.5461737,
+    "longitude": 5.8327464,
+    "is_active": true
+  },
+  {
+    "id": "95dc68f3-671a-4df3-8f35-dca26f5e8597",
+    "name": "Jumia Pickup station otovwodo",
+    "state": "Delta",
+    "address": "Ughelli ogor market opposite mountain on fire church otovwodo UGHELLI patani express road",
+    "landmark": "Opposite mountains of fire church",
+    "latitude": 5.5001866,
+    "longitude": 5.9938339,
+    "is_active": true
+  },
+  {
+    "id": "4f46b09d-9188-4fb2-9e55-a0a00471f7c3",
+    "name": "Jumia Pickup Station Owhase (Udu Rd)",
+    "state": "Delta",
+    "address": "7, UDU ROAD OPPOSITE SEE AND ENOCH FILLING STATION UDU DELTA STATE",
+    "landmark": "Enoch Filling Station",
+    "latitude": 5.5111286,
+    "longitude": 5.7840319,
+    "is_active": true
+  },
+  {
+    "id": "ed492ac7-b542-4a93-b63d-967c40c21e5e",
+    "name": "Jumia Pickup Station Ozoro",
+    "state": "Delta",
+    "address": "Shop 11 and 12 Davidstar plaza along kwale ozoro expressway road opposite okay hotel and suites",
+    "landmark": "Beside Joy's kitchen",
+    "latitude": 5.5511125,
+    "longitude": 6.2326406,
+    "is_active": true
+  },
+  {
+    "id": "f46afdaa-483b-42de-8e29-be739b10c4d2",
+    "name": "Jumia Pickup Station Sapele",
+    "state": "Delta",
+    "address": "169, Ejele Plaza, Ajogodo, Sapele Warri Road, Adjacent Total Filling Station By New Road Junction, Sapele, Delta State, Nigeria",
+    "landmark": "Opposite Foodsco warehouse",
+    "latitude": 5.8825212,
+    "longitude": 5.6965657,
+    "is_active": true
+  },
+  {
+    "id": "eeba8fb3-6d64-4c27-8363-15c6d240d17e",
+    "name": "Jumia Pickup Station Ubeji",
+    "state": "Delta",
+    "address": "Suite 25 &26, Jesus Is lord Plaza, Ubeji Junction,Opposite Waves Eatery, Ubeji.",
+    "landmark": "Waves Eatery",
+    "latitude": 5.5713498,
+    "longitude": 5.7068463,
+    "is_active": true
+  },
+  {
+    "id": "4d7e8906-dd52-4e20-95b6-198d91a7ae5c",
+    "name": "Jumia Pickup Station Udu",
+    "state": "Delta",
+    "address": "1, Hospital Road Ekete Inland Udu LGA Delta State",
+    "landmark": "Hospital Road",
+    "latitude": 5.4981322,
+    "longitude": 5.8050617,
+    "is_active": true
+  },
+  {
+    "id": "cb0b2cbc-cce0-4b44-b2fa-527323e678e8",
+    "name": "Jumia Pickup Station Ugberikoko",
+    "state": "Delta",
+    "address": "No 25, Ugberikoko Road, Adjacent Bunex Filling Station, Sapele.",
+    "landmark": "Before Gana Market, Sapele",
+    "latitude": 5.8946092,
+    "longitude": 5.6427566,
+    "is_active": true
+  },
+  {
+    "id": "bf71f059-bedf-4a67-ab66-dfca94865b5e",
+    "name": "Jumia Pickup Station Ughelli",
+    "state": "Delta",
+    "address": "84 upper affisere road ughelli, Upstairs before the 2 storey building.",
+    "landmark": "Behind Stadium, By the 2 story building.",
+    "latitude": 5.5000301,
+    "longitude": 6.0017489,
+    "is_active": true
+  },
+  {
+    "id": "bcf3579c-60bd-420a-b965-30c43f61b49b",
+    "name": "Jumia Pickup Station Ughelli-Isoko rd",
+    "state": "Delta",
+    "address": "55 isoko road ughelli delta state, the two story building opposite uloho avenue junction isoko road",
+    "landmark": "The 2 story building opposite uloho avenue junction",
+    "latitude": 5.4896073,
+    "longitude": 6.0045773,
+    "is_active": true
+  },
+  {
+    "id": "7832ddb2-c913-42ba-8d60-6d286ef1ab7c",
+    "name": "Jumia Pickup Station Umunede",
+    "state": "Delta",
+    "address": "Shop No. 4, New Plaza, Opposite Double Network Mast, Asaba-Onitsha Expressway, Umunede, Delta State",
+    "landmark": "Double Network Mast",
+    "latitude": 6.2687967,
+    "longitude": 6.3066585,
+    "is_active": true
+  },
+  {
+    "id": "c11849b5-422b-4c71-b157-41b4265fd8f9",
+    "name": "Jumia Pickup Station Uruoka",
+    "state": "Delta",
+    "address": "No 36, old sapele Agbor Road, Uruoka Abraka",
+    "landmark": "Urhuoka Primary School",
+    "latitude": 5.7894321,
+    "longitude": 6.1023468,
+    "is_active": true
+  },
+  {
+    "id": "b75b8280-1f6e-47ee-8bda-972f5034599d",
+    "name": "Jumia Pickup Station Warri",
+    "state": "Delta",
+    "address": "PLOT 11, 37 STREET DDPA OFF WEST-END HOSPITAL ROAD, OFF AIRPORT ROAD WARRI DELTA STATE.",
+    "landmark": "Off West-End Road, Off Airport Road",
+    "latitude": 5.5418104,
+    "longitude": 5.7557282,
+    "is_active": true
+  },
+  {
+    "id": "9aa2f2c4-075a-44ce-b8d2-71b4acff39fc",
+    "name": "Jumia Pickup Station Warri Okere rd",
+    "state": "Delta",
+    "address": "25 Okere road, by the bridge(canal), Warri Delta State.",
+    "landmark": "Close to Don sir Iyke world",
+    "latitude": 5.5172019,
+    "longitude": 5.7483548,
+    "is_active": true
+  },
+  {
+    "id": "d05ee47c-e4ea-41a5-859e-7aaf833e24c0",
+    "name": "Jumia Pickup Station Abakaliki",
+    "state": "Ebonyi",
+    "address": "MUPHY FUEL STATION. PRESCO JUNCTION , NEAR PRESCO CAMPUS",
+    "landmark": "ElechiChris Farms",
+    "latitude": 6.3261375,
+    "longitude": 8.0827656,
+    "is_active": true
+  },
+  {
+    "id": "d1605991-0792-4394-86ec-e30e7de64982",
+    "name": "Jumia Pickup Station Afikpo",
+    "state": "Ebonyi",
+    "address": "No 51 Amasiri Rd, Afikpo.",
+    "landmark": "Ehugbo Shopping Plaza",
+    "latitude": 5.8873604,
+    "longitude": 7.932828,
+    "is_active": true
+  },
+  {
+    "id": "76bd203d-b685-4cb6-9926-3722a164e75f",
+    "name": "Jumia Pickup Station Afikpo rd",
+    "state": "Ebonyi",
+    "address": "No. 27 Afikpo Road Abakaliki near rain oil filling station, Ebonyi State",
+    "landmark": "Rain oil filling Station Afikpo road",
+    "latitude": 6.3141947,
+    "longitude": 8.1073405,
+    "is_active": true
+  },
+  {
+    "id": "2b668a97-e7f8-4aef-9004-8cd623ae22db",
+    "name": "Jumia Pickup Station Akpakpava",
+    "state": "Edo",
+    "address": "Shop 2, No. 47 Akpakpava Road, Off Ring Road, Benin City Benin Edo Nigeria",
+    "landmark": "Beside Access Bank",
+    "latitude": 6.3376236,
+    "longitude": 5.6285219,
+    "is_active": true
+  },
+  {
+    "id": "3d99efd9-c9d9-44df-84fc-1299b344b711",
+    "name": "Jumia Pickup Station Amagba G.R.A",
+    "state": "Edo",
+    "address": "Champion Event Plaza After I.O.U Farm, Ugbor, Along Amagba Road.",
+    "landmark": "I.O.U Farm, Ugbor",
+    "latitude": 6.2476125,
+    "longitude": 5.6029219,
+    "is_active": true
+  },
+  {
+    "id": "e94b40dd-ee6b-41b7-9985-873c7e46ad53",
+    "name": "Jumia Pickup Station Amufi Junction",
+    "state": "Edo",
+    "address": "INSIDE NIPCO FILLING STATION, AMUFI JUNCTION, AGBOR ROAD, BENIN CITY",
+    "landmark": "INSIDE NIPCO FILLING STATION",
+    "latitude": 6.3384125,
+    "longitude": 5.7163906,
+    "is_active": true
+  },
+  {
+    "id": "8edaac11-9f70-4a25-8ddb-f3389bd503e9",
+    "name": "Jumia Pickup Station Auchi",
+    "state": "Edo",
+    "address": "MESHI BUILDING OPPOSITE LEVIS FUEL STATION SABO SOUTH CDA AUCHI EDO STATE",
+    "landmark": "SABO POLICE STATION",
+    "latitude": 7.0668645,
+    "longitude": 6.2747734,
+    "is_active": true
+  },
+  {
+    "id": "e9a0ab1e-7a4b-4800-aa0a-b8dd5a4c314c",
+    "name": "Jumia Pickup Station Benin",
+    "state": "Edo",
+    "address": "Plot 108 Namuna Street, off Limit Road by Sapele Road, Benin City.",
+    "landmark": "beside Blooming and Brainy School",
+    "latitude": 6.2776625,
+    "longitude": 5.6255469,
+    "is_active": true
+  },
+  {
+    "id": "911d4c8d-afda-4232-b25b-b6766d0b2549",
+    "name": "Jumia pickup Station Benin Aduwawa",
+    "state": "Edo",
+    "address": "Amas shopping complex, off Benin Auchi Rd, Ikpoba hill, Benin City 300104",
+    "landmark": "Beside Mikonos Hotel",
+    "latitude": 6.3700859,
+    "longitude": 5.6862073,
+    "is_active": true
+  },
+  {
+    "id": "f0348668-d093-451c-98d6-068c86f4823f",
+    "name": "Jumia Pickup Station Benin-Agbor Rd",
+    "state": "Edo",
+    "address": "178 A232, Benin City 300104, Edo",
+    "landmark": "Mobil Petrol station",
+    "latitude": 6.3475072,
+    "longitude": 5.6785135,
+    "is_active": true
+  },
+  {
+    "id": "b0194f11-77d2-4da6-bb4b-0231a5bc965c",
+    "name": "Jumia Pickup Station Egor Market Rd",
+    "state": "Edo",
+    "address": "416 Upper Siluko before Egor Market opposite New Ford Mart.",
+    "landmark": "New Ford Mart",
+    "latitude": 6.3644542,
+    "longitude": 5.5868202,
+    "is_active": true
+  },
+  {
+    "id": "28968e8e-6d82-462b-be58-10143bc28213",
+    "name": "Jumia Pickup Station Ekenwa",
+    "state": "Edo",
+    "address": "Shop 6, Winniebel Plaza, beside GT Bank, Ekenwan Road, Benin-City Edo State",
+    "landmark": "Beside GT Bank, Ekenwan Road, Benin-City",
+    "latitude": 6.3287711,
+    "longitude": 5.5902786,
+    "is_active": true
+  },
+  {
+    "id": "98410f14-1fa7-4a6d-98de-638ad8b58de4",
+    "name": "Jumia Pickup Station Ekhire",
+    "state": "Edo",
+    "address": "Abili plaza Ekhire girls, very close to campus3 gate and campus2 back gate",
+    "landmark": "Abili Plaza.",
+    "latitude": 7.0527625,
+    "longitude": 6.2630781,
+    "is_active": true
+  },
+  {
+    "id": "5891dd5b-9a2e-473f-a45b-8428361476fb",
+    "name": "Jumia Pickup Station Ekpoma",
+    "state": "Edo",
+    "address": "No 9 afua street, off royal market road, Ekpoma,Edo",
+    "landmark": "close to Rainoil filling station",
+    "latitude": 6.7477582,
+    "longitude": 6.1460979,
+    "is_active": true
+  },
+  {
+    "id": "38c6511f-fccf-4837-889d-9e25e9d77e94",
+    "name": "Jumia Pickup Station Ihumudumu",
+    "state": "Edo",
+    "address": "NO 81 Along Idumebo Road, by St John Anglican Church. Ekpoma",
+    "landmark": "St John's Anglican Church, Ihumudumu",
+    "latitude": 6.7429546,
+    "longitude": 6.1420947,
+    "is_active": true
+  },
+  {
+    "id": "19898f4c-a4ac-4cfe-bd56-b53f626057f9",
+    "name": "Jumia Pickup Station Jattu",
+    "state": "Edo",
+    "address": "111 along bode Jattu express way, before SS food affairs restaurant, Auchi",
+    "landmark": "Before SS food affairs restaurant",
+    "latitude": 7.0649198,
+    "longitude": 6.2660565,
+    "is_active": true
+  },
+  {
+    "id": "2abd349f-e50f-445f-898e-882ff11f1544",
+    "name": "Jumia Pickup Station Mission road",
+    "state": "Edo",
+    "address": "Suite 1A, Atom Plaza (beside Mobil Filling Station), Opposite Access Bank, 63 Mission Road, Benin city",
+    "landmark": "Adjacent Mobil filling station",
+    "latitude": 6.3408609,
+    "longitude": 5.6259741,
+    "is_active": true
+  },
+  {
+    "id": "4916b65f-f57a-4d4e-a612-d7dc27d63dc0",
+    "name": "Jumia Pickup Station New Benin Market",
+    "state": "Edo",
+    "address": "Isi's Plaza, 2 Victory street, by Victory street junction, along New Lagos Road, Benin City, Edo state.",
+    "landmark": "New Benin Market",
+    "latitude": 6.3585218,
+    "longitude": 5.6221,
+    "is_active": true
+  },
+  {
+    "id": "0ac852f0-e1e0-4a17-926e-32a36afec19c",
+    "name": "Jumia Pickup Station Ogheghe",
+    "state": "Edo",
+    "address": "Suite 9, Victoria Plaza, Ogheghe Road, off Benin Sapele Road, Benin City 300105, Edo",
+    "landmark": "Victoria Plaza, Ogheghe",
+    "latitude": 6.2061745,
+    "longitude": 5.6164707,
+    "is_active": true
+  },
+  {
+    "id": "fd654e18-8317-4578-a837-0840cdeb89fa",
+    "name": "Jumia Pickup Station Oko Ogba (Airport Rd)",
+    "state": "Edo",
+    "address": "hop 13 iyayi shopping complex, 1st upstair after Ogba market, opposite Scout Camp, along Airport Road, Benin City 300001, Edo State",
+    "landmark": "Opposite the Scout Camp",
+    "latitude": 6.2890664,
+    "longitude": 5.585405,
+    "is_active": true
+  },
+  {
+    "id": "1e8e6e2a-f9b0-4359-b6b8-19d328ef914e",
+    "name": "Jumia Pickup Station Oluku",
+    "state": "Edo",
+    "address": "Shop 5 n 6, Carina Shopping Complex by Nitel Junction",
+    "landmark": "Opposite Nitel Junction",
+    "latitude": 6.4381706,
+    "longitude": 5.5981307,
+    "is_active": true
+  },
+  {
+    "id": "249fe79b-ae44-488e-94e2-fbc05382b9e9",
+    "name": "Jumia Pickup Station Oyomon Rd",
+    "state": "Edo",
+    "address": "Shop 5 and 6 Oyakhilome Plaza Oyomon Road Uromi",
+    "landmark": "yakhilome Plaza",
+    "latitude": 6.7128795,
+    "longitude": 6.3344708,
+    "is_active": true
+  },
+  {
+    "id": "d1eaa538-80c9-449a-b6ff-24506e3e521f",
+    "name": "Jumia Pickup Station Siluko",
+    "state": "Edo",
+    "address": "No 129 Siluko Road after UPSS By Oguoula Junction",
+    "landmark": "before UPSS Junction",
+    "latitude": 6.3500436,
+    "longitude": 5.6035578,
+    "is_active": true
+  },
+  {
+    "id": "d0388341-305c-4e74-8bb9-924d1ec3d238",
+    "name": "Jumia Pickup Station Ugbowo",
+    "state": "Edo",
+    "address": "14, Uwaifo Street, off Nova Road, Ugbowo Benin,Edo State.",
+    "landmark": "Close To University Of Benin",
+    "latitude": 6.3843125,
+    "longitude": 5.6129531,
+    "is_active": true
+  },
+  {
+    "id": "f03a6a30-e8f1-4315-8ae7-bc4f32d7ab07",
+    "name": "Jumia Pickup Station Upper Mission",
+    "state": "Edo",
+    "address": "Upper mission extension after Ziko gas Opposite Dan Obosa filling station by Dominion City Church.",
+    "landmark": "Dan Obosa filling station",
+    "latitude": 6.3774114,
+    "longitude": 5.6679253,
+    "is_active": true
+  },
+  {
+    "id": "b4f9d009-349d-4407-af17-9122a967f7ec",
+    "name": "Jumia Pickup Station Upper Sakponba",
+    "state": "Edo",
+    "address": "Suite 2 NNPC Mega filling Station,Adjacent Jesus Christ Bus stop, Upper Sakponba, Benin.",
+    "landmark": "NNPC Filling Station",
+    "latitude": 6.3075321,
+    "longitude": 5.6488572,
+    "is_active": true
+  },
+  {
+    "id": "0afb0ca8-00f9-4612-82bd-fc0f843d6cf4",
+    "name": "Jumia Pickup Station Adehun-Adebayo",
+    "state": "Ekiti",
+    "address": "G & G Shopping Complex ;Beside Adeparusi Junction opposite simple 01 Amala and Pounded Yam City,Adehun along adebayo road",
+    "landmark": "Adjacent Adekaitan filling station",
+    "latitude": 7.6269458,
+    "longitude": 5.2222356,
+    "is_active": true
+  },
+  {
+    "id": "0343440f-8bc5-4eea-87e1-826842be27fa",
+    "name": "Jumia Pickup Station Afe Babalola Way",
+    "state": "Ekiti",
+    "address": "No 18 Club Royale, Beside Abound Fueling Station, Afe Babalola Way Ureje, Ado Ekiti",
+    "landmark": "By Club Royale, Beside Abound Fueling Station",
+    "latitude": 7.6397864,
+    "longitude": 5.220663,
+    "is_active": true
+  },
+  {
+    "id": "aec3dad0-65cf-43e7-ab8a-ac672eddaa88",
+    "name": "Jumia Pickup Station Ajilosun",
+    "state": "Ekiti",
+    "address": "No 25 Ikere Road, Adjacent Little by Little Plaza,Ikere Road, Ajilosun Ado Ekiti",
+    "landmark": "LITTLE BY LITTLE PLAZA",
+    "latitude": 7.6125668,
+    "longitude": 5.222894,
+    "is_active": true
+  },
+  {
+    "id": "286c2856-fa91-469e-9ac6-4b099f9cb1a5",
+    "name": "Jumia Pickup Station Ekiti",
+    "state": "Ekiti",
+    "address": "7, Adewumi Fajana Avenue, Ekiti State Housing Estate Phase 1, Oke Ila, Ado Ekiti",
+    "landmark": "Ekiti State Housing Estate Phase 1",
+    "latitude": 7.62444,
+    "longitude": 5.228618,
+    "is_active": true
+  },
+  {
+    "id": "1fa19269-0819-48b4-899e-d722c9fc3b28",
+    "name": "Jumia Pickup Station Ekiti-Ilawe rd",
+    "state": "Ekiti",
+    "address": "Suite A2, Grace of God shopping complex adjacent transformer besides satellite campus NTA road, Ado Ekiti, Ekiti State Nigeria",
+    "landmark": "Opp Amala Spot",
+    "latitude": 7.6295432,
+    "longitude": 5.186659,
+    "is_active": true
+  },
+  {
+    "id": "5849bff0-e6fa-4b10-b3af-ce60c032a8e5",
+    "name": "Jumia Pickup Station Ikere",
+    "state": "Ekiti",
+    "address": "3P Shopping complex, Ikere, Ekiti State EKITI, Ekiti state, Nigeria",
+    "landmark": "beside first bank Ikere",
+    "latitude": 7.5073012,
+    "longitude": 5.2292186,
+    "is_active": true
+  },
+  {
+    "id": "841b7be1-d8af-4390-890e-23556ba736e9",
+    "name": "Jumia Pickup Station Iworoko Rd",
+    "state": "Ekiti",
+    "address": "Fajuyi Ln, Ado - Iworoko - Ifaki Rd, beside wema and union bank, Okesha, Ado Ekiti 360101, Ekiti",
+    "landmark": "beside Wema bank",
+    "latitude": 7.6276619,
+    "longitude": 5.217787,
+    "is_active": true
+  },
+  {
+    "id": "756bb2b6-9293-4ee3-b0db-f25e2d4619c3",
+    "name": "Jumia Pickup station Abakaliki Rd. GRA",
+    "state": "Enugu",
+    "address": "No 1a Devon drive off abakaliki road purity plaza Enugu.",
+    "landmark": "Opp The Lord's Express Transport",
+    "latitude": 6.4604486,
+    "longitude": 7.5022288,
+    "is_active": true
+  },
+  {
+    "id": "b5862939-fbee-4df7-8622-35d09042225a",
+    "name": "Jumia Pickup Station Agbani Road",
+    "state": "Enugu",
+    "address": "160 AGBANI ROAD ENUGU BY IGBARIAM BUS STOP OPPOSITE DOMINION CITY CHURCH",
+    "landmark": "DOMINION CITY CHURCH",
+    "latitude": 6.4126477,
+    "longitude": 7.4949633,
+    "is_active": true
+  },
+  {
+    "id": "9347faf2-b806-4388-af1b-b1c5e95176c0",
+    "name": "Jumia Pickup Station Ebony Paint Road",
+    "state": "Enugu",
+    "address": "No 3 Abony Paint Behind Coisco Filling Station Gariki Agbani Road",
+    "landmark": "Landmark- Coisco Filling Station",
+    "latitude": 6.3911039,
+    "longitude": 7.4950805,
+    "is_active": true
+  },
+  {
+    "id": "07552a6d-691b-49c9-af01-8e7a421162f1",
+    "name": "Jumia Pickup Station Enugu",
+    "state": "Enugu",
+    "address": "No 2 Alvan Ikoku, Odu Enyi Plaza along Virgin forest filling station street presidential road",
+    "landmark": "roban hotel",
+    "latitude": 6.4427093,
+    "longitude": 7.5111646,
+    "is_active": true
+  },
+  {
+    "id": "3fa304c0-33e8-496f-823b-4637d284e147",
+    "name": "Jumia Pickup Station Garden EState",
+    "state": "Enugu",
+    "address": "Eastern mass Transport beside Eco bank PNT okpala avenue, Holy ghost enugu",
+    "landmark": "Landmark- Eco Bank",
+    "latitude": 6.4506624,
+    "longitude": 7.4814098,
+    "is_active": true
+  },
+  {
+    "id": "5224ab8e-63e7-42f4-9fcf-b7cd6513fc45",
+    "name": "Jumia Pickup Station Nsukka",
+    "state": "Enugu",
+    "address": "No 175 Onuiyi street (behind flat) Nsukka, Enugu",
+    "landmark": "close to Akudo hostel",
+    "latitude": 6.8725875,
+    "longitude": 7.3982969,
+    "is_active": true
+  },
+  {
+    "id": "4e476bcf-6412-4b58-b588-5f4b4c74c150",
+    "name": "Jumia Pickup Station Orba Rd",
+    "state": "Enugu",
+    "address": "103 Enugu Rd, Local, beside Diamond Access Bank, Opposite EEDC(Nepa) office , Nsukka 410101, Enugu",
+    "landmark": "EEDC(Nepa) office",
+    "latitude": 6.8463003,
+    "longitude": 7.4018668,
+    "is_active": true
+  },
+  {
+    "id": "e4ac7b65-01a1-49f0-b43a-54b6626235ae",
+    "name": "Jumia Pickup Station Rehab Road Emene",
+    "state": "Enugu",
+    "address": "No 25 E Assurance Plaza Opposite Our Lady Catholic church Rehab Road Emene Enugu",
+    "landmark": "Old Orie Emene Bus Stop",
+    "latitude": 6.4813367,
+    "longitude": 7.577533,
+    "is_active": true
+  },
+  {
+    "id": "7b65ef57-33c1-42d7-86d5-43bb2c27477f",
+    "name": "Jumia Pickup Station Trans Ekulu (Nike Lake Rd)",
+    "state": "Enugu",
+    "address": "No. 143 Nike Lake Road, Trans Ekulu, Enugu",
+    "landmark": "Beside Timber",
+    "latitude": 6.4951713,
+    "longitude": 7.5063975,
+    "is_active": true
+  },
+  {
+    "id": "9385a3ee-4621-4b71-a57c-f59a0fff625f",
+    "name": "Jumia Pickup Station Abacha Rd karu",
+    "state": "Federal Capital Territory",
+    "address": "Shop WB 04, Ground Floor De Gallery's Plaza. Old Karu Road Abuja.",
+    "landmark": "Old Karu Road Abuja.",
+    "latitude": 9.0186375,
+    "longitude": 7.5894844,
+    "is_active": true
+  },
+  {
+    "id": "152bbb9c-54fa-43ea-a770-00ef760799ee",
+    "name": "Jumia Pickup Station Abuja-Dutse",
+    "state": "Federal Capital Territory",
+    "address": "Shop 6, De Choice Plaza, Opposite First High Tension, Sokale, Dutse Alhaji, FCT, Abuja.",
+    "landmark": "Opposite First High Tension, Sokale Gardens",
+    "latitude": 9.1518299,
+    "longitude": 7.3778061,
+    "is_active": true
+  },
+  {
+    "id": "774e43b9-1e99-4e12-9013-9dfecb6e4e1b",
+    "name": "Jumia Pickup Station Aco (Airport Rd)",
+    "state": "Federal Capital Territory",
+    "address": "Shop A4, ACO Estate Mall, Before Best Budget Hotel, ACO Estate, Lugbe",
+    "landmark": "ACO PEDESTRIAN BRIDGE",
+    "latitude": 8.9422167,
+    "longitude": 7.3245137,
+    "is_active": true
+  },
+  {
+    "id": "634392bb-14b2-4a50-bb3e-94933cd7c99a",
+    "name": "Jumia Pickup Station Apo Resettlement",
+    "state": "Federal Capital Territory",
+    "address": "Shop 10, Awesome Plaza, Apo Resettlement Area, Zone-A. Abuja",
+    "landmark": "Opposite Chicken Republic",
+    "latitude": 8.9840631,
+    "longitude": 7.4995422,
+    "is_active": true
+  },
+  {
+    "id": "458ed751-9c0d-4479-a94d-a7e79a845552",
+    "name": "Jumia Pickup Station Bwari",
+    "state": "Federal Capital Territory",
+    "address": "No 42, Suite A8 & A9, Law School Road, Danbaba Plaza, Opposite Jamb HQ Office, Beside Unity Bank Bwari, Abuja., ABUJA-BWARI, Federal Capital Territory",
+    "landmark": "Opp Jamb Headquaters, Bwari Abuja.",
+    "latitude": 9.2793,
+    "longitude": 7.3772831,
+    "is_active": true
+  },
+  {
+    "id": "6ed980d9-3a7f-4bfa-98eb-cde5e361f4e4",
+    "name": "Jumia Pickup Station CBD",
+    "state": "Federal Capital Territory",
+    "address": "Plot 232, No 2 Leventis Building Samuel Adesujo Ademulegun Avenue off Mohammadu Buhari Way CBD Abuja",
+    "landmark": "Behind Grand Square",
+    "latitude": 9.0539022,
+    "longitude": 7.4777815,
+    "is_active": true
+  },
+  {
+    "id": "13663575-fbc3-4f60-b8b8-a215fe7addd6",
+    "name": "Jumia Pickup Station Dei-Dei",
+    "state": "Federal Capital Territory",
+    "address": "Shop 9 & 11 Hairat Plaza, Along Dakwa Road, Dei-Dei Abuja FCT.",
+    "landmark": "By Revans Pharmacy & Stores",
+    "latitude": 9.1157985,
+    "longitude": 7.2570038,
+    "is_active": true
+  },
+  {
+    "id": "9b7a7df8-122f-4fd2-9f78-3e16a2312420",
+    "name": "Jumia Pickup Station Garki",
+    "state": "Federal Capital Territory",
+    "address": "3SK Plaza, Samuel Ladoke Akintola Boulevard Gariki Opposite G&C Store. F.C.T, Abuja.",
+    "landmark": "Opposite G&C Store",
+    "latitude": 9.0183703,
+    "longitude": 7.4925165,
+    "is_active": true
+  },
+  {
+    "id": "c8a64748-bd4f-4806-9ba8-6910c325678c",
+    "name": "Jumia Pickup Station Gudu",
+    "state": "Federal Capital Territory",
+    "address": "Shop A12 Ground Floor Iyemi Plaza Gudu,Loogoma Road Abuja.",
+    "landmark": "Calabar Pot Kitchen",
+    "latitude": 9.0083613,
+    "longitude": 7.4775779,
+    "is_active": true
+  },
+  {
+    "id": "11a63830-2693-45f4-8b1e-23de321c3fdf",
+    "name": "Jumia Pickup Station Gwagwalada",
+    "state": "Federal Capital Territory",
+    "address": "Suite B11, Deo Shopping Mall, Market Road. Plot 473 Gwagwalada Expansion Layout, Gwagwalada.",
+    "landmark": "Opposite Gwagwalada Market and Close To First Bank Market Road.",
+    "latitude": 8.9413713,
+    "longitude": 7.0764666,
+    "is_active": true
+  },
+  {
+    "id": "a9fbe3f6-d011-42ec-bde5-bac1e1e0282b",
+    "name": "Jumia Pickup Station Gwagwalada-Dagiri",
+    "state": "Federal Capital Territory",
+    "address": "Shop A19 Salma Plaza Along Abuja - Lokoja Express Road Dagiri Gwagwalada AbujaShop A16 SALMA PLAZA (Old Season 7 Plaza) Along Abuja-Lokoja Express Road, Gwagwalada Dagiri Abuja.",
+    "landmark": "Adjacent Leading Kids Academy",
+    "latitude": 8.9508329,
+    "longitude": 7.0767365,
+    "is_active": true
+  },
+  {
+    "id": "728cca52-96c9-44b7-ab5d-0e16dd5e7f06",
+    "name": "Jumia Pickup Station Gwarinpa (6th Avenue)",
+    "state": "Federal Capital Territory",
+    "address": "4224 69 Rd, Gwarinpa, Abuja 900108, Federal Capital Territory",
+    "landmark": "Mc Phiz Plaza",
+    "latitude": 9.1206333,
+    "longitude": 7.382871,
+    "is_active": true
+  },
+  {
+    "id": "c0159942-eefd-458f-a550-95cf7315d55b",
+    "name": "Jumia Pickup Station Jabi",
+    "state": "Federal Capital Territory",
+    "address": "Suite A5 Jabi Plaza. Beside Rukayat plaza. Opposite Zenith bank and Jabi park",
+    "landmark": "Rukayat Plaza, Opposite Zenith Bank",
+    "latitude": 9.0651843,
+    "longitude": 7.4318587,
+    "is_active": true
+  },
+  {
+    "id": "86e15a3b-2d53-4124-83ee-e0ed4f65d381",
+    "name": "Jumia Pickup Station Jikwoyi",
+    "state": "Federal Capital Territory",
+    "address": "Shop 12 Ground Floor New Dawn plaza jikwoyi phase 2 Abuja.",
+    "landmark": "jikwoyi phase 2 Abuja.",
+    "latitude": 8.9805131,
+    "longitude": 7.5638775,
+    "is_active": true
+  },
+  {
+    "id": "164a3742-56ae-496e-bb79-578fbaae39a0",
+    "name": "Jumia Pickup Station Karu",
+    "state": "Federal Capital Territory",
+    "address": "After chief palace, before ecomog restaurant karu- karshi road.",
+    "landmark": "Ecomog restaurant",
+    "latitude": 9.0047687,
+    "longitude": 7.5720996,
+    "is_active": true
+  },
+  {
+    "id": "87efd1a2-b4ef-440b-9bda-8cc8de1b594f",
+    "name": "Jumia Pickup Station Kubwa Phase 4",
+    "state": "Federal Capital Territory",
+    "address": "Shop A7, 104 Gado Nasko Road, by Phase IV bridge, Kubwa, Abuja",
+    "landmark": "by Phase IV bridge",
+    "latitude": 9.1529957,
+    "longitude": 7.3334296,
+    "is_active": true
+  },
+  {
+    "id": "9dbcc5aa-756f-4899-9a95-04576dc890d1",
+    "name": "Jumia Pickup Station Kubwa-Byazhin",
+    "state": "Federal Capital Territory",
+    "address": "Kubwa shopping mall, shop 8, opposite Yoruba mosque Kubwa, Before Aso savings bank, After premier hotel",
+    "landmark": "NAVA OFFICER QUARTERS, KUBWA",
+    "latitude": 9.1539563,
+    "longitude": 7.3260407,
+    "is_active": true
+  },
+  {
+    "id": "8ff799cd-e548-40d7-b76a-9ff93c612432",
+    "name": "Jumia Pickup Station Kuje Kuchiako",
+    "state": "Federal Capital Territory",
+    "address": "Golden Plaza, Plot No 982 Kuchiyako, Kuje Abuja Area Council, FCT Abuja",
+    "landmark": "Bryana Resort & Apartments",
+    "latitude": 8.8728375,
+    "longitude": 7.2502031,
+    "is_active": true
+  },
+  {
+    "id": "53497352-51a1-479f-8ca4-9143635962b0",
+    "name": "Jumia Pickup Station Kuje Transit Park",
+    "state": "Federal Capital Territory",
+    "address": "Shop 7&8, Kuje Transit Park (Wowo park / Gwagwalada park), Besides Kuje Town Hall Building, Kuje, FCT, Abuja",
+    "landmark": "Kuje Transit Park/Wowo park/Gwagwalada Park, Kuje Town Hall Building, NNPC Filling Station.",
+    "latitude": 8.8821438,
+    "longitude": 7.2275336,
+    "is_active": true
+  },
+  {
+    "id": "7df61be8-5879-41f1-b8d2-e88569a698a0",
+    "name": "Jumia Pickup Station Kwali",
+    "state": "Federal Capital Territory",
+    "address": "3G Plaza, Lambata Kwali Area Council, Kwali Abuja",
+    "landmark": "Opposite Lambata police station",
+    "latitude": 8.8211875,
+    "longitude": 7.0459219,
+    "is_active": true
+  },
+  {
+    "id": "8a5160fe-1708-4159-abfb-923470409411",
+    "name": "Jumia Pickup Station Lugbe",
+    "state": "Federal Capital Territory",
+    "address": "AL-AMIN MALL, opposite Khia Medics/Pharmacy Complex, Adjacent to Rain - Oil Petrol Station, FHA Lugbe, Abuja",
+    "landmark": "AL-AMIN MALL",
+    "latitude": 8.9640864,
+    "longitude": 7.3813708,
+    "is_active": true
+  },
+  {
+    "id": "ebb777a0-38c3-49dd-aa76-b655b1e99547",
+    "name": "Jumia Pickup Station Mabushi",
+    "state": "Federal Capital Territory",
+    "address": "Shafa Filling Station Mabuishi By Gado District Road Opp Mabuishi Bus Terminal.",
+    "landmark": "Opp Mabuishi Bus Terminal",
+    "latitude": 9.0866197,
+    "longitude": 7.4567867,
+    "is_active": true
+  },
+  {
+    "id": "211fd35b-40e6-4cf8-adb3-40c2fde9ccd3",
+    "name": "Jumia Pickup Station Mararaba",
+    "state": "Federal Capital Territory",
+    "address": "Mugyal plaza along Abuja-Keffi expressway Mararaba, Abuja",
+    "landmark": "Beside A.Y.M SHAFA Petrol station",
+    "latitude": 9.0251111,
+    "longitude": 7.6046667,
+    "is_active": true
+  },
+  {
+    "id": "074aefd7-f8c0-4b87-b1ed-f799320c320e",
+    "name": "Jumia Pickup Station Mpape",
+    "state": "Federal Capital Territory",
+    "address": "Shop A-05, AMAM PLAZA, OPPOSITE CHICKEN REPUBLIC,MPAPE",
+    "landmark": "Chicken Republic",
+    "latitude": 9.1302448,
+    "longitude": 7.4917679,
+    "is_active": true
+  },
+  {
+    "id": "fd3cf5ba-58e6-4fad-ab9b-b89d243c855d",
+    "name": "Jumia Pickup Station Nyanya",
+    "state": "Federal Capital Territory",
+    "address": "Jumia pickup station Nyanya-shop 3, Obalende Mami Market Area C opposite Assembly of God church Nyanya Abuja FCT.",
+    "landmark": "Close to Assemblies of God Church",
+    "latitude": 9.056077,
+    "longitude": 7.5788975,
+    "is_active": true
+  },
+  {
+    "id": "adae8db7-68d6-40fe-8279-116bb79b17ee",
+    "name": "Jumia Pickup Station One Man Village",
+    "state": "Federal Capital Territory",
+    "address": "Shop A-124, World Gate Plaza",
+    "landmark": "World Gate",
+    "latitude": 9.017175,
+    "longitude": 7.6215463,
+    "is_active": true
+  },
+  {
+    "id": "c3f154ec-f822-4109-999d-77b7df09c62b",
+    "name": "Jumia Pickup Station Orozo",
+    "state": "Federal Capital Territory",
+    "address": "SHOP 17,GOLDEN APPLE PLAZA OROZO KARSHI ROAD",
+    "landmark": "GOLDEN APPLE PLAZA",
+    "latitude": 8.8999898,
+    "longitude": 7.5707688,
+    "is_active": true
+  },
+  {
+    "id": "7010b8c2-5965-4d3d-bd50-4da1853e506d",
+    "name": "Jumia Pickup Station Wuye",
+    "state": "Federal Capital Territory",
+    "address": "Shop 078, Turai Yaradua Block, Abuja",
+    "landmark": "Wuye Ultra Modern Market",
+    "latitude": 9.0510884,
+    "longitude": 7.4417564,
+    "is_active": true
+  },
+  {
+    "id": "7ae8406b-efd7-44e8-a77c-ec0cc24baca4",
+    "name": "Jumia Pickup Station Gombe Main Market Rd",
+    "state": "Gombe",
+    "address": "Shop 16, ASM Mai Manja Plaza, Opposite Jaiz Bank, along Main Market Road, Gombe, Gombe State.",
+    "landmark": "By Jaiz Bank Gombe.",
+    "latitude": 10.283202,
+    "longitude": 11.1811779,
+    "is_active": true
+  },
+  {
+    "id": "c5c911f4-eb23-4f40-a3ab-3700dad96660",
+    "name": "Jumia Pickup Station Amakohia Akwakuma",
+    "state": "Imo",
+    "address": "7 Orlu Rd, opposite Rainoil filling station. Luxuria plaza, Amakohia-Akwakuma, Owerri 460108, Imo",
+    "landmark": "Jong Fuelling Station",
+    "latitude": 5.5315625,
+    "longitude": 7.0165625,
+    "is_active": true
+  },
+  {
+    "id": "282c8927-734d-4862-a3e6-619830a67c7e",
+    "name": "Jumia Pickup Station De Glen Hotel",
+    "state": "Imo",
+    "address": "27 Poly Road, beside De Glen Hotel Umukoto, Along, Nekede 460281, Imo, Nigeria.",
+    "landmark": "De Glen Hotel and Suites",
+    "latitude": 5.4477748,
+    "longitude": 7.042935,
+    "is_active": true
+  },
+  {
+    "id": "85f8e9be-97aa-41b1-a096-ba00d92f9466",
+    "name": "Jumia pickup station Egbu Road",
+    "state": "Imo",
+    "address": "Evergreen plaza egbu",
+    "landmark": "Beside Shoprite",
+    "latitude": 5.4787291,
+    "longitude": 7.067224,
+    "is_active": true
+  },
+  {
+    "id": "40e63b01-7915-4c2e-8ff7-e36fadd6d6ef",
+    "name": "Jumia Pickup Station Irete",
+    "state": "Imo",
+    "address": "LEGAL HOUSE PLAZA , K/M 3 owerri-onitsha Road, Irete, Imo state",
+    "landmark": "beside Save more supermarket",
+    "latitude": 5.4872477,
+    "longitude": 7.0304468,
+    "is_active": true
+  },
+  {
+    "id": "6049892d-10d9-466f-8bb0-a6073ce299d0",
+    "name": "Jumia Pickup Station Mbaise",
+    "state": "Imo",
+    "address": "Benaemmy's Plaza, beside Ahaira diocese, Ahaizu Mbaise , along Eke Ahaira junction/Eke Nguru Rd.",
+    "landmark": "Ahaira diocese",
+    "latitude": 5.5384547,
+    "longitude": 7.2437105,
+    "is_active": true
+  },
+  {
+    "id": "38651e3f-c5ee-42ae-a17b-c42e38367523",
+    "name": "Jumia Pickup Station MCC Road",
+    "state": "Imo",
+    "address": "51 Uratta Road, Owerri 460281, Imo",
+    "landmark": "Adjacent St John's lab, Owerri, Imo State",
+    "latitude": 5.4889375,
+    "longitude": 7.0460625,
+    "is_active": true
+  },
+  {
+    "id": "169a4dc1-bdba-4fa5-8397-995b4453161e",
+    "name": "Jumia pickup Station Okigwe Road",
+    "state": "Imo",
+    "address": "6/7 Orji layout, okpokiri plaza Okigwe road orji owerri, imo state",
+    "landmark": "Beside Chicken Republic",
+    "latitude": 5.5175871,
+    "longitude": 7.0470054,
+    "is_active": true
+  },
+  {
+    "id": "30c97bdd-87b5-48f8-80f0-70c52143f336",
+    "name": "Jumia Pickup Station Poly Junction",
+    "state": "Imo",
+    "address": "The Sun Place ( Munas Fast food) along Naze / Federal Polytechnic road Owerri, IMO State",
+    "landmark": "Muna's Cafe",
+    "latitude": 5.4514375,
+    "longitude": 7.0498125,
+    "is_active": true
+  },
+  {
+    "id": "5af50467-87a1-4cf1-aacb-85a392544425",
+    "name": "Jumia Pickup Station Umuguma Rd (Ogbosisi)",
+    "state": "Imo",
+    "address": "No 45, Owerrinta Ohoba road, Umuguma, World bank, Imo state.",
+    "landmark": "Evette Institute of Catering",
+    "latitude": 5.4881264,
+    "longitude": 7.0177824,
+    "is_active": true
+  },
+  {
+    "id": "3d46b149-0239-48c0-a904-b303b758f8dd",
+    "name": "Jumia Pickup Station World bank",
+    "state": "Imo",
+    "address": "110 federal secretariat road Area A world-bank, By ideal suite beside living temple School",
+    "landmark": "beside living temple academy School",
+    "latitude": 5.4816823,
+    "longitude": 7.0041294,
+    "is_active": true
+  },
+  {
+    "id": "7d4627e6-950c-4f2d-8d57-797d9ddc344c",
+    "name": "Jumia Pickup Station ABU Zaria",
+    "state": "Kaduna",
+    "address": "shop 5, Bibbies Plaza, Abusite computers building, ABU Main gate, Samaru, Zaria",
+    "landmark": "Beside Union bank",
+    "latitude": 11.154021,
+    "longitude": 7.6574828,
+    "is_active": true
+  },
+  {
+    "id": "3451bfda-e686-4ae7-86a0-fadbb724cf56",
+    "name": "Jumia Pickup Station Goni Gora",
+    "state": "Kaduna",
+    "address": "No 1 Onwuka Road, After Jubilee Hotel Abuja-Kaduna Express Road, Gonin Gora, Kaduna State.",
+    "landmark": "After Jubilee Hotel Abuja-Kaduna Express Road",
+    "latitude": 10.4200322,
+    "longitude": 7.4043413,
+    "is_active": true
+  },
+  {
+    "id": "bce08a7b-944f-4400-a1e1-d5553cc49986",
+    "name": "Jumia Pickup Station Kaduna",
+    "state": "Kaduna",
+    "address": "N0. 50 CMBU ROAD, OFF YUSUF ILIYA STREET, BARNAWA GRA, KADUNA",
+    "landmark": "Street Behind Invicta Radio",
+    "latitude": 10.4812753,
+    "longitude": 7.439669,
+    "is_active": true
+  },
+  {
+    "id": "304ef300-6989-4e57-83c0-8b0fa4c7103f",
+    "name": "Jumia Pickup Station Kaduna-Sabo Tasha",
+    "state": "Kaduna",
+    "address": "Shop 5, Starcade Plaza, Kachia Rd Sabon Tasha, Kaduna-south, Kaduna State.",
+    "landmark": "OPP Living Faith Church (Sabo)",
+    "latitude": 10.4895506,
+    "longitude": 7.4188235,
+    "is_active": true
+  },
+  {
+    "id": "b28e34fd-3c10-43d3-b3af-370820936110",
+    "name": "Jumia Pickup Station Kamazo",
+    "state": "Kaduna",
+    "address": "20 Yakowa Way, after Kamazo Bus Stop, Kamazo Kaduna State",
+    "landmark": "Kamazo Bus-stop",
+    "latitude": 10.4552257,
+    "longitude": 7.4879887,
+    "is_active": true
+  },
+  {
+    "id": "6341cbd7-558e-44f8-b6be-ffc5a72c3a15",
+    "name": "Jumia Pickup Station Kasuwa",
+    "state": "Kaduna",
+    "address": "S20, Shop 05. Zarah House, Ahmadu Bello Way By Gwandu Road, Beside Chicken Republic, Opposite Disney Chicken, Kakuri Kaduna.",
+    "landmark": "Close By: Beside Chicken Republic, Opposite Disney Chicken. Ahmadu Bello Way, Kaduna",
+    "latitude": 10.5150475,
+    "longitude": 7.4304564,
+    "is_active": true
+  },
+  {
+    "id": "297d1a77-60e9-4a15-868f-e9faab1c18eb",
+    "name": "Jumia Pickup Station kawo",
+    "state": "Kaduna",
+    "address": "No. J5, Shop A4 & A5, Maru Plaza, Zaria Road, opposite Kawo Overhead Bridge Kawo, Kaduna State",
+    "landmark": "Close By: Stanbic IBTC Bank",
+    "latitude": 10.599334,
+    "longitude": 7.4530568,
+    "is_active": true
+  },
+  {
+    "id": "4757a710-2552-472d-a518-fe0e18a8fd9d",
+    "name": "Jumia Pickup Station Malali",
+    "state": "Kaduna",
+    "address": "Shop A9 Malali Ultra Modern Market, Cameroun Road MALALI, Kaduna State.",
+    "landmark": "Close By: MTN Office, Malali Ultra Modern Market.",
+    "latitude": 10.5622834,
+    "longitude": 7.4700521,
+    "is_active": true
+  },
+  {
+    "id": "a613cbc1-d975-48d9-ad41-711668701875",
+    "name": "Jumia Pickup Station Mando",
+    "state": "Kaduna",
+    "address": "Shop 1, New Plaza, Along Airport Road, 2 Mando Rd, Sabon Gida, Kaduna 802151, Kaduna Along mando market, close to old shema fuel station",
+    "landmark": "Beside Shema Filling Station",
+    "latitude": 10.5938566,
+    "longitude": 7.4046303,
+    "is_active": true
+  },
+  {
+    "id": "3252d1af-8fda-49ff-84ed-ef87fd734de7",
+    "name": "Jumia Pickup Station Maraban Rido",
+    "state": "Kaduna",
+    "address": "Shop 11 Himmasu Plaza, Behind Maraban Rido Market, Opposite Anna Plaza, Maraban Rido, Kaduna State",
+    "landmark": "Himmasu Plaza, Behind Maraban Rido Market, Opposite Anna Plaza",
+    "latitude": 10.4375756,
+    "longitude": 7.548744,
+    "is_active": true
+  },
+  {
+    "id": "35a96bc1-9c0b-4057-91fb-5cc7029ad453",
+    "name": "Jumia Pickup Station Millennium City",
+    "state": "Kaduna",
+    "address": "Muhammad Nur Plaza, Millennium City, Dan Hono, off NNPC Filling Station, Kaduna State.",
+    "landmark": "Dan Hono, off NNPC Filling Station",
+    "latitude": 10.503644,
+    "longitude": 7.4337395,
+    "is_active": true
+  },
+  {
+    "id": "ce184ec2-87c1-4a95-bf82-f40957226abc",
+    "name": "Jumia Pickup Station Rigasa",
+    "state": "Kaduna",
+    "address": "Gidan Malam Mai Sitin, Abuja Road, Rigasa, Kaduna State",
+    "landmark": "Close to Al-Ansar Medical and Diagnostic Services",
+    "latitude": 10.5247111,
+    "longitude": 7.3942893,
+    "is_active": true
+  },
+  {
+    "id": "5a057a47-eeb8-45a5-89e0-a4a4669e59d2",
+    "name": "Jumia Pickup Station Bichi",
+    "state": "Kano",
+    "address": "Shop No30A & 29A Jobe Plaza, along Gwarzo Road , Opposite access bank Bichi Town, Bichi LGA, Kano State.",
+    "landmark": "Access Bank Bichi Town",
+    "latitude": 12.2312766,
+    "longitude": 8.2404397,
+    "is_active": true
+  },
+  {
+    "id": "b4bf2d6e-d6c2-41d0-98b7-d3bde333190c",
+    "name": "Jumia Pickup Station Fagge",
+    "state": "Kano",
+    "address": "Civic center, Ultra modern market block 17 shop 3, Fagge Iga, Kano state",
+    "landmark": "Civic Center, Ultra modern market",
+    "latitude": 12.031519,
+    "longitude": 8.521298,
+    "is_active": true
+  },
+  {
+    "id": "4cb6da27-7ab5-4b49-87a2-38b55f54f234",
+    "name": "Jumia Pickup Station Farawa",
+    "state": "Kano",
+    "address": "Rahama Shopping Plaza, Opposite Audu Manager Filling Station, Close To Mariri Market Maiduguri Road, Farawa, Kano State",
+    "landmark": "Opposite Audu Manager Filling Station, Close To Mariri Market",
+    "latitude": 11.9721274,
+    "longitude": 8.5602899,
+    "is_active": true
+  },
+  {
+    "id": "36258c9a-38de-4e7b-a896-cd97c44fdfab",
+    "name": "Jumia Pickup station Hotoro",
+    "state": "Kano",
+    "address": "Shop No.4 shehu kazaure road ,off Maiduguri road, opposite kwanar maggi,Hotoro GRA kano state",
+    "landmark": "Kwanan Maggi",
+    "latitude": 11.9722926,
+    "longitude": 8.5644875,
+    "is_active": true
+  },
+  {
+    "id": "acf7839b-fffb-42d9-8950-0ea085f131db",
+    "name": "Jumia Pickup Station Kano Zoo Road",
+    "state": "Kano",
+    "address": "Shop A3 Prime hub plaza beside A.Y Mai Kifi petrol Station, zoo road, Kano state",
+    "landmark": "Royal Plaza Zoo road.",
+    "latitude": 11.97336,
+    "longitude": 8.53423,
+    "is_active": true
+  },
+  {
+    "id": "fa5e0786-a28e-49ca-a1c2-e340bab1eb62",
+    "name": "Jumia Pickup Station Kano-Hadejia Rd",
+    "state": "Kano",
+    "address": "Hadejia road, yankaba opposite Bennie international school. Kano",
+    "landmark": "opposite Benin international school",
+    "latitude": 12.0108719,
+    "longitude": 8.5835435,
+    "is_active": true
+  },
+  {
+    "id": "dfd7b450-a5e4-4fee-b18a-ec19011e15c6",
+    "name": "Jumia Pickup Station Kano-Katsina rd",
+    "state": "Kano",
+    "address": "Besides Chicken Republic, New Akija Plaza. Katsina Road, Kano city",
+    "landmark": "Beside chicken Republic",
+    "latitude": 12.0275673,
+    "longitude": 8.5145454,
+    "is_active": true
+  },
+  {
+    "id": "d25f3771-f455-4eab-b31b-f735337494f9",
+    "name": "Jumia Pickup Station Kofar Gadon Kaya",
+    "state": "Kano",
+    "address": "53 Gidan Yaya Plaza, Yahaya gusau road, Sharada Kano",
+    "landmark": "Kofar Gadon Kaya",
+    "latitude": 11.979493,
+    "longitude": 8.4959213,
+    "is_active": true
+  },
+  {
+    "id": "148bc9eb-1a41-48a6-b67a-484cc08a33b3",
+    "name": "Jumia Pickup Station Kofar Kabuga",
+    "state": "Kano",
+    "address": "Shop A|11 Khairat Plaza, Janbulo 3rd gate Kofar Kabuga, Gwarzo rd Kano.",
+    "landmark": "Opp NYSC Secretariat Kano",
+    "latitude": 11.9767464,
+    "longitude": 8.4572234,
+    "is_active": true
+  },
+  {
+    "id": "c7287b1b-8d04-4b7e-b9f2-69416bf72f07",
+    "name": "Jumia Pickup Station Kofar Kansakali",
+    "state": "Kano",
+    "address": "Shop 2&3, Baushe plaza, Kofar Waika / Kofar Kansakali, Muhammad Buhari Road, Adjacent Northwest University Main Campus",
+    "landmark": "Besides As-Sajda Success Academy, Kofar Kansakali",
+    "latitude": 12.0028518,
+    "longitude": 8.4869905,
+    "is_active": true
+  },
+  {
+    "id": "5dbf51fc-a4bc-4255-af94-6cefcdfdc1d8",
+    "name": "Jumia Pickup Station Naibawa",
+    "state": "Kano",
+    "address": "Shop 3, Naibawa corner masalachi opposite Taj bank beside Ameesh luxury plaza",
+    "landmark": "Opposite Taj bank beside Ameesh luxury plaza",
+    "latitude": 11.9408875,
+    "longitude": 8.5637656,
+    "is_active": true
+  },
+  {
+    "id": "f0c92be8-a740-417a-bd65-490b84a7cfec",
+    "name": "Jumia Pickup Station Sabon Gari",
+    "state": "Kano",
+    "address": "A2, 360 Twin Towers LTD, Ahmadiyya Junction, Besides DanMarna Filling Station, Opposite France Embassy, Airport Road , Sabon Gari, Kano Station",
+    "landmark": "Ahmadiyya Junction, Besides DanMarna Filling Station, Opposite France Embassy, Airport Road",
+    "latitude": 12.0342375,
+    "longitude": 8.5432299,
+    "is_active": true
+  },
+  {
+    "id": "2a4e0874-6fdf-4885-b1df-31609407319f",
+    "name": "Jumia Pickup Station Sharada Rd",
+    "state": "Kano",
+    "address": "Shop A6&7, Dgts Plaza, Beside Big Trust Academy, Sharada Phase 3, Jaen Kano.",
+    "landmark": "Beside Big Trust Academy",
+    "latitude": 11.9387462,
+    "longitude": 8.4804381,
+    "is_active": true
+  },
+  {
+    "id": "1413daf7-046b-4364-ad18-461aae4fcc15",
+    "name": "Jumia Pickup Station Tudun Murtala",
+    "state": "Kano",
+    "address": "Zango, Yan Kifi Junction ,Opposite Akiss Event Center, before Salbas Filling Station",
+    "landmark": "Close to Rufaidah House and Rufaidah Yoghurt, Tudun Murtala Road, Kano State.",
+    "latitude": 12.0382875,
+    "longitude": 8.5849219,
+    "is_active": true
+  },
+  {
+    "id": "1c15776f-37b9-44eb-9434-2fed4bab2341",
+    "name": "Jumia Pickup Station Kiddies Roundabout",
+    "state": "Katsina",
+    "address": "Kokiya Filling Station, Kiddies Roundabout Katsina, Katsina state",
+    "landmark": "Kiddies Roundabout",
+    "latitude": 12.9739501,
+    "longitude": 7.61916,
+    "is_active": true
+  },
+  {
+    "id": "f422aa2c-b99e-4080-b105-99158329ce2a",
+    "name": "Jumia Pickup Station Rafin Dadi-Station",
+    "state": "Katsina",
+    "address": "Waziri Avenue, Rafin dadi, Katsina Opposite Alhaji iro isanse House Katsina, Katsina State.",
+    "landmark": "Opposite Alhaji Iro Isanse House Katsina",
+    "latitude": 12.9943486,
+    "longitude": 7.6064583,
+    "is_active": true
+  },
+  {
+    "id": "7f66e6fd-a571-4e30-9333-3453e2edf5f4",
+    "name": "Jumia Pickup Station Birnin Kebbi",
+    "state": "Kebbi",
+    "address": "No 5, Alhaji Mutubari Labbo shop, beside Amina Rabo plaza, Birnin Kebbi central market. Kebbi state",
+    "landmark": "Amina Rabo Plaza",
+    "latitude": 12.4379741,
+    "longitude": 4.2087484,
+    "is_active": true
+  },
+  {
+    "id": "bb21d58e-df35-4f4e-8bd0-874b81146612",
+    "name": "Jumia Pickup Station Jega",
+    "state": "Kebbi",
+    "address": "Shop No 11 & 12 Katanga complex, beside old BLB supermarket opposite Dustin wawa. Kebbi State.",
+    "landmark": "Old BLB supermarket",
+    "latitude": 12.2265875,
+    "longitude": 4.3822656,
+    "is_active": true
+  },
+  {
+    "id": "8922d64f-afcc-4cf8-9154-c86cb9ad5c30",
+    "name": "Jumia Pickup Station Anyigba",
+    "state": "Kogi",
+    "address": "Shop 3, Ibro Plaza, Idah-Lokoja Road Anyigba, Kogi State",
+    "landmark": "High Court Of Justice",
+    "latitude": 7.4896027,
+    "longitude": 7.1709572,
+    "is_active": true
+  },
+  {
+    "id": "93e1504e-dba1-4780-92f7-0215288d9eb9",
+    "name": "Jumia Pickup Station Barrack road",
+    "state": "Kogi",
+    "address": "Shop A2, Aisho Shopping Complex, After Zone 8 Round About, Along barrack road, Otokiti, Lokoja, Kogi State.",
+    "landmark": "Angela's Kitchen Adonkolo",
+    "latitude": 7.8103709,
+    "longitude": 6.7004447,
+    "is_active": true
+  },
+  {
+    "id": "6f6a040d-dcfb-4a28-9999-16ac81a2015d",
+    "name": "Jumia Pickup Station Big Rio Filling Station",
+    "state": "Kogi",
+    "address": "Big Rio Filling Station Eika Area, Beside Dan-Sanusi Luxury hotels, Okene-Lokoja Rd, Eika/Ohizenyi, Okene, Kogi State.",
+    "landmark": "Dan-Sanusi Luxury hotels",
+    "latitude": 7.5506318,
+    "longitude": 6.2341671,
+    "is_active": true
+  },
+  {
+    "id": "e095384e-6d57-4e19-afcc-d22b09ce350e",
+    "name": "Jumia Pickup Station Filele",
+    "state": "Kogi",
+    "address": "Shop 1, Honey Gold Filele, Kogi State",
+    "landmark": "Opposite Motel 5",
+    "latitude": 7.853269,
+    "longitude": 6.719046,
+    "is_active": true
+  },
+  {
+    "id": "f3da287e-314d-4fd1-957f-2630de1caef9",
+    "name": "Jumia Pickup Station Ganaja Road",
+    "state": "Kogi",
+    "address": "Ali Yakub Filling Station, Ganaja village, Lokoja. Kogi State.",
+    "landmark": "ALI YAKUB NIG, Filling Station",
+    "latitude": 7.7927368,
+    "longitude": 6.7261772,
+    "is_active": true
+  },
+  {
+    "id": "663f3121-ff40-4ea1-b480-77682b3abf5e",
+    "name": "Jumia Pickup Station Kabba",
+    "state": "Kogi",
+    "address": "Frankfrayo Shopping Complex, Opposite UBA Bank, Lokoja Road, Kabba, Kogi State.",
+    "landmark": "Opposite UBA Bank",
+    "latitude": 7.8361875,
+    "longitude": 6.0804219,
+    "is_active": true
+  },
+  {
+    "id": "da73d5d5-4e43-4566-a72f-8f7d0a3a0d0a",
+    "name": "Jumia Pickup Station Lokoja",
+    "state": "Kogi",
+    "address": "Suit 6, City Complex, Opposite Bishop Delisle Secondary School, Beside Police Area Command, Ibrahim Taiwo Road Lokoja.",
+    "landmark": "National Open University, Lokoja",
+    "latitude": 7.8105456,
+    "longitude": 6.7436081,
+    "is_active": true
+  },
+  {
+    "id": "c6a2f988-107e-4652-967a-6d6528efa091",
+    "name": "Jumia Pickup Station Okene",
+    "state": "Kogi",
+    "address": "No 8 idoji street okene, kogi state",
+    "landmark": "Close to Benin-Abuja Junction",
+    "latitude": 7.5440891,
+    "longitude": 6.2402729,
+    "is_active": true
+  },
+  {
+    "id": "fccb5a2c-04ce-4edc-a4c9-f3b84e6986e0",
+    "name": "Jumia Pickup Station Ilorin",
+    "state": "Kwara",
+    "address": "No. 52, Stadium Road, off Ibrahim Taiwo road, Ilorin, Kwara State",
+    "landmark": "Olumo Building",
+    "latitude": 8.4822124,
+    "longitude": 4.5496862,
+    "is_active": true
+  },
+  {
+    "id": "b0ed8dca-ea38-412c-afcd-db06f68823e9",
+    "name": "Jumia Pickup Station Ilorin Gambari Road",
+    "state": "Kwara",
+    "address": "Balogun Gambari Road, beside Balogun Fulani Microfinance Bank, Ilorin Kwara State",
+    "landmark": "Balogun Fulani Microfinance Bank",
+    "latitude": 8.4937279,
+    "longitude": 4.5569266,
+    "is_active": true
+  },
+  {
+    "id": "6d10832d-2d9f-481d-ab6e-b237c7c5bbf7",
+    "name": "Jumia Pickup Station Ilorin-Gss",
+    "state": "Kwara",
+    "address": "Mercy Seat Plaza Opposite Total Filling Station Sango Ilorin Kwara State",
+    "landmark": "Total Filling Station Sango",
+    "latitude": 8.5028168,
+    "longitude": 4.5776183,
+    "is_active": true
+  },
+  {
+    "id": "af3b5c5d-8f85-4aa1-9206-459e5d9a8b33",
+    "name": "Jumia Pickup Station Ilorin-Offa Garage",
+    "state": "Kwara",
+    "address": "Shop A15 M & J Shopping complex, Beside Esteem G supermarket, Offa garage Road, Ilorin Kwara State",
+    "landmark": "(in between Esteem G supermarket and First Bank",
+    "latitude": 8.4605032,
+    "longitude": 4.5739782,
+    "is_active": true
+  },
+  {
+    "id": "4d2a34ea-6fcd-4890-b572-5f228e3b926c",
+    "name": "Jumia Pickup Station Ilorin-Surulere rd",
+    "state": "Kwara",
+    "address": "No 115 Abdulazeez attah road, Opposite B Division Police Station, Surulere, Ilorin",
+    "landmark": "Opp Division B Police Station",
+    "latitude": 8.4812377,
+    "longitude": 4.5359159,
+    "is_active": true
+  },
+  {
+    "id": "654c302a-def2-4eb2-b3af-ce23178090e8",
+    "name": "Jumia Pickup Station llorin Airport Rd",
+    "state": "Kwara",
+    "address": "Suite A, Adebayo Yusuf House, opposite International Airport Ilorin.",
+    "landmark": "Beside Donrich Educational Services",
+    "latitude": 8.43727,
+    "longitude": 4.498981,
+    "is_active": true
+  },
+  {
+    "id": "821b6901-f579-4b52-83b3-9a9bd1628643",
+    "name": "Jumia Pickup Station Offa-Olofa way",
+    "state": "Kwara",
+    "address": "Suite 5, Ijakadi Shopping Mall, along Olofa Way, Offa, Kwara",
+    "landmark": "beside Ibolo Microfinance Bank",
+    "latitude": 8.1557047,
+    "longitude": 4.7240671,
+    "is_active": true
+  },
+  {
+    "id": "1cd17cfc-af05-4791-a931-e28a18f3b270",
+    "name": "Jumia Pickup Station Oloje",
+    "state": "Kwara",
+    "address": "Flat 7, Federal Housing Low cost, Opposite KAMHAB Restaurant along Ansarul-Islam Secondary School, Oloje-Ogidi, Ilorin",
+    "landmark": "Adjacent to Ansarul-Islam Secondary School",
+    "latitude": 8.5163232,
+    "longitude": 4.5116914,
+    "is_active": true
+  },
+  {
+    "id": "cf715e59-d41d-4c7b-9d1c-d01f2b715304",
+    "name": "Jumia Pickup Station Tanke",
+    "state": "Kwara",
+    "address": "32, University Road, Beside ReoCake/Club Rush Building, Tanke.",
+    "landmark": "ReoCake/Club Rush Building",
+    "latitude": 8.4833052,
+    "longitude": 4.6032645,
+    "is_active": true
+  },
+  {
+    "id": "91dc7b3f-c24e-478d-8692-ca492f5c00d8",
+    "name": "Jumia Pickup Station - Epe",
+    "state": "Lagos",
+    "address": "Shop 4 and 5 bamu plaza beside Petrocam fuel station Tjunction epe",
+    "landmark": "Beside Petrocam Filling Station.",
+    "latitude": 6.5853125,
+    "longitude": 3.9536719,
+    "is_active": true
+  },
+  {
+    "id": "ada84c7f-0043-44e4-8a4a-e68f471cc9bf",
+    "name": "Jumia Pickup Station - Unilag",
+    "state": "Lagos",
+    "address": "Suite 3, 2001 Cafeteria New Hall,Wisdom Café Unilag Yaba Lagos",
+    "landmark": "Wisdom Cafe",
+    "latitude": 6.5095442,
+    "longitude": 3.3710936,
+    "is_active": true
+  },
+  {
+    "id": "cbfe7a36-53f5-4a30-9fc0-5b0d179f0f4d",
+    "name": "Jumia Pickup Station Abijo (Majek)",
+    "state": "Lagos",
+    "address": "Shop B6, Lotto Plaza, Opposite Farapark and besides Manbilla Hotel, Majek, eti-osa",
+    "landmark": "Manbilla Hotel",
+    "latitude": 6.4589849,
+    "longitude": 3.6015207,
+    "is_active": true
+  },
+  {
+    "id": "722bf836-5310-4b66-aa6c-3f04338d5702",
+    "name": "Jumia Pickup Station Abule Egba",
+    "state": "Lagos",
+    "address": "10 Oke Street, Ahmadiya Bus-stop, Ojokoro, Lagos",
+    "landmark": "Abule Tailor Busstop",
+    "latitude": 6.6649912,
+    "longitude": 3.2947783,
+    "is_active": true
+  },
+  {
+    "id": "01008ea4-59fa-430b-9138-89986c606b3e",
+    "name": "Jumia Pickup Station Adamo",
+    "state": "Lagos",
+    "address": "Main Market Square, Adamo, Itokin Rd., Ikorodu, Lagos State",
+    "landmark": "Main Market Square Adamo",
+    "latitude": 6.6341028,
+    "longitude": 3.5363656,
+    "is_active": true
+  },
+  {
+    "id": "5ecc8874-a916-4693-82c0-b98010eff913",
+    "name": "Jumia Pickup Station Addo Rd",
+    "state": "Lagos",
+    "address": "Shop 11, Living faith Church Complex, Red House bus Stop, Along Sterling Bank langbasa road . Ajah.",
+    "landmark": "Red house bust stop",
+    "latitude": 6.5042824,
+    "longitude": 3.5818424,
+    "is_active": true
+  },
+  {
+    "id": "af35a85e-73d5-4195-84d0-3eb5e1f43ce3",
+    "name": "Jumia Pickup Station Adeniran Ogunsanya",
+    "state": "Lagos",
+    "address": "48, Adeniran Ogunsanya Street, Surulere, Lagos.",
+    "landmark": "Beside Zenith Carex courier & Logistics",
+    "latitude": 6.4955264,
+    "longitude": 3.3574081,
+    "is_active": true
+  },
+  {
+    "id": "274d72c5-4cfc-40f8-814b-bd17edaabe7b",
+    "name": "Jumia Pickup Station Agege",
+    "state": "Lagos",
+    "address": "Plot 358 Augustus Plaza, Abbatoir Junction, Old Abeokuta motor road, Agege. Lagos",
+    "landmark": "Opp Abbatoir Police station",
+    "latitude": 6.6360524,
+    "longitude": 3.3139601,
+    "is_active": true
+  },
+  {
+    "id": "126acbdf-fdbf-403b-9ed4-d45fd4a47216",
+    "name": "Jumia Pickup Station Aguda",
+    "state": "Lagos",
+    "address": "78 Adetola Road, Aguda. Beside Bokku Cele Aguda",
+    "landmark": "Bokku Supermarket",
+    "latitude": 6.4901481,
+    "longitude": 3.3369566,
+    "is_active": true
+  },
+  {
+    "id": "553910c9-ed80-4ebb-abde-e4834bc1db74",
+    "name": "Jumia Pickup Station Agungi",
+    "state": "Lagos",
+    "address": "ologolo bus stop , YOB Shopping complex, Agungi Lekki",
+    "landmark": "Dominos building",
+    "latitude": 6.4357894,
+    "longitude": 3.5151061,
+    "is_active": true
+  },
+  {
+    "id": "911c0e53-fbf8-4f62-8618-4ae6ce93db57",
+    "name": "Jumia Pickup Station Airport Junction",
+    "state": "Lagos",
+    "address": "56, Murtala Mohammed Int'l Airport Road,",
+    "landmark": "Zenith Bank Airport Junction",
+    "latitude": 6.5686654,
+    "longitude": 3.32445,
+    "is_active": true
+  },
+  {
+    "id": "0d01c9fc-e000-49f9-933d-fc5291ab832b",
+    "name": "Jumia Pickup Station Ajegunle",
+    "state": "Lagos",
+    "address": "22 amore street , opposite Da vics foodcity, Tolu busstop along boundary road",
+    "landmark": "Tolu bustop",
+    "latitude": 6.5992992,
+    "longitude": 3.3497323,
+    "is_active": true
+  },
+  {
+    "id": "c36eafc3-ad50-4928-9e8a-ac3ddcc65568",
+    "name": "Jumia Pickup Station Akesan",
+    "state": "Lagos",
+    "address": "Shop 7 Beta Dey shopping Complex and Shopping mart, Km 10 Lasu Ojo road Akesan Junction, Lagos",
+    "landmark": "Akesan Busstop",
+    "latitude": 6.5386668,
+    "longitude": 3.2214135,
+    "is_active": true
+  },
+  {
+    "id": "cc2bee3a-7ff3-4922-938e-f51b68011d69",
+    "name": "Jumia Pickup Station Alagbado",
+    "state": "Lagos",
+    "address": "Address- Suite A12, G.Royal Plaza, Casso Bus Stop (Zenith Bank) Alagbado, Lagos.",
+    "landmark": "Beside Justrite supermarket",
+    "latitude": 6.6702051,
+    "longitude": 3.2719322,
+    "is_active": true
+  },
+  {
+    "id": "0d2e8f85-5610-444d-9609-3f16211b812f",
+    "name": "Jumia Pickup Station Amukoko",
+    "state": "Lagos",
+    "address": "No. 9 mosafejo Alaba Road",
+    "landmark": "Adjacent Bokku Mart, Orile Amukoko",
+    "latitude": 6.4666732,
+    "longitude": 3.3490079,
+    "is_active": true
+  },
+  {
+    "id": "1858bd28-7626-4efd-8679-0a7bb4292ada",
+    "name": "Jumia Pickup Station Awoyaya",
+    "state": "Lagos",
+    "address": "Elohim plaza beside trekkers hub oribanwa.",
+    "landmark": "Beside Trekkers hub",
+    "latitude": 6.473044,
+    "longitude": 3.725583,
+    "is_active": true
+  },
+  {
+    "id": "916de51e-8677-4b07-97c6-80b647546c7b",
+    "name": "Jumia Pickup Station Awoyaya Shopping Complex",
+    "state": "Lagos",
+    "address": "Shop Doveline Network, Awoyaya shopping complex , Awoyaya busstop",
+    "landmark": "Opposite Sunbeth Fuel Station",
+    "latitude": 6.4732426,
+    "longitude": 3.7258598,
+    "is_active": true
+  },
+  {
+    "id": "b139fcf4-a901-4eb3-b203-8cfb3d9b223a",
+    "name": "Jumia Pickup Station Badagry",
+    "state": "Lagos",
+    "address": "Block A2, HSE 1. Muhammad Buhari Estate Badagry, Lagos State.",
+    "landmark": "Muhammad Buhari Estate Bus stop",
+    "latitude": 6.4666815,
+    "longitude": 2.9780354,
+    "is_active": true
+  },
+  {
+    "id": "c0872e13-7a62-44a3-83b6-3adaca89a156",
+    "name": "Jumia Pickup Station Badagry Roundabout (Ajara)",
+    "state": "Lagos",
+    "address": "Shop No. 2, Block B, Kiki Shopping Complex, Ajara Dokoh Badagry Round About Lagos, Nigeria.",
+    "landmark": "Badagry Garrage Bus Stop",
+    "latitude": 6.4182673,
+    "longitude": 2.8901388,
+    "is_active": true
+  },
+  {
+    "id": "c2b4bb99-c573-4f1e-9e1c-aca385f4f81c",
+    "name": "Jumia Pickup Station Bariga",
+    "state": "Lagos",
+    "address": "23 Emmanuel Street, Bariga market, off jagunmolu road, Lagos State.",
+    "landmark": "Emmanuel Street",
+    "latitude": 6.5379765,
+    "longitude": 3.3918116,
+    "is_active": true
+  },
+  {
+    "id": "31096d06-0574-4103-9381-58e3bb1fdc02",
+    "name": "Jumia Pickup Station Bogije",
+    "state": "Lagos",
+    "address": "H&B Plaza, Lekki - Epe Expressway, opp. Access Bank, Bogije, Ibeju Lekki, Lagos",
+    "landmark": "Access Bank, Bogije, Ibeju Lekki",
+    "latitude": 6.4765428,
+    "longitude": 3.7629874,
+    "is_active": true
+  },
+  {
+    "id": "9da0606f-c776-4de0-8fd2-ebc01a70e161",
+    "name": "Jumia Pickup Station Budo Peninsula Estate",
+    "state": "Lagos",
+    "address": "House 2, Road 3. Budo Peninsula Estate Phase II Ajah, Lagos",
+    "landmark": "Ajah Ajiwe Police Station",
+    "latitude": 6.4701356,
+    "longitude": 3.5817184,
+    "is_active": true
+  },
+  {
+    "id": "c5484af2-1d8b-4ad2-a34e-8c15354b8b55",
+    "name": "Jumia Pickup Station Command",
+    "state": "Lagos",
+    "address": "Shop 2, Psalm 23 Plaza. 18, Ajasa-Command Road, Beside Nnpc Command Bus-Stop.",
+    "landmark": "opposite St. Lawrence School",
+    "latitude": 6.6361649,
+    "longitude": 3.2571349,
+    "is_active": true
+  },
+  {
+    "id": "269016a2-cec0-4da7-a8af-3aab73be568e",
+    "name": "Jumia Pickup Station Dalemo Alakuko",
+    "state": "Lagos",
+    "address": "3, Ojuelegba Road, Dalemo Alakuko. Lagos State",
+    "landmark": "Dalemo Bustop by AP Filling Station",
+    "latitude": 6.6968724,
+    "longitude": 3.2741961,
+    "is_active": true
+  },
+  {
+    "id": "72cc7354-2e86-4cec-8dd2-42d64a2ca35a",
+    "name": "Jumia Pickup Station Dopemu",
+    "state": "Lagos",
+    "address": "1 Alimosho Rd, Alimosho, Lagos",
+    "landmark": "Beside UBA Bank, Alaguntan Junction, Alimosho, Lagos.",
+    "latitude": 6.6101768,
+    "longitude": 3.305973,
+    "is_active": true
+  },
+  {
+    "id": "91390df3-3339-4a86-8b08-b677b6783625",
+    "name": "Jumia Pickup Station Ebute Ipakodo",
+    "state": "Lagos",
+    "address": "81, Beach road, Oba Sekunmade Opposite, Nigeria Port Authority. Ebute Ipakodo Ikorodu",
+    "landmark": "Opposite Nigeria Port Authority. Ebute Ipakodo",
+    "latitude": 6.6031625,
+    "longitude": 3.4864844,
+    "is_active": true
+  },
+  {
+    "id": "8450227f-fecd-4af8-82ed-1c908a053fbc",
+    "name": "Jumia Pickup Station Egbeda",
+    "state": "Lagos",
+    "address": "35, Ponle Bus Stop, Egbeda",
+    "landmark": "Beside Ikeja Electricity Distribution Company - Ikedc Ponle Bus Stop.",
+    "latitude": 6.605134,
+    "longitude": 3.2941531,
+    "is_active": true
+  },
+  {
+    "id": "28b2195a-31c9-4817-b577-d00e20e25953",
+    "name": "Jumia Pickup Station Eleko Junction",
+    "state": "Lagos",
+    "address": "No 3, OHONBA STREET, BESIDE OHONBA ROYAL HOTEL. ELEKO JUNCTION.",
+    "landmark": "Opposite Ohonba royal hotel",
+    "latitude": 6.4755807,
+    "longitude": 3.8467281,
+    "is_active": true
+  },
+  {
+    "id": "f59b3d04-17ad-4882-9a31-bf68b627b9ce",
+    "name": "Jumia Pickup Station Epe (Yemco)",
+    "state": "Lagos",
+    "address": "shop 18 Yemco plaza beside maternity FRSC BUSTOP ITA-OPO EPE LAGOS",
+    "landmark": "Beside betnaija Shop Ayetoro Market.",
+    "latitude": 6.5892581,
+    "longitude": 3.9800928,
+    "is_active": true
+  },
+  {
+    "id": "e70f1ece-2caa-44ce-b935-c663862f4f28",
+    "name": "Jumia Pickup Station Festac",
+    "state": "Lagos",
+    "address": "21 Road, V Close House 1 Festac Town.",
+    "landmark": "Beside Kulture Kitchen",
+    "latitude": 6.4736497,
+    "longitude": 3.2886091,
+    "is_active": true
+  },
+  {
+    "id": "be4462c2-3a4f-4d13-ba46-596c7faab12d",
+    "name": "Jumia Pickup Station Gbagada-Charlie Boy",
+    "state": "Lagos",
+    "address": "DHL building, beside KFC, Charlie Boy Bus stop, Apapa-Oshodi Expressway, Gbagada, Lagos",
+    "landmark": "Dhl Building",
+    "latitude": 6.5583517,
+    "longitude": 3.3914817,
+    "is_active": true
+  },
+  {
+    "id": "82faa315-201f-45a3-b90e-b8ffe0a36dcf",
+    "name": "Jumia Pickup Station Gberigbe",
+    "state": "Lagos",
+    "address": "Shop 14 & 15 ORELADE LADERA COMPLEX, GBERIGBE, Ikorodu Lagos",
+    "landmark": "After Methodist Primary school Gberigbe",
+    "latitude": 6.6026596,
+    "longitude": 3.6167146,
+    "is_active": true
+  },
+  {
+    "id": "887d6a21-91b4-415f-8b86-40f975573861",
+    "name": "Jumia Pickup Station Ibeju (Okeogun)",
+    "state": "Lagos",
+    "address": "Shop 8, mercantile plaza, Besides MRS fuel station Ibeju busstop, Lagos",
+    "landmark": "Our Lady of the Holy Rosary Catholic Church",
+    "latitude": 6.4847998,
+    "longitude": 3.8897149,
+    "is_active": true
+  },
+  {
+    "id": "956a996f-7079-4193-b218-6b96bf67f293",
+    "name": "Jumia Pickup Station Ifelodun",
+    "state": "Lagos",
+    "address": "53 Ifelodun Street, Military zone Bus Stop, ejigbo Lagos",
+    "landmark": "Close to NCMS filling Station",
+    "latitude": 6.5627112,
+    "longitude": 3.2996724,
+    "is_active": true
+  },
+  {
+    "id": "dc93e520-7e8f-40b3-8c7a-10b2204a3ab9",
+    "name": "Jumia Pickup Station Igbogbo",
+    "state": "Lagos",
+    "address": "Bola Ahmed Tinubu way ikorodu, besides Havelock hotel and bar",
+    "landmark": "beside Havelock hotel",
+    "latitude": 6.5928955,
+    "longitude": 3.5226228,
+    "is_active": true
+  },
+  {
+    "id": "64daca70-f8e9-4bbc-b0d2-7db54a8903b3",
+    "name": "Jumia Pickup Station Ijanikin",
+    "state": "Lagos",
+    "address": "25, Station Bus Stop, Opposite Police Station, Ijanikin",
+    "landmark": "Police Station Ijanikin",
+    "latitude": 6.488621,
+    "longitude": 3.1428341,
+    "is_active": true
+  },
+  {
+    "id": "dcdee660-7a62-475f-abcc-426d3ae9aeb8",
+    "name": "Jumia Pickup Station Ijede",
+    "state": "Lagos",
+    "address": "Idiroko area, Ijede Road, opposite Essential Discount Mall, Idiroko Ijede.",
+    "landmark": "opposite Essential Discount Mall",
+    "latitude": 6.6276846,
+    "longitude": 3.5460773,
+    "is_active": true
+  },
+  {
+    "id": "596207a2-a72b-400e-8483-542cf50bc596",
+    "name": "Jumia Pickup Station Ijegun",
+    "state": "Lagos",
+    "address": "Dsquare plaza Beside Ijegun Jnr Grammar School, Alimosho LGA. Shop A6, along Isheri-Osun Road, Ijegun",
+    "landmark": "Ijegun Junior Grammar School",
+    "latitude": 6.5141532,
+    "longitude": 3.2700639,
+    "is_active": true
+  },
+  {
+    "id": "a9ee9d67-2a52-48a5-999c-7eb243e46dd6",
+    "name": "Jumia Pickup Station Iju-Ishaga Road",
+    "state": "Lagos",
+    "address": "135 Iju Road, Suite A5, IMAGE PLAZA, Church bus stop, Ifako-Ijaiye, Lagos.",
+    "landmark": "Opposite Olowosokedile police station (Beside Fujimoto).",
+    "latitude": 6.6504332,
+    "longitude": 3.3231382,
+    "is_active": true
+  },
+  {
+    "id": "96e3f31b-d0f1-423b-a154-f5576ee8bf39",
+    "name": "Jumia Pickup Station Ikeja",
+    "state": "Lagos",
+    "address": "No 1 Regina Omolara street Off Agbaoku, Ikeja, Lagos",
+    "landmark": "Close to Classic hotel Opebi",
+    "latitude": 6.5965945,
+    "longitude": 3.358233,
+    "is_active": true
+  },
+  {
+    "id": "711c60ff-4932-4aa8-9243-b1bb2f53a4bf",
+    "name": "Jumia Pickup Station Ikorodu",
+    "state": "Lagos",
+    "address": "58, Owode Ibeshe,road, Aganga bus stop, Ikorodu",
+    "landmark": "Aganga Bus-Stop Beside Holy Trinity Hospital",
+    "latitude": 6.5742808,
+    "longitude": 3.486342,
+    "is_active": true
+  },
+  {
+    "id": "6e81aa05-16a0-4b4b-a04b-a4faf827800d",
+    "name": "Jumia Pickup Station Ikorodu Garage",
+    "state": "Lagos",
+    "address": "48, Owolowo street, printing press market road, Ojubode Ikorodu, Lagos",
+    "landmark": "Close to Esso Hospital",
+    "latitude": 6.6176594,
+    "longitude": 3.503272,
+    "is_active": true
+  },
+  {
+    "id": "06efd150-5c64-4d7f-a713-7a39d3b209f5",
+    "name": "Jumia Pickup Station Ikota",
+    "state": "Lagos",
+    "address": "Shop D170 Off Road 1, Ikota shopping Complex VGC, Lagos",
+    "landmark": "Ikota Shopping Complex",
+    "latitude": 6.463451,
+    "longitude": 3.5546939,
+    "is_active": true
+  },
+  {
+    "id": "eddce130-ef9f-43a4-9540-348a653010eb",
+    "name": "Jumia Pickup Station Ikotun Abaranje",
+    "state": "Lagos",
+    "address": "29, Zone A, Ogunfowora Estate, Abaranje road, Ikotun",
+    "landmark": "The Kings kid school",
+    "latitude": 6.5375075,
+    "longitude": 3.2555339,
+    "is_active": true
+  },
+  {
+    "id": "da6cf0f8-8f9a-40cf-ac5f-36652ab69982",
+    "name": "Jumia Pickup Station Ikoyi",
+    "state": "Lagos",
+    "address": "No 19 ALFRED REWANE Road Formal Ikoyi Registry IKOYI.",
+    "landmark": "Ikoyi Registry",
+    "latitude": 6.448074,
+    "longitude": 3.428285,
+    "is_active": true
+  },
+  {
+    "id": "11e94fa2-a84d-445e-9aa0-687f04d0b1bb",
+    "name": "Jumia Pickup Station Ipaja-Baruwa",
+    "state": "Lagos",
+    "address": "2, Alhaja Wosilat Street, Aina Obembe Baruwa inside, Oluwaga Busstop, Off Ayobo road.",
+    "landmark": "Opposite Mobile Filling Station.",
+    "latitude": 6.5971112,
+    "longitude": 3.2585079,
+    "is_active": true
+  },
+  {
+    "id": "d07d4575-03e7-46b7-ac4e-b8ed60bb1ad0",
+    "name": "Jumia Pickup Station Isawo",
+    "state": "Lagos",
+    "address": "304, ISAWO ROAD, OFF MATKAY BUS-STOP, BESIDE NIPCO FILLING STATION, AGRIC, IKORODU, LAGOS.",
+    "landmark": "NIPCO FILLING STATION",
+    "latitude": 6.6591092,
+    "longitude": 3.4725606,
+    "is_active": true
+  },
+  {
+    "id": "56b9eb31-3f30-4ef1-b04f-49066e8938eb",
+    "name": "Jumia Pickup Station Ishashi",
+    "state": "Lagos",
+    "address": "49, Iyana Isashi Road, ABS bus top, Iyana Isashi, Ojo, Lagos",
+    "landmark": "Regional Hotel (Iyana Isashi)",
+    "latitude": 6.4865287,
+    "longitude": 3.174198,
+    "is_active": true
+  },
+  {
+    "id": "49300d36-03db-4df5-be06-027bbf62ef65",
+    "name": "Jumia Pickup Station Isolo",
+    "state": "Lagos",
+    "address": "6B Daddy Adediran street Adagun Odo Off Ire Akari Estate road Isolo.",
+    "landmark": "KeyStone Bank",
+    "latitude": 6.523846,
+    "longitude": 3.322807,
+    "is_active": true
+  },
+  {
+    "id": "8e005cfc-8589-458f-beae-0c3746d19c49",
+    "name": "Jumia Pickup Station Iyana Iba",
+    "state": "Lagos",
+    "address": "Shop F13, Naowa mega Plaza, Village bu stop, Iyana iba road, Lagos.",
+    "landmark": "Opp GTbank",
+    "latitude": 6.4846105,
+    "longitude": 3.1993496,
+    "is_active": true
+  },
+  {
+    "id": "bc55ce5a-1e83-4c6b-b8f7-d157a1a00ec9",
+    "name": "Jumia Pickup Station Iyana-Ejigbo (Chicken Republic)",
+    "state": "Lagos",
+    "address": "68, Egbe Road, Jesus Saves Plaza, Iyana-Ejigbo, Lagos.",
+    "landmark": "Beside Chicken Republic",
+    "latitude": 6.5387112,
+    "longitude": 3.3073799,
+    "is_active": true
+  },
+  {
+    "id": "fc3bfdb8-896c-4dfb-b93a-32eb99365bcd",
+    "name": "Jumia Pickup Station Jakande First Gate",
+    "state": "Lagos",
+    "address": "Elegushi Plaza Km 15, Lekki Express Way, Opp Jakande First Gate, Beside FCMB, Lagos State.",
+    "landmark": "Beside FCMB, Lagos State.",
+    "latitude": 6.4368324,
+    "longitude": 3.5067841,
+    "is_active": true
+  },
+  {
+    "id": "2d0168c1-ef31-46fe-bbf1-1788e1b96698",
+    "name": "Jumia Pickup Station Jankara",
+    "state": "Lagos",
+    "address": "138 Adeniji Adele Rd, Lagos Island, Lagos 102273, Lagos State.",
+    "landmark": "opp LSPDC estate phase 4 adeniji Adele",
+    "latitude": 6.4566622,
+    "longitude": 3.3991541,
+    "is_active": true
+  },
+  {
+    "id": "8e2aa9ab-7ed7-48ac-b0a8-8f3930c44e27",
+    "name": "Jumia Pickup Station Ketu",
+    "state": "Lagos",
+    "address": "BABAJIDE SANWO-OLU COMPLEX, KETU, SHOP 4, OBA TAIWO ONIKOSI BLOCK",
+    "landmark": "OBA TAIWO ONIKOSI BLOCK",
+    "latitude": 6.5999494,
+    "longitude": 3.3831145,
+    "is_active": true
+  },
+  {
+    "id": "fa2305ee-78b1-4b4e-9e1d-e454aef62f5e",
+    "name": "Jumia Pickup Station Kingsfield College Ijede",
+    "state": "Lagos",
+    "address": "17, Ijede Road, Limited Bus stop, beside Kingsfield College Ijede road, Ikorodu, Lagos.",
+    "landmark": "Kingsfield College",
+    "latitude": 6.5755208,
+    "longitude": 3.5921001,
+    "is_active": true
+  },
+  {
+    "id": "a449e738-92eb-4b9b-82d0-cfaa11fbc43f",
+    "name": "Jumia Pickup Station Lawanson",
+    "state": "Lagos",
+    "address": "1 Saibu Lawal St, Lawanson, Lagos 101241, Lagos",
+    "landmark": "Ladey's Signature",
+    "latitude": 6.4910259,
+    "longitude": 3.326247,
+    "is_active": true
+  },
+  {
+    "id": "e819cc74-1d63-40c1-b8d4-7a048d85e6c1",
+    "name": "Jumia Pickup Station Lekki freedomway",
+    "state": "Lagos",
+    "address": "Plot 46 & 47, Stonebridge Street, off Tunde Laitan, off Freedomway, Lekki - Ikate, Lagos.",
+    "landmark": "RENEE supermarket after The DOM church. (Next right turn after RENEE supermarket)",
+    "latitude": 6.4517571,
+    "longitude": 3.4841036,
+    "is_active": true
+  },
+  {
+    "id": "e3f0e3a3-841d-4151-a8bd-3453c6ad3be0",
+    "name": "Jumia Pickup Station Liverpool",
+    "state": "Lagos",
+    "address": "No 25A Liverpool road GRA, close to Access bank, Apapa, Lagos state.",
+    "landmark": "Close to Access bank",
+    "latitude": 6.4425135,
+    "longitude": 3.3609391,
+    "is_active": true
+  },
+  {
+    "id": "5216fb21-1f9e-417f-83b5-892f9a9af800",
+    "name": "Jumia Pickup Station Marina",
+    "state": "Lagos",
+    "address": "51 Marina Rd, Lagos Island, Lagos 102273, Lagos.",
+    "landmark": "Kingsway Building Lagos",
+    "latitude": 6.4542597,
+    "longitude": 3.3846872,
+    "is_active": true
+  },
+  {
+    "id": "dfd910c2-e84f-4847-b5e4-9b41898f3998",
+    "name": "Jumia Pickup Station Muri okunola",
+    "state": "Lagos",
+    "address": "3 ABIOLA SEGUN AJAYI STREET OFF MURI OKUNOLA STREET BESIDE ZENITH BANK VICTORIA ISLAND",
+    "landmark": "PetShop Plus VI",
+    "latitude": 6.4325665,
+    "longitude": 3.4367811,
+    "is_active": true
+  },
+  {
+    "id": "6f203806-311d-40a0-ae61-7ae4cb7a6d94",
+    "name": "Jumia Pickup Station odongunyan",
+    "state": "Lagos",
+    "address": "No 35b Odonla road Odongunyan Lagos",
+    "landmark": "Odongunyan Bustop",
+    "latitude": 6.664438,
+    "longitude": 3.5222494,
+    "is_active": true
+  },
+  {
+    "id": "7a1ac87b-8c64-4f31-9868-cbb10c6c0f9f",
+    "name": "Jumia Pickup Station Ogba (Yaya-Abatan)",
+    "state": "Lagos",
+    "address": "72, Yaya Abatan, College Road Abeokuta street junction Ogba Lagos",
+    "landmark": "Opposite the National Teachers Institute",
+    "latitude": 6.6360237,
+    "longitude": 3.338424,
+    "is_active": true
+  },
+  {
+    "id": "a5479d95-0143-4bd7-b713-d32acce5fe50",
+    "name": "Jumia Pickup Station Ogijo",
+    "state": "Lagos",
+    "address": "Plot 3 Nasfat junction, ikorodu shagamu road",
+    "landmark": "Vigil medical laboratory services",
+    "latitude": 6.7291109,
+    "longitude": 3.5264033,
+    "is_active": true
+  },
+  {
+    "id": "e44d2598-7549-4afa-a738-27deec80c4df",
+    "name": "Jumia Pickup Station Ogunnusi Road",
+    "state": "Lagos",
+    "address": "Bamboo Plaza Ogunnusi Road, Omole Phase 1. Ojodu",
+    "landmark": "NNPC filling station",
+    "latitude": 6.6360562,
+    "longitude": 3.3544241,
+    "is_active": true
+  },
+  {
+    "id": "87d654cf-d8c8-49b0-858b-c2769f4fd4be",
+    "name": "Jumia Pickup Station Ojota",
+    "state": "Lagos",
+    "address": "Mrs Filling Station, Ogudu Rd, Ojota, Lagos 105102, Lagos",
+    "landmark": "MRS Filling Station",
+    "latitude": 6.5886297,
+    "longitude": 3.3800648,
+    "is_active": true
+  },
+  {
+    "id": "91b7e673-5f45-4fb3-b36c-87a7570f1348",
+    "name": "Jumia Pickup Station Oke Eletu",
+    "state": "Lagos",
+    "address": "Oke Eletu, Opposite Tinubu Estate,Ijede Road.",
+    "landmark": "Opposite Tinubu Estate,Ijede Road.",
+    "latitude": 6.59591,
+    "longitude": 3.58878,
+    "is_active": true
+  },
+  {
+    "id": "57793660-abae-4a0b-953b-6d0c3db27b43",
+    "name": "Jumia Pickup Station Okota",
+    "state": "Lagos",
+    "address": "SHOP 3, 119/121 AGO PALACE WAY, OKOTA, Lagos State.",
+    "landmark": "Market Square Express",
+    "latitude": 6.5041893,
+    "longitude": 3.3071118,
+    "is_active": true
+  },
+  {
+    "id": "36777019-f358-4133-afd9-db9fff079d92",
+    "name": "Jumia Pickup Station Onosa",
+    "state": "Lagos",
+    "address": "Suite 6/7, Rainbow Plaza, Opp. Onosa Bus- Stop Ibeju Lekki, Lagos State",
+    "landmark": "Rainbow Plaza, Opp. Onosa Bus- Stop",
+    "latitude": 6.4716732,
+    "longitude": 3.80387,
+    "is_active": true
+  },
+  {
+    "id": "e630586c-8b11-43a8-8e4b-db34e08796d1",
+    "name": "Jumia Pickup Station Poka",
+    "state": "Lagos",
+    "address": "Larabby hotel junction opposite AP fuel station along epe -ijebu ode express way poka epe lagos",
+    "landmark": "AP fuel station",
+    "latitude": 6.616705,
+    "longitude": 3.9866367,
+    "is_active": true
+  },
+  {
+    "id": "c7e24efa-503f-412b-b10f-d8082267fb97",
+    "name": "Jumia Pickup Station Sabo-Ikorodu",
+    "state": "Lagos",
+    "address": "Shop 4 beside G&G fuel station adjacent federal low-cost estates along sabo itokin road ikorodu lagos",
+    "landmark": "opposite Low-cost estate/BRT park",
+    "latitude": 6.6293375,
+    "longitude": 3.5123281,
+    "is_active": true
+  },
+  {
+    "id": "381462f3-d9f1-4e88-9d82-9219a8a41adc",
+    "name": "Jumia Pickup Station Sangotedo (Yakoyo)",
+    "state": "Lagos",
+    "address": "Shop Doveline Network, Km 46, Lekki–Epe Expressway Beside Yakoyo, Opposite Leawood Hotel Sangotedo, Lagos State",
+    "landmark": "Opposite Leawood Hotel",
+    "latitude": 6.4730002,
+    "longitude": 3.6296172,
+    "is_active": true
+  },
+  {
+    "id": "0c623cba-b198-4928-b9a6-b095f6454666",
+    "name": "Jumia Pickup Station Satellite Town",
+    "state": "Lagos",
+    "address": "Shop 4 @ No 418, Old ojo road by Maruwa Road , Finiger junction Satellite Town, Lagos",
+    "landmark": "Domino's Pizza Satellite",
+    "latitude": 6.4561065,
+    "longitude": 3.2611705,
+    "is_active": true
+  },
+  {
+    "id": "058aea1d-311a-47c8-b9b1-42beb9b3e0d8",
+    "name": "Jumia Pickup Station Yaba",
+    "state": "Lagos",
+    "address": "9 Olumo street Onike Yaba",
+    "landmark": "Yaba-Onike Iwaya",
+    "latitude": 6.5097604,
+    "longitude": 3.3848294,
+    "is_active": true
+  },
+  {
+    "id": "7ac95d3a-e37b-46c3-bbf5-1c304cea535a",
+    "name": "Jumia Pickup Station-Palmgrove",
+    "state": "Lagos",
+    "address": "2, Efunboye Close, Off Shyllon street, Palmgrove, Lagos.",
+    "landmark": "Shyllon Primary School, Opposite Efunboye Close",
+    "latitude": 6.5395362,
+    "longitude": 3.3644841,
+    "is_active": true
+  },
+  {
+    "id": "d310c2dd-a140-442a-8b9b-8dda98ec6fc2",
+    "name": "Jumia Pickup Station Akwanga",
+    "state": "Nasarawa",
+    "address": "Shop 5, Savannah plaza, Lafiya road, Akwanga, Nasarawa State.",
+    "landmark": "Adjacent Unity Bank",
+    "latitude": 8.9066616,
+    "longitude": 8.4074573,
+    "is_active": true
+  },
+  {
+    "id": "cf9d186f-ae80-4c1d-a62e-bead87432ccf",
+    "name": "Jumia Pickup Station Keffi",
+    "state": "Nasarawa",
+    "address": "Shop 1, Opposite Jehovah Witness, Keffi-Akwanga Road, Keffi, Nasarawa State.",
+    "landmark": "Adjacent A.A Rano Filling station Opposite Jehovah Witness.",
+    "latitude": 8.8497447,
+    "longitude": 7.8940038,
+    "is_active": true
+  },
+  {
+    "id": "a170591e-03e2-448a-9c09-d3189b8215a9",
+    "name": "Jumia Pickup Station Masaka",
+    "state": "Nasarawa",
+    "address": "Suite 10, Ammabua Plaza, Masaka U-Turn, Masaka Nasarawa State.",
+    "landmark": "Masaka U-Turn",
+    "latitude": 9.0045661,
+    "longitude": 7.681943,
+    "is_active": true
+  },
+  {
+    "id": "9c23978b-7b7e-4547-a190-716685649ae6",
+    "name": "Jumia Pickup Station Bida",
+    "state": "Niger",
+    "address": "Jumia Pickup Station Bida - Shop 1 & 2, Beside Uncle B Photo Studio, Opposite fire service office, Social welfare, Bida, Niger State",
+    "landmark": "Behind Uncle Photos",
+    "latitude": 9.0828784,
+    "longitude": 5.9921536,
+    "is_active": true
+  },
+  {
+    "id": "91124ca5-62b1-4697-b782-d05c9586d993",
+    "name": "Jumia Pickup Station Bida (Tswatamukun)",
+    "state": "Niger",
+    "address": "Shop 1&2 Aji Naira Plaza, Tswatamukun, Bida, Niger",
+    "landmark": "Beside Woye Pharmacy",
+    "latitude": 9.0796794,
+    "longitude": 6.0097018,
+    "is_active": true
+  },
+  {
+    "id": "d16bcb3c-bf91-4a3d-8e99-e33ace7097ee",
+    "name": "Jumia Pickup Station Bosso",
+    "state": "Niger",
+    "address": "Shop no 3 beside farayola pharmacy opposite FUT Bosso Campus Minna Niger state",
+    "landmark": "Close to Bosso Market",
+    "latitude": 9.6522343,
+    "longitude": 6.5260767,
+    "is_active": true
+  },
+  {
+    "id": "9b660ddc-26ab-4593-ae6b-0aacaa82a2cb",
+    "name": "Jumia Pickup Station Kontagora",
+    "state": "Niger",
+    "address": "Assibitn Gari area, near Amear place, Kontagora",
+    "landmark": "Amear Place",
+    "latitude": 10.407146,
+    "longitude": 5.4699173,
+    "is_active": true
+  },
+  {
+    "id": "39129c6f-8682-4eb1-944e-7adb89de6986",
+    "name": "Jumia Pickup Station Madalla",
+    "state": "Niger",
+    "address": "Shop PR05, Precious Royal Plaza, Tipper Garage, Close to Road Safety Office, Madalla-Zuba Express Way, Madalla, Niger State.",
+    "landmark": "Road Safety Office, Madalla Tipper Garage",
+    "latitude": 9.1018441,
+    "longitude": 7.2167511,
+    "is_active": true
+  },
+  {
+    "id": "f4040bd0-918b-402d-84ed-3c3599f2f53d",
+    "name": "Jumia Pickup Station Maitumbi",
+    "state": "Niger",
+    "address": "Shop 14, Niger Sherifat, Opposite Sawmill Flamingo, Maitumbi, Airport Road, Minna, Niger state",
+    "landmark": "Sawmill",
+    "latitude": 9.5835546,
+    "longitude": 6.5463156,
+    "is_active": true
+  },
+  {
+    "id": "34c6f836-dd0e-4780-95c1-4d385e7ef91e",
+    "name": "Jumia Pickup Station Minna",
+    "state": "Niger",
+    "address": "Shop 66/67, NULGE Complex, Beside NISEPA Office, Minna, Niger State",
+    "landmark": "Close to Tunga Roundabout",
+    "latitude": 9.6336916,
+    "longitude": 6.5425064,
+    "is_active": true
+  },
+  {
+    "id": "3ad9758e-05b5-4c70-9c78-2783aa7bd2ff",
+    "name": "Jumia Pickup Station MMCastle",
+    "state": "Niger",
+    "address": "MM Castle, Adjacent Federal University of Technology Minna Gidan Kwano Campus, Minna-Bida Road, Minna, Niger State.",
+    "landmark": "Federal University of Technology Minna",
+    "latitude": 9.542047,
+    "longitude": 6.4701852,
+    "is_active": true
+  },
+  {
+    "id": "13ef230d-ef0c-444f-a40c-e9d3e045bff5",
+    "name": "Jumia Pickup Station Suleja",
+    "state": "Niger",
+    "address": "No 1, Nice Avenue, Goben Pharmacy, Morocco road, Beside Cherish Kitchen, Suleja, Niger State.",
+    "landmark": "Beside Cherish Kitchen, Suleja",
+    "latitude": 9.1866873,
+    "longitude": 7.1814737,
+    "is_active": true
+  },
+  {
+    "id": "73741a96-c8ec-4a15-8fbe-e41700b914a1",
+    "name": "Jumia Pickup Station - Sagamu",
+    "state": "Ogun",
+    "address": "No 16, Ajegunle Street, beside Ajegunle Central Mosque, Opposite Zenith Bank off Akarigbo Road Sagamu.",
+    "landmark": "Opposite Zenith Bank",
+    "latitude": 6.8521751,
+    "longitude": 3.6549249,
+    "is_active": true
+  },
+  {
+    "id": "05521ceb-4935-413b-9da0-d6e3e97e20bd",
+    "name": "Jumia Pickup Station Abiola Way",
+    "state": "Ogun",
+    "address": "Dolly house,opposite laroy hotel abiola Abeokuta.",
+    "landmark": "Laroy Hotel",
+    "latitude": 7.1676233,
+    "longitude": 3.3721551,
+    "is_active": true
+  },
+  {
+    "id": "80f0e7fc-a283-4890-aa00-b48f32d49fdd",
+    "name": "Jumia Pickup Station Adigbe",
+    "state": "Ogun",
+    "address": "37,Olorode Japo Adigbe Street, Abeokuta, Ogun, NG",
+    "landmark": "Beside cleverbiz plaza, carwash mango road",
+    "latitude": 7.1183928,
+    "longitude": 3.3216998,
+    "is_active": true
+  },
+  {
+    "id": "f0b8e4f8-1321-4b26-b847-27d5eb15da4f",
+    "name": "Jumia Pickup Station Agbara",
+    "state": "Ogun",
+    "address": "Jida road 34 Abgara market new dimension plaza. Ogun State.",
+    "landmark": "Adjacent to Agbara market",
+    "latitude": 6.5032125,
+    "longitude": 3.0997656,
+    "is_active": true
+  },
+  {
+    "id": "2c7fc925-df7d-4e78-a6eb-0bc0065b361b",
+    "name": "Jumia Pickup Station Agbara-Atan Rd",
+    "state": "Ogun",
+    "address": "Status Restaurant Bus stop, opposite Olmart Supermarket.",
+    "landmark": "Close to OLMART SUPERMARKET",
+    "latitude": 6.5062387,
+    "longitude": 3.0841702,
+    "is_active": true
+  },
+  {
+    "id": "3adccc6e-4d10-4ed4-ae93-9b637cf89a30",
+    "name": "Jumia Pickup Station Ago iwoye",
+    "state": "Ogun",
+    "address": "No. 32 Igan Road, Ago Iwoye, Ogun State.",
+    "landmark": "Close to Iya Sewa Food Canteen, Igan Road",
+    "latitude": 6.9433251,
+    "longitude": 3.9139484,
+    "is_active": true
+  },
+  {
+    "id": "fca197f9-1ef3-40e7-84da-fc496e34e676",
+    "name": "Jumia Pickup Station Ajuwon Market",
+    "state": "Ogun",
+    "address": "No 52 Ayawoele road Ajuwon-Alagbole road ogun state",
+    "landmark": "Grace Divine High School",
+    "latitude": 6.6710814,
+    "longitude": 3.3476233,
+    "is_active": true
+  },
+  {
+    "id": "4771308f-b561-401c-a01f-0eee260525a4",
+    "name": "Jumia Pickup Station Akute",
+    "state": "Ogun",
+    "address": "21, fabolude, Akute-alagbole Road, Adjacent to Foursquare church, Opposite Presh wash Laundries",
+    "landmark": "Foursquare Church, Fabolude Bus stop",
+    "latitude": 6.6653957,
+    "longitude": 3.352398,
+    "is_active": true
+  },
+  {
+    "id": "ec8cec71-519c-4890-a50c-397646b7f53e",
+    "name": "Jumia Pickup Station Asese Fejeg Plaza",
+    "state": "Ogun",
+    "address": "Shop No B6, fejeg Plaza, Aseese major road, along Lagos Ibadan Exp. Way, Ogun State",
+    "landmark": "Mia Kia Farms",
+    "latitude": 6.7693823,
+    "longitude": 3.4227375,
+    "is_active": true
+  },
+  {
+    "id": "0192eccd-0cae-45d1-85c7-d7a2ef0cbd9a",
+    "name": "Jumia Pickup Station Atan",
+    "state": "Ogun",
+    "address": "Shop 3/4 Ketu-Oluyomi Agbara Road, Atan Ota.",
+    "landmark": "NNPC Filling station Atan Ota",
+    "latitude": 6.6433985,
+    "longitude": 3.0870702,
+    "is_active": true
+  },
+  {
+    "id": "bf2eb021-01ac-4b6c-820c-b4e7813fc6e6",
+    "name": "Jumia Pickup Station Camp Road",
+    "state": "Ogun",
+    "address": "Timeline Bazaar beside Peakolam Restaurant Camp Abeokuta Ogun State",
+    "landmark": "Peakolam Suit Along Funab road",
+    "latitude": 7.1935873,
+    "longitude": 3.4378448,
+    "is_active": true
+  },
+  {
+    "id": "26947cb7-25e7-4a97-afd4-819633c376f3",
+    "name": "Jumia Pickup Station Folagbade",
+    "state": "Ogun",
+    "address": "Shop 4&5 Awojobi complex opp FCMB arigbabu roundabout folagbade road ijebu ode",
+    "landmark": "Opp FCMB Bank",
+    "latitude": 6.8270509,
+    "longitude": 3.9201298,
+    "is_active": true
+  },
+  {
+    "id": "60ac95ac-2e48-4c25-bf0a-b76a9e780b0f",
+    "name": "Jumia Pickup Station Ibafo",
+    "state": "Ogun",
+    "address": "Shop D6, Sammy plaza, Ibafo",
+    "landmark": "Opposite UBA",
+    "latitude": 6.8175625,
+    "longitude": 3.4394844,
+    "is_active": true
+  },
+  {
+    "id": "8b86469f-fa13-4a95-b484-bfcb3fe20e09",
+    "name": "Jumia Pickup Station Idi-Aba",
+    "state": "Ogun",
+    "address": "Shop 11, Bayus Complex, Opp FMC, Idi-aba, Abeokuta.",
+    "landmark": "Opposite Federal Medical Center",
+    "latitude": 7.1434077,
+    "longitude": 3.3739137,
+    "is_active": true
+  },
+  {
+    "id": "3996e339-2ab3-4839-a5fa-9254e8d21730",
+    "name": "Jumia Pickup Station Ifo",
+    "state": "Ogun",
+    "address": "79B Lagos-Abeokuta Expressway, Orelope Estate Adjacent Choozrite Supermarket Area, Ifo, Ogun State.",
+    "landmark": "Adjacent choozrite supermarket area. Ifo",
+    "latitude": 6.6633505,
+    "longitude": 3.2858449,
+    "is_active": true
+  },
+  {
+    "id": "3a7aca27-112e-427c-a977-8272efffd0c0",
+    "name": "Jumia Pickup Station Ijebu-Igbo",
+    "state": "Ogun",
+    "address": "R&R plaza Beside LOPA Opp Surry car WashPalace way junction,Oke takoApoje road, igbaire Oke sopin Ijebu Igbo",
+    "landmark": "Beside Great Generation Children school",
+    "latitude": 6.9792351,
+    "longitude": 3.9980485,
+    "is_active": true
+  },
+  {
+    "id": "9ff3a45d-ab82-4df1-a4a5-ecd16ecb59f3",
+    "name": "Jumia Pickup Station Ijoko Rd",
+    "state": "Ogun",
+    "address": "1, Omo osata close, opposite Fatgbems filling station, Ijoko road, Sango, Ogun state",
+    "landmark": "OPPOSITE FATGBEMS FILLING STATION",
+    "latitude": 6.7143118,
+    "longitude": 3.2448138,
+    "is_active": true
+  },
+  {
+    "id": "2381ab99-f7b0-493d-9a97-2ca159eefeb3",
+    "name": "Jumia Pickup Station Ikenne",
+    "state": "Ogun",
+    "address": "Shop 3 Opposite cornestone event center, beside post office,Awolowo road ikenne ogun state",
+    "landmark": "Ikenne Post Office",
+    "latitude": 6.8650212,
+    "longitude": 3.7143181,
+    "is_active": true
+  },
+  {
+    "id": "78aac952-843b-452c-a47e-3f86c570492f",
+    "name": "Jumia Pickup Station Ilaro",
+    "state": "Ogun",
+    "address": "House 2 inside FEYDOC OIL AND GAS Along Express ilaro ogun state.",
+    "landmark": "Info Tech filling station",
+    "latitude": 6.8874617,
+    "longitude": 2.9954465,
+    "is_active": true
+  },
+  {
+    "id": "905b397b-74a7-4fb4-982b-04e607ed21d9",
+    "name": "Jumia Pickup Station Ilishan",
+    "state": "Ogun",
+    "address": "Shop 3, Rose of Sharon Complex, along Babcock Unisersity, Ilishan-remo.",
+    "landmark": "Beside Babcock Medical Centre Gate",
+    "latitude": 6.892376,
+    "longitude": 3.7183243,
+    "is_active": true
+  },
+  {
+    "id": "783a2abc-dafe-491a-a3fb-1ded880c1b2d",
+    "name": "Jumia Pickup Station Iperu",
+    "state": "Ogun",
+    "address": "Arch Bishop Solomon Gbadebo Shopping Complex, adjacent Solomon Gbadebo Memorial Anglican church, Ogere Road, Iperu Ogun State.",
+    "landmark": "Solomon Gbadebo Memorial Anglican church, Ogere Road",
+    "latitude": 6.9416191,
+    "longitude": 3.6447157,
+    "is_active": true
+  },
+  {
+    "id": "3fe4566a-ec24-482d-890b-b0e0c58bafb9",
+    "name": "Jumia Pickup Station Isale oko",
+    "state": "Ogun",
+    "address": "2 Akarigbo Road, Arms Inn filling station. Beside Isale Oko Garage, Sagamu.",
+    "landmark": "Arms Inn filling station. Beside Isale Oko Garage, close to QD Autos.",
+    "latitude": 6.8524003,
+    "longitude": 3.6559274,
+    "is_active": true
+  },
+  {
+    "id": "3e38ad48-0b4b-4274-bc1f-f39cbb5e1643",
+    "name": "Jumia Pickup Station Ita-Oshin",
+    "state": "Ogun",
+    "address": "No 25 lagos road close to ita-oshin garage Abeokuta ogun state",
+    "landmark": "Close to ita-oshin garage/At the front of Royal ville school",
+    "latitude": 7.1578117,
+    "longitude": 3.3264577,
+    "is_active": true
+  },
+  {
+    "id": "fbd81257-d661-4687-8d46-e500c94019f9",
+    "name": "Jumia Pickup Station Iwesi",
+    "state": "Ogun",
+    "address": "Lap Complex Iwesi Junction, Opposite kara cattle market (imowo eleran) ijebu ode ogunstate.",
+    "landmark": "Kara Cattle Market",
+    "latitude": 6.8489125,
+    "longitude": 3.9314219,
+    "is_active": true
+  },
+  {
+    "id": "75870fab-02a7-4149-9b5d-4a3e5ea8ec46",
+    "name": "Jumia Pickup Station Iyana Iyesi",
+    "state": "Ogun",
+    "address": "No 21 Iyesi Rd, Iyana iyesi Bus Stop Opposite Lamod Plaza. Otta Ogun state",
+    "landmark": "Otta Ogun state",
+    "latitude": 6.6813803,
+    "longitude": 3.1840074,
+    "is_active": true
+  },
+  {
+    "id": "731acbad-3529-4062-87f5-4d1b56d3e9c4",
+    "name": "Jumia Pickup Station Magboro",
+    "state": "Ogun",
+    "address": "12, Tosho Plaza, Tosho Bus stop, Magboro, Ogun State",
+    "landmark": "Opposite Medisense pharmacy and Amuf Petrol Station Magboro",
+    "latitude": 6.7189155,
+    "longitude": 3.4018969,
+    "is_active": true
+  },
+  {
+    "id": "3f8bdb1b-9c03-4d0c-8b11-7204462a4934",
+    "name": "Jumia Pickup Station Mowe",
+    "state": "Ogun",
+    "address": "Shop 2 Maya plaza opposite mobile filling station,ofada road Mowe Ogun state",
+    "landmark": "opposite mobile filling station",
+    "latitude": 6.8085486,
+    "longitude": 3.4367201,
+    "is_active": true
+  },
+  {
+    "id": "e1deea74-b840-4748-a95b-2cca09e8fbe3",
+    "name": "Jumia Pickup Station Ntabo Ijoko Rd",
+    "state": "Ogun",
+    "address": "Ntabo Shopping complex, Along Sango Ijoko Ota Road. Ogun State.",
+    "landmark": "Opposite opeyemi Social Event center.",
+    "latitude": 6.710554,
+    "longitude": 3.2447509,
+    "is_active": true
+  },
+  {
+    "id": "04605898-05d6-4742-bb7b-9301300a3d45",
+    "name": "Jumia Pickup Station Oke-Ilewo",
+    "state": "Ogun",
+    "address": "Jide Jones Road, Oke-ilewo, Abeokuta",
+    "landmark": "Opp Deedee Pharmacy",
+    "latitude": 7.1659062,
+    "longitude": 3.3725808,
+    "is_active": true
+  },
+  {
+    "id": "9610074e-ffbc-4296-af9e-ec1161f3299a",
+    "name": "Jumia Pickup Station Ondo Rd",
+    "state": "Ogun",
+    "address": "Satina bustop Ondo road -benin Rd ijebu ode",
+    "landmark": "CAC Church",
+    "latitude": 6.8251634,
+    "longitude": 3.919259,
+    "is_active": true
+  },
+  {
+    "id": "2154d304-4f0d-4991-ac73-cab3c69fad7a",
+    "name": "Jumia Pickup Station Onihale",
+    "state": "Ogun",
+    "address": "Lagos Abeokuta expressway Ilepa Ileapo Sawmail, Ifo, Ogun State",
+    "landmark": "Ascon Junction Adjacent Mavdav Filling Station, ifo",
+    "latitude": 6.8105985,
+    "longitude": 3.1980366,
+    "is_active": true
+  },
+  {
+    "id": "ec8284f0-3c6d-430f-bcbc-1ce1605fa03d",
+    "name": "Jumia Pickup Station Ota",
+    "state": "Ogun",
+    "address": "78, Idiroko road, Orin David school of music, besides Union bank along Oju ore Ota.",
+    "landmark": "Union bank, dental bus stop, oju ore.",
+    "latitude": 6.6926435,
+    "longitude": 3.236561,
+    "is_active": true
+  },
+  {
+    "id": "8cf1ed7f-848c-4bc6-9221-b5afc28cabe0",
+    "name": "Jumia Pickup Station Sagamu Oba-Erinwole",
+    "state": "Ogun",
+    "address": "1 Ademola Awosanya Avenue, beside ON THE ROAD HOTEL, Oba Erinwole Road, Sagamu, Ogun State",
+    "landmark": "Beside ON THE ROAD HOTEL",
+    "latitude": 6.8433788,
+    "longitude": 3.6320755,
+    "is_active": true
+  },
+  {
+    "id": "2319ec14-fb85-4a7a-b713-4006ea7b311d",
+    "name": "Jumia Pickup Station Sotubo",
+    "state": "Ogun",
+    "address": "Shop 1 and 2 Temidire street, Ikorodu-Shagamu Rd, Sotubo, Ogun state.",
+    "landmark": "Opposite Ijagba Community High School",
+    "latitude": 6.8071829,
+    "longitude": 3.5865435,
+    "is_active": true
+  },
+  {
+    "id": "ba975ea3-f83d-4fca-b36e-9ca8cf233c1e",
+    "name": "Jumia Pickup Station Totoro",
+    "state": "Ogun",
+    "address": "No 18, Beside Ago-oba central mosque, Ago owu totoro road, Abeokuta Ogun state.",
+    "landmark": "Beside H Classic Plaza, Totoro Road, Ikeredu-Idan",
+    "latitude": 7.15543,
+    "longitude": 3.33879,
+    "is_active": true
+  },
+  {
+    "id": "2d14f4c4-7137-464b-b9d4-059bcfbd1a5b",
+    "name": "Jumia Pickup Station Adofure",
+    "state": "Ondo",
+    "address": "Aonl Akinduko oil Filling Station, Oke-Aro Road, Adofure",
+    "landmark": "Aonl Akinduko oil Filling Station",
+    "latitude": 7.1972045,
+    "longitude": 5.167676,
+    "is_active": true
+  },
+  {
+    "id": "9aa15a77-f634-4842-8e44-95a87eed40f1",
+    "name": "Jumia Pickup Station Akungba",
+    "state": "Ondo",
+    "address": "G-signature Junction, Ikare Akoko-Ipeme road, Akungba",
+    "landmark": "Beside City Garden Bar",
+    "latitude": 7.4574534,
+    "longitude": 5.7349126,
+    "is_active": true
+  },
+  {
+    "id": "749f92ae-be32-4ee0-b01a-10b891276d3b",
+    "name": "Jumia Pickup Station Akure",
+    "state": "Ondo",
+    "address": "Suit 111 Towlab centre, Behind NNPC petrol station, shagari Village, Akure",
+    "landmark": "Ilesha Garrage",
+    "latitude": 7.2828022,
+    "longitude": 5.1940511,
+    "is_active": true
+  },
+  {
+    "id": "34ed4079-a9f4-400e-8050-76f8eed68891",
+    "name": "Jumia Pickup Station Akure Ondo Rd",
+    "state": "Ondo",
+    "address": "AP petrol station, beside Ayus Hotel Ondo Road Akure, Ondo state",
+    "landmark": "Ayus Hotel",
+    "latitude": 7.256959,
+    "longitude": 5.1864618,
+    "is_active": true
+  },
+  {
+    "id": "7deed89d-14e3-45a6-be8d-8cf4e048a268",
+    "name": "Jumia Pickup Station Akure-Oda rd",
+    "state": "Ondo",
+    "address": "Shessy Emirates Filling station, opposite Bovas Filling station, Oda Rd, Akure.",
+    "landmark": "Dejuks Resort Junction",
+    "latitude": 7.2571325,
+    "longitude": 5.2057909,
+    "is_active": true
+  },
+  {
+    "id": "f1899d90-ba71-40fb-8b46-f874190366ad",
+    "name": "Jumia Pickup Station Alagbaka",
+    "state": "Ondo",
+    "address": "No 1, El-shaddai Road, Off Oba Adesida Road, Alagbaka, Akure, Ondo State.",
+    "landmark": "Iheoma Plaza",
+    "latitude": 7.2544149,
+    "longitude": 5.2193608,
+    "is_active": true
+  },
+  {
+    "id": "77f89d45-40a5-45e7-a4f1-bffb5c2f1f6a",
+    "name": "Jumia Pickup Station Futa",
+    "state": "Ondo",
+    "address": "Opposite Cathon view plaza. Apatapiti, Futa South Gate.",
+    "landmark": "opposite Giant ibk oil & gas filling station close to school gate",
+    "latitude": 7.290987,
+    "longitude": 5.1544948,
+    "is_active": true
+  },
+  {
+    "id": "7b71e85e-78cf-4a9b-b0c5-1f8334dee258",
+    "name": "Jumia Pickup Station Idanre",
+    "state": "Ondo",
+    "address": "Shop 1 Abbas Joy filling station,Idanre",
+    "landmark": "Abbas Joy Filling Station",
+    "latitude": 7.1426268,
+    "longitude": 5.0971767,
+    "is_active": true
+  },
+  {
+    "id": "465e53e7-9ea1-4ce8-ab39-ed75a0fd9950",
+    "name": "Jumia Pickup Station Ikare",
+    "state": "Ondo",
+    "address": "Shop 1 and 2 God's own plaza beside AP petrol Station Hospital road Ikare Akoko",
+    "landmark": "Beside AP petrol Station Hospital road",
+    "latitude": 7.5248063,
+    "longitude": 5.7668515,
+    "is_active": true
+  },
+  {
+    "id": "327292a1-896b-473f-8e4a-cb6fa5c27b78",
+    "name": "Jumia Pickup Station Oba Ile",
+    "state": "Ondo",
+    "address": "1 and 2 BF filling station opposite Eat Rite Oba-ile Akure",
+    "landmark": "BF filling station opposite Eat Rite",
+    "latitude": 7.2635353,
+    "longitude": 5.2953925,
+    "is_active": true
+  },
+  {
+    "id": "239e1f38-8385-47a6-9d93-4ba11916e859",
+    "name": "Jumia Pickup Station Oke Aro",
+    "state": "Ondo",
+    "address": "Shop 8 and 9, 440 photography plaza beside Idanre garage. Oba afunbiowo road.",
+    "landmark": "Idanre Garage market",
+    "latitude": 7.2317634,
+    "longitude": 5.1827417,
+    "is_active": true
+  },
+  {
+    "id": "65625832-d576-4979-94a7-eaa05720e205",
+    "name": "Jumia Pickup Station Oke Ijebu",
+    "state": "Ondo",
+    "address": "SHOP 6 A&A SHOPPING COMPLEX BESIDE GROOVY HOTEL OKE IJEBU PICKUP STATION",
+    "landmark": "Groovy Hotel",
+    "latitude": 7.2659592,
+    "longitude": 5.2042647,
+    "is_active": true
+  },
+  {
+    "id": "d666abc6-b93f-44a3-aeba-053d8ebffcf5",
+    "name": "Jumia Pickup Station Ondo",
+    "state": "Ondo",
+    "address": "Shop 2 POWA shopping complex yaba Ondo, ondo state",
+    "landmark": "POWA shopping complex, Yaba Police station. Adjacent Stanbic Bank",
+    "latitude": 7.1034572,
+    "longitude": 4.8474234,
+    "is_active": true
+  },
+  {
+    "id": "86a0dcf0-9f80-4b3c-9ca8-a8fd2e472335",
+    "name": "Jumia Pickup Station Ondo-Ajemulegun",
+    "state": "Ondo",
+    "address": "No 252 Akinjewe Shopping Complex Beside Jaak Filling Station Kolarewire, Ajemulegun Road Ondo Town.",
+    "landmark": "M&C FM Ondo town",
+    "latitude": 7.1105877,
+    "longitude": 4.8497943,
+    "is_active": true
+  },
+  {
+    "id": "7d66d3f4-e4f8-4d56-b1b4-66a2785150d8",
+    "name": "Jumia Pickup Station Ore",
+    "state": "Ondo",
+    "address": "Shop 57 Akeredolu shopping complex, Ore Ondo State.",
+    "landmark": "Pima Hospital",
+    "latitude": 6.7518524,
+    "longitude": 4.8779969,
+    "is_active": true
+  },
+  {
+    "id": "9c1d870d-3661-4fd8-b163-6896152368f4",
+    "name": "Jumia Pickup station Orita-Odigbo",
+    "state": "Ondo",
+    "address": "Shop 2 and 3 Oluyemi Shopping Complex Orita-Odigbo, Ondo State",
+    "landmark": "Oluyemi Shopping Complex Orita-Odigbo",
+    "latitude": 6.7946477,
+    "longitude": 4.8677042,
+    "is_active": true
+  },
+  {
+    "id": "2a6aa329-7bbf-404c-8240-adf0bb14b3da",
+    "name": "Jumia Pickup Station Owo",
+    "state": "Ondo",
+    "address": "No.1 Alhaji Basiru house beside post office owo Ondo state.",
+    "landmark": "Owo post office",
+    "latitude": 7.198851,
+    "longitude": 5.593239,
+    "is_active": true
+  },
+  {
+    "id": "240ae493-1b21-451a-a3d9-738b93da9355",
+    "name": "Jumia Pickup Station Oyemekun Rd",
+    "state": "Ondo",
+    "address": "No 128 Oyemekun road, opposite DHL office, Akure",
+    "landmark": "opposite ministry of Work, before PDP office",
+    "latitude": 7.2603875,
+    "longitude": 5.1751406,
+    "is_active": true
+  },
+  {
+    "id": "40ab3060-13d6-4334-bb0a-4208fe10d7ad",
+    "name": "Jumia Pickup Ilesha (Oke-Omiru)",
+    "state": "Osun",
+    "address": "Shop 4, SHAPHER PLAZA, A 229, OKE-OMIRU, OSOGBO ROAD, ILESA",
+    "landmark": "Opp Olorunwa food Canteen",
+    "latitude": 7.6386449,
+    "longitude": 4.7481926,
+    "is_active": true
+  },
+  {
+    "id": "aa39b021-6479-4f6c-bb70-821c4dd02dc3",
+    "name": "Jumia Pickup Station Agunbelewo",
+    "state": "Osun",
+    "address": "Shop 1, Ademab City Mall, Agunbelewo, Osogbo",
+    "landmark": "Close to LAMECO ROUNDABOUT",
+    "latitude": 7.8049345,
+    "longitude": 4.5350466,
+    "is_active": true
+  },
+  {
+    "id": "023c9ce8-13b5-4be9-ae76-c554d41ed7ed",
+    "name": "Jumia Pickup Station Ede",
+    "state": "Osun",
+    "address": "42, Ajegunle Road Ogberin Area after De Gideon Pharmacy",
+    "landmark": "Adjacent Nipco filling station, Ede, Osun State",
+    "latitude": 7.7227533,
+    "longitude": 4.4310524,
+    "is_active": true
+  },
+  {
+    "id": "7f97b31b-65ec-4b26-81fc-ea000f3b2a26",
+    "name": "Jumia Pickup Station Ife-Lagere",
+    "state": "Osun",
+    "address": "6, Aderemi Road, Lagere Junction, Ile-Ife Osun State.",
+    "landmark": "Lagere Junction",
+    "latitude": 7.4841047,
+    "longitude": 4.550204,
+    "is_active": true
+  },
+  {
+    "id": "eb4211b2-05a5-4dc0-a88f-4a8f1ed275fa",
+    "name": "Jumia Pickup Station Ife-Mayfair",
+    "state": "Osun",
+    "address": "Shop 102, Ruth and Boaz Plaza Mayfair Ile-Ife Osun State",
+    "landmark": "Beside Phaim Pharmacy",
+    "latitude": 7.488558,
+    "longitude": 4.5349526,
+    "is_active": true
+  },
+  {
+    "id": "6a3971ca-1767-4603-be14-167d259b468d",
+    "name": "Jumia Pickup Station Ife-Ondo Road",
+    "state": "Osun",
+    "address": "Shop 2 and 3 opposite Texaco Bus stop Ondo Road Ile-ife Osun State",
+    "landmark": "Opposite Texaco Bus stop Ondo Road",
+    "latitude": 7.4742344,
+    "longitude": 4.5394507,
+    "is_active": true
+  },
+  {
+    "id": "cd699622-4526-4ae3-9779-cd9a19f86d05",
+    "name": "Jumia Pickup Station Ikire",
+    "state": "Osun",
+    "address": "26, Titilope Shopping Plaza, Olorishaoko, Ikire Osun State",
+    "landmark": "Beside Agbasco Furniture",
+    "latitude": 7.3699703,
+    "longitude": 4.1872178,
+    "is_active": true
+  },
+  {
+    "id": "fe00a61f-7166-4606-bc12-fd8fe2169419",
+    "name": "Jumia Pickup Station Ikirun",
+    "state": "Osun",
+    "address": "2, Moshadek shopping complex, GARAGE, IKIRUN,Osun",
+    "landmark": "Beside AFRICAN CHURCH SAVIOUR'S CATHEDRAL",
+    "latitude": 7.9262735,
+    "longitude": 4.6662876,
+    "is_active": true
+  },
+  {
+    "id": "44bfc5cb-329a-4759-bb60-91e6117f52d1",
+    "name": "Jumia Pickup Station Ile Ife (Fajuyi Rd)",
+    "state": "Osun",
+    "address": "1,Emerald filling station opp,Wura Hotel and event centre, OAU Teaching hospital road ile Ife, Osun State.",
+    "landmark": "OAU teaching hospital.",
+    "latitude": 7.4984895,
+    "longitude": 4.5703797,
+    "is_active": true
+  },
+  {
+    "id": "05ec4658-45f7-4ea5-8824-395c24a179f0",
+    "name": "Jumia Pickup Station Ilesha",
+    "state": "Osun",
+    "address": "Shop 25, Rowlat Plaza Ita Balogun Junction, Opp Zenith Bank Ilesha, Osun State.",
+    "landmark": "Opp Zenith Bank",
+    "latitude": 7.6230913,
+    "longitude": 4.7401729,
+    "is_active": true
+  },
+  {
+    "id": "b14c43cf-7a66-46fb-a224-152b1bfcd3a5",
+    "name": "Jumia Pickup Station Iwo (Adeeke)",
+    "state": "Osun",
+    "address": "Shop 4 & 8 Solademi Shopping Complex, Adeeke, Iwo Osun State",
+    "landmark": "Opposite prince lamuye Lodge",
+    "latitude": 7.6281552,
+    "longitude": 4.1602296,
+    "is_active": true
+  },
+  {
+    "id": "8ae919e9-3ff8-4dba-a228-ceac94405bb9",
+    "name": "Jumia Pickup Station Okuku",
+    "state": "Osun",
+    "address": "Shop 4&5 Iyalaje Shopping Complex Okuku, Osun State",
+    "landmark": "Opposite adekeye oyekunle petrol station",
+    "latitude": 8.0196097,
+    "longitude": 4.6689672,
+    "is_active": true
+  },
+  {
+    "id": "322f3910-f42d-47a8-aa21-d47be6144aea",
+    "name": "Jumia Pickup Station Ona Baba Ona",
+    "state": "Osun",
+    "address": "44 Aro Arike Shopping Plaza, Ona Baba ona, Osogbo, Osun State",
+    "landmark": "Aro Arike Shopping Plaza, Garage Ilesha",
+    "latitude": 7.7695895,
+    "longitude": 4.5783524,
+    "is_active": true
+  },
+  {
+    "id": "e2925e9c-f2d6-46c5-bf99-5fdb51a48603",
+    "name": "Jumia Pickup Station Orita Panada",
+    "state": "Osun",
+    "address": "Jumia Pickup Station Orita Panada - Shop 2, Opposite Orita Panada, Iwo, Osun State.",
+    "landmark": "Junction oshogbo, oke-bode road. Beside Bovas petrol station.",
+    "latitude": 7.6373347,
+    "longitude": 4.1920669,
+    "is_active": true
+  },
+  {
+    "id": "cc84852c-9ef5-41c7-9195-fb14c4f392da",
+    "name": "Jumia Pickup Station Osogbo - Lautech gate",
+    "state": "Osun",
+    "address": "Shop A5, NIPOST Shopping Complex, off station road, Ajegunle Oshogbo",
+    "landmark": "beside LAUTECH Teaching Hospital",
+    "latitude": 7.7826709,
+    "longitude": 4.5418141,
+    "is_active": true
+  },
+  {
+    "id": "5a033d67-b6e8-473c-9c44-683868e150eb",
+    "name": "Jumia Pickup Station Osogbo-Ayetoro",
+    "state": "Osun",
+    "address": "16, OLD NEPA OFFICE OSOGBO, OSUN STATE.",
+    "landmark": "BESIDE IBUAJE MICRO-FINANCE, BANK PEPSI-COLA AYETORO",
+    "latitude": 7.792531,
+    "longitude": 4.5729659,
+    "is_active": true
+  },
+  {
+    "id": "7014fb51-7f8f-4375-bc11-0276ef99ef41",
+    "name": "Jumia Pickup Station Osogbo-gbogan",
+    "state": "Osun",
+    "address": "KLM 4, Gbongan /Ibadan Express way,Oshogbo",
+    "landmark": "Adjacent Sterling Bank",
+    "latitude": 7.7564125,
+    "longitude": 4.5283594,
+    "is_active": true
+  },
+  {
+    "id": "08cbe06e-10ce-4b1b-9b9d-5166dedb651f",
+    "name": "Jumia Pickup Station Osogbo-Jaleyemi",
+    "state": "Osun",
+    "address": "Jaleyemi Junction, Beside Embassy Food Canteen. Osogbo, Osun State",
+    "landmark": "Jaleyemi Junction",
+    "latitude": 7.7696545,
+    "longitude": 4.5477854,
+    "is_active": true
+  },
+  {
+    "id": "a60edbe0-719a-49f3-8b2f-8ab9f7683d15",
+    "name": "Jumia Pick Up Station Orita Aperin-Bere",
+    "state": "Oyo",
+    "address": "No2 debkeem plaza beside royal jelad filling station,akoyoyo bus stop amuloko. ORITA APERIN BERE ROAD, Ibadan olorunsogo",
+    "landmark": "beside Royal Jelad Filling Station, Akoyoyo Bus Stop, Amuloko",
+    "latitude": 7.3695588,
+    "longitude": 3.9342953,
+    "is_active": true
+  },
+  {
+    "id": "a45d641d-0632-4d78-9248-10f929004ec6",
+    "name": "Jumia Pickup Station Adikuta Rd",
+    "state": "Oyo",
+    "address": "Shop number 5, Saint Michaels cathedral complex, Oke ebo area. Oyo.",
+    "landmark": "Dishman Stores",
+    "latitude": 7.8496374,
+    "longitude": 3.9483142,
+    "is_active": true
+  },
+  {
+    "id": "ac73703f-6df0-495f-b94b-8dc6bd674291",
+    "name": "Jumia Pickup Station Agodi Gate",
+    "state": "Oyo",
+    "address": "B03, Agbeke KD Plaza, Opposite Praying Ground, Agodi Gate, Ibadan.",
+    "landmark": "YIDI Praying Ground",
+    "latitude": 7.3989125,
+    "longitude": 3.9219844,
+    "is_active": true
+  },
+  {
+    "id": "7682b9e7-5ff2-450b-a6fa-3a043c43cc88",
+    "name": "Jumia Pickup Station Akobo",
+    "state": "Oyo",
+    "address": "Shop 2, Adeleke Plaza, Akobo",
+    "landmark": "Bovas oil and Revel Lounge",
+    "latitude": 7.4509933,
+    "longitude": 3.9519234,
+    "is_active": true
+  },
+  {
+    "id": "3fc6e31e-c69f-489a-9f2a-14f0285705f4",
+    "name": "Jumia Pickup Station Apete",
+    "state": "Oyo",
+    "address": "Shop 3 AGC Plaza Opposite Awotan Central Mosque Apete, Ibadan",
+    "landmark": "Opposite Awotan Central",
+    "latitude": 7.4489355,
+    "longitude": 3.8641633,
+    "is_active": true
+  },
+  {
+    "id": "de9a4760-2adc-4e8e-bafe-81dfb1407201",
+    "name": "Jumia Pickup Station Beere Rd",
+    "state": "Oyo",
+    "address": "Shop 2 Olasokun complex alekuso street, Opposite Peak Milk house, Beere road ibadan oyo state",
+    "landmark": "Peak Milk house",
+    "latitude": 7.3787808,
+    "longitude": 3.8962506,
+    "is_active": true
+  },
+  {
+    "id": "5f04881e-635e-40f5-b8ef-efdd70ec0443",
+    "name": "Jumia Pickup Station Dugbe",
+    "state": "Oyo",
+    "address": "Shop 122, Railway Shopping complex, J Allen Dugbe, Ibadan",
+    "landmark": "Opp Keystone Bank",
+    "latitude": 7.3890436,
+    "longitude": 3.8775316,
+    "is_active": true
+  },
+  {
+    "id": "b944f7b3-5fb6-44e8-b9bc-b73f57bee6b8",
+    "name": "Jumia Pickup Station Egbeda (Ibadan)",
+    "state": "Oyo",
+    "address": "Suit 4, Falode Imole Ayo shopping complex. New Ife - Road",
+    "landmark": "Beside MRS filling station Ibadan, Oyo state",
+    "latitude": 7.3910496,
+    "longitude": 3.9568371,
+    "is_active": true
+  },
+  {
+    "id": "1024a335-ad7d-453c-a152-957b8cf2f02e",
+    "name": "Jumia Pickup Station Ibadan",
+    "state": "Oyo",
+    "address": "Shop 13 modern complex Saki Garrage Sango Ibadan",
+    "landmark": "A three Hotel, Sango",
+    "latitude": 7.4371158,
+    "longitude": 3.907602,
+    "is_active": true
+  },
+  {
+    "id": "62b06b7f-0404-4ecf-93d9-29b6bdd0a5d6",
+    "name": "Jumia Pickup Station Ibadan niser",
+    "state": "Oyo",
+    "address": "Shop 1, Gaaf Building, Beside Keto Filling Station. Ajibode Junction. Ibadan Oyo State.",
+    "landmark": "Gaaf Building. Beside Keto Filling Station",
+    "latitude": 7.4557521,
+    "longitude": 3.9076983,
+    "is_active": true
+  },
+  {
+    "id": "efc81e34-d023-47b9-b81e-ee7d860e62f2",
+    "name": "Jumia Pickup Station Ibadan-TCTC",
+    "state": "Oyo",
+    "address": "Shop 8 Abewon Shopping Complex Beside Tafotech Filling Station Eleyele Ibadan",
+    "landmark": "Tafotech Filling Station Eleyele",
+    "latitude": 7.4135271,
+    "longitude": 3.8648739,
+    "is_active": true
+  },
+  {
+    "id": "aad31008-2bab-43b8-a7f4-2d36872dfe58",
+    "name": "Jumia Pickup Station Ibadan-ups",
+    "state": "Oyo",
+    "address": "No 95,MKO Abiola Way Peniel building;ring road,ibadan",
+    "landmark": "Opposite Henrytee Motors",
+    "latitude": 7.3587163,
+    "longitude": 3.8718912,
+    "is_active": true
+  },
+  {
+    "id": "4f8ea763-623b-4d3f-a1ea-433dd4c4b29c",
+    "name": "Jumia Pickup Station Iwo rd",
+    "state": "Oyo",
+    "address": "Shop 12 & 13 ,Mobos shopping complex opposite gbagi market new ife road ibadan",
+    "landmark": "Gbagi Second Gate",
+    "latitude": 7.385084,
+    "longitude": 3.9866556,
+    "is_active": true
+  },
+  {
+    "id": "67f2b552-2a26-4c05-b538-0a3748928839",
+    "name": "Jumia Pickup Station Iyana Church",
+    "state": "Oyo",
+    "address": "Shop 2, Alohaji Lasisi Adigun Ogo Oluwa Yayi Shopping Complex, Opposite SIDDY oil filling Station, iyana church IBADAN",
+    "landmark": "opposite Siddy Oil Fueling Station, Iyana Church, Ibadan.",
+    "latitude": 7.4202934,
+    "longitude": 3.971099,
+    "is_active": true
+  },
+  {
+    "id": "777ae3fd-cc59-4eb2-9c1e-00bf08266bab",
+    "name": "Jumia Pickup Station Kuola New Garage Rd",
+    "state": "Oyo",
+    "address": "Melbas Cottage, Beside Mobil Filling Station, Revival-Kuola, Akala Expressway, Ibadan.",
+    "landmark": "Beside Mobil Filling Station",
+    "latitude": 7.3571734,
+    "longitude": 3.8320065,
+    "is_active": true
+  },
+  {
+    "id": "0854697f-e573-4677-b69e-0022547a77b6",
+    "name": "Jumia Pickup Station Lalupon",
+    "state": "Oyo",
+    "address": "5/1 Jagun Village Road Lalupon Junction, Oyo State",
+    "landmark": "Lalupon Garage",
+    "latitude": 7.4654418,
+    "longitude": 4.0721007,
+    "is_active": true
+  },
+  {
+    "id": "a0bde7ae-47b9-4a2c-9aed-365001451004",
+    "name": "Jumia Pickup Station Moniya",
+    "state": "Oyo",
+    "address": "Shop 1,Lekem shopping complex old Oyo road bank alade,moniya Ibadan",
+    "landmark": "opposite radekaz petrol station",
+    "latitude": 7.5190625,
+    "longitude": 3.9128125,
+    "is_active": true
+  },
+  {
+    "id": "6d1b1fc6-c0ff-4d4a-8b7a-bc4d13c77640",
+    "name": "Jumia Pickup Station Ogbomosho",
+    "state": "Oyo",
+    "address": "No 29 tanimola street beside eki waters sabo ogbomosho.",
+    "landmark": "Close to Isale General,Along Ilorin-Ogbomosho Express road",
+    "latitude": 8.1500496,
+    "longitude": 4.2384621,
+    "is_active": true
+  },
+  {
+    "id": "f52c2a89-95d7-4428-a29a-05c4651f5941",
+    "name": "Jumia Pickup Station Ogbomosho Sabo",
+    "state": "Oyo",
+    "address": "Shop 2, Opposite Ajewole Microfinance Bank, Ogbomosho Sabo, Oyo State.",
+    "landmark": "Item 7",
+    "latitude": 8.1480934,
+    "longitude": 4.2519541,
+    "is_active": true
+  },
+  {
+    "id": "38818fff-ae77-4259-842f-33a03bf54e48",
+    "name": "Jumia Pickup Station Omi Adio",
+    "state": "Oyo",
+    "address": "shop 1, Top Palaza, Jiboye Bus Stop, Beside Timtop Feeds Depot, Omi Adio, Oyo State. Ibadan",
+    "landmark": "Jiboye Bus Stop, Beside Timtop Feeds Depot",
+    "latitude": 7.3899814,
+    "longitude": 3.7536663,
+    "is_active": true
+  },
+  {
+    "id": "81500b6f-a724-4f9f-be17-5a12f0a2d444",
+    "name": "Jumia Pickup Station Orita Challenge",
+    "state": "Oyo",
+    "address": "Shop 10 & 11, BHM complex beside Polaris bank, Opposite Orita challenge police station Ibadan.",
+    "landmark": "Beside Polaris bank, Opposite Orita challenge police station Ibadan.",
+    "latitude": 7.3372784,
+    "longitude": 3.8708396,
+    "is_active": true
+  },
+  {
+    "id": "9f0dc7bd-0fc2-4b59-8ce2-61fa589e089d",
+    "name": "Jumia Pickup Station Owode Apata",
+    "state": "Oyo",
+    "address": "Shop 7, De Divine Plaza, Besides Rinsayo Filling Station, Apata Along Abeokuta Road, Ibadan-Apata, Oyo State.",
+    "landmark": "Rinsoyo Filling Station",
+    "latitude": 7.3936112,
+    "longitude": 3.812984,
+    "is_active": true
+  },
+  {
+    "id": "e774bdcc-8df5-4ee0-8c54-4d11d2ace260",
+    "name": "Jumia Pickup Station Owode Oyo",
+    "state": "Oyo",
+    "address": "Opposite MTN office OWODE-OYO",
+    "landmark": "Opposite Mtn Office. Oju-Odo",
+    "latitude": 7.828916,
+    "longitude": 3.9225852,
+    "is_active": true
+  },
+  {
+    "id": "acfdacd6-356b-4b0a-bc7c-350b79aa989e",
+    "name": "Jumia Pickup Station Oyo",
+    "state": "Oyo",
+    "address": "Suite 10,Cooperative Shopping Complex,Emmanuel Alayande College of Emmanuel Alayande College Of Education, Oyo",
+    "landmark": "Alayande College Of Education,Oyo",
+    "latitude": 7.8736277,
+    "longitude": 3.9115355,
+    "is_active": true
+  },
+  {
+    "id": "a43efa26-b7cd-47ff-965c-d118a3c737c8",
+    "name": "Jumia Pickup Station Oyo-iseyin",
+    "state": "Oyo",
+    "address": "No 27, Baptist College of Theology Shopping Complex, Oyo-Iseyin road Oyo",
+    "landmark": "Close to Laba Art Production",
+    "latitude": 7.8449431,
+    "longitude": 3.9183279,
+    "is_active": true
+  },
+  {
+    "id": "1921eadf-a616-4ba8-b84d-821c7a2bcb6e",
+    "name": "Jumia Pickup Station Shasha",
+    "state": "Oyo",
+    "address": "Shop 17 Jide Plaza, Old Oyo Road",
+    "landmark": "Adjacent Mount Zion Hospital, Shasha Ibadan",
+    "latitude": 7.5272303,
+    "longitude": 3.9115972,
+    "is_active": true
+  },
+  {
+    "id": "47ddb826-af48-4965-a246-99397d79507b",
+    "name": "Jumia Pickup Station Soka",
+    "state": "Oyo",
+    "address": "Alh. Adeshina Shopping Complex, Cooperative Bus-stop opp. Nipco Filling Station,Olomi Market, Olomi-Academy, Ibadan.",
+    "landmark": "Prestige Nursery and Primary School",
+    "latitude": 7.3197723,
+    "longitude": 3.9223363,
+    "is_active": true
+  },
+  {
+    "id": "192d182e-ee89-47dc-954f-10d02467e09c",
+    "name": "Jumia Pickup Station Texaco Iwo Road",
+    "state": "Oyo",
+    "address": "No. 81, RADLD-OAK COMPLEX OPPOSITE TEXACO FILLING STATION, BESIDE SATON FEKAZ BUILDING, IWO ROAD, IBADAN, OYO STATE.",
+    "landmark": "TEXACO FILLING STATION",
+    "latitude": 7.4018738,
+    "longitude": 3.9393926,
+    "is_active": true
+  },
+  {
+    "id": "24eda517-dc36-44d9-9bb0-355d99631fb3",
+    "name": "Jumia Pickup Station Uch",
+    "state": "Oyo",
+    "address": "No 2 Angola Area Opposite Access Bank UCH branch,Agodi, Ibadan",
+    "landmark": "Opposite Access Bank",
+    "latitude": 7.4020973,
+    "longitude": 3.9139109,
+    "is_active": true
+  },
+  {
+    "id": "eb0036e3-411c-4e7e-9a3a-861f741ed535",
+    "name": "Jumia Pickup Station Uni.Ibadan",
+    "state": "Oyo",
+    "address": "University Bookshop Basement, University of Ibadan.",
+    "landmark": "University of Ibadan",
+    "latitude": 7.3775507,
+    "longitude": 3.9470625,
+    "is_active": true
+  },
+  {
+    "id": "7509a222-7dd2-41f0-9ffc-37a89f807496",
+    "name": "Jumia Pickup Station Jos-Bukuru",
+    "state": "Plateau",
+    "address": "Shop 1, success plaza, Bukuru Jos",
+    "landmark": "Yakubu gowan way Bukuru",
+    "latitude": 9.7832528,
+    "longitude": 8.8594192,
+    "is_active": true
+  },
+  {
+    "id": "c77f13e0-47ca-43f3-a914-60833d5bb992",
+    "name": "Jumia Pickup Station Jos-Terminus",
+    "state": "Plateau",
+    "address": "Plot 38, shop 3, SWAN PAINT PLAZA Tafawa Balewa Road, Jos.",
+    "landmark": "Opposite Township Primary School",
+    "latitude": 9.9255012,
+    "longitude": 8.8823993,
+    "is_active": true
+  },
+  {
+    "id": "63fa70a0-c6a5-40f3-bbaa-bda123afe5cf",
+    "name": "Jumia Pickup Station Ada George",
+    "state": "Rivers",
+    "address": "No 41, Rumuepirikom/Iwofe Rd, opposite heritage filing station, Rumu opirikom, Port Harcourt 500102, Rivers",
+    "landmark": "Opposite Heritage Fuelling Station",
+    "latitude": 4.8226875,
+    "longitude": 6.9593125,
+    "is_active": true
+  },
+  {
+    "id": "681d5498-5c69-4be9-a3f6-49d1caabe55b",
+    "name": "Jumia Pickup Station Ahoada",
+    "state": "Rivers",
+    "address": "Zephenia plaza, Zonal Hospital Road, Opposite Sam Royal Hotel, Ahoada Town, Rivers State",
+    "landmark": "Opposite Sam Royal Hotel",
+    "latitude": 5.0972507,
+    "longitude": 6.6415881,
+    "is_active": true
+  },
+  {
+    "id": "5d825a2f-7a10-414d-9c8f-659bb93696e5",
+    "name": "Jumia Pickup Station Aluu",
+    "state": "Rivers",
+    "address": "No 6 Rumuekini Road, Close to Jehovah Witness, Aluu by boundary, Port Harcourt.",
+    "landmark": "Izumba Filling Station",
+    "latitude": 4.9315625,
+    "longitude": 6.9428906,
+    "is_active": true
+  },
+  {
+    "id": "19d8fd0c-eff8-4ee3-932d-bc9e67bf7037",
+    "name": "Jumia Pickup Station Borokiri",
+    "state": "Rivers",
+    "address": "No.34 Harold Wilson drive, BOROKIRI, opposite salvation ministries. PORT-HARCOURT-BOROKIRI, Rivers State.",
+    "landmark": "Opp Chastino Supermarket",
+    "latitude": 4.7528607,
+    "longitude": 7.0404035,
+    "is_active": true
+  },
+  {
+    "id": "2220fec8-f26c-42e0-814e-7dea6b8708a5",
+    "name": "Jumia Pickup Station Choba",
+    "state": "Rivers",
+    "address": "No 180 uniport big gate, Alikor Estate Junction",
+    "landmark": "Alikor Estate",
+    "latitude": 4.8927625,
+    "longitude": 6.9051719,
+    "is_active": true
+  },
+  {
+    "id": "97511666-bfe8-4f73-9c5c-8abd0f5be127",
+    "name": "Jumia Pickup Station Choba General Market",
+    "state": "Rivers",
+    "address": "70 Uniport road, Choba, Port Harcourt.",
+    "landmark": "Opposite Choba Main General Market",
+    "latitude": 4.8889875,
+    "longitude": 6.9015781,
+    "is_active": true
+  },
+  {
+    "id": "27bf0c1e-7f88-44ee-8726-834b41ec778d",
+    "name": "Jumia Pickup Station D-Line",
+    "state": "Rivers",
+    "address": "61b Aba Road, D Line",
+    "landmark": "By craft center bus stop",
+    "latitude": 4.8009125,
+    "longitude": 7.0061259,
+    "is_active": true
+  },
+  {
+    "id": "5569a122-06bb-4d31-aa09-1874168fc9e3",
+    "name": "Jumia Pickup Station Elelenwon",
+    "state": "Rivers",
+    "address": "45 Justice Ichendu Road, opposite stark energy Akpajo, old refinery road elelenwon, Port Harcourt, Rivers state",
+    "landmark": "Opp stark energy Akpajo",
+    "latitude": 4.8465625,
+    "longitude": 7.0646875,
+    "is_active": true
+  },
+  {
+    "id": "990fbcba-d9de-4eb0-b954-278536b1dd0b",
+    "name": "Jumia Pickup Station Eleme",
+    "state": "Rivers",
+    "address": "Suite 3 Lizpa plaza,17 market Road Alode-Eleme Rivers state.",
+    "landmark": "Maestro Rose Hotel, Eleme",
+    "latitude": 4.7748898,
+    "longitude": 7.1265158,
+    "is_active": true
+  },
+  {
+    "id": "885fda55-df18-4dc3-b58d-5a29ddeea1db",
+    "name": "Jumia Pickup Station Elimgbu",
+    "state": "Rivers",
+    "address": "Goal Cash Building, No. 65 Rumuokwurushi Road, Tank Junction, Port Harcourt, Rivers State.",
+    "landmark": "Tank Junction (Goal Cash Building), Port Harcourt,",
+    "latitude": 4.8565932,
+    "longitude": 7.0569084,
+    "is_active": true
+  },
+  {
+    "id": "8b238c04-33a5-40f3-8e10-3b03bdc96031",
+    "name": "Jumia Pickup Station Eliozu",
+    "state": "Rivers",
+    "address": "NO 3 Trinity close,Police post off G.U Ake Road, Eliozu, portharcourt,PORTHARCOURT-ELIOZU, Rivers state.",
+    "landmark": "Behind Unity Oil Eliozu",
+    "latitude": 4.8781125,
+    "longitude": 7.0122344,
+    "is_active": true
+  },
+  {
+    "id": "6b03aa2f-cf19-4118-b49e-9fb025b8b835",
+    "name": "Jumia Pickup Station Gra Phase 2",
+    "state": "Rivers",
+    "address": "149 Woji Street GRA Phase 2 Portharcourt close to Oak haven hotel, N.D.I.C and Focal hotel",
+    "landmark": "Adjacent NDIC",
+    "latitude": 4.8153875,
+    "longitude": 6.9963281,
+    "is_active": true
+  },
+  {
+    "id": "805eb997-ebd4-4dab-a013-f90a2db3f67c",
+    "name": "Jumia Pickup Station Igwuruta (eneka)",
+    "state": "Rivers",
+    "address": "Eddy law plaza igwuruta beside sobaz filling station [ [OPPOSITE PRINCE BYNOE FILLING STATION]",
+    "landmark": "beside Sobaz petrol station",
+    "latitude": 4.9476112,
+    "longitude": 7.0238042,
+    "is_active": true
+  },
+  {
+    "id": "2ad2b5f2-154e-4685-ac88-649eb843a6b6",
+    "name": "Jumia Pickup Station Mgbuoba",
+    "state": "Rivers",
+    "address": "NO 111 NTA ROAD, LOCATION JUNCTION (UWA PLAZA), OPPOSITE GTB BANK, PORT HARCOURT, RIVERS STATE",
+    "landmark": "Deli fresh fast food",
+    "latitude": 4.8536703,
+    "longitude": 6.9742385,
+    "is_active": true
+  },
+  {
+    "id": "bbc76838-d93d-4d95-9d0a-9e1059502361",
+    "name": "Jumia Pickup Station Obigbo",
+    "state": "Rivers",
+    "address": "No. 62 Location Road, opposite Chimosky Communications and Shoe house, Oyigbo Express Junction, Rivers State",
+    "landmark": "Tecno House, Chimosky Communications.",
+    "latitude": 4.8804375,
+    "longitude": 7.1330156,
+    "is_active": true
+  },
+  {
+    "id": "b01df48f-4f76-411b-b955-17b7472ce564",
+    "name": "Jumia Pickup Station Ogbogoro",
+    "state": "Rivers",
+    "address": "No 1 Chief Sunny Street, Osina plaza, SunLife Junction, Ogbogoro Road Portharcourt",
+    "landmark": "Emitare fueling station, Egbelu.",
+    "latitude": 4.8380125,
+    "longitude": 6.9459844,
+    "is_active": true
+  },
+  {
+    "id": "906e5ac3-f64d-4bad-903e-49a910fa51e1",
+    "name": "Jumia Pickup Station Okrika",
+    "state": "Rivers",
+    "address": "MERCY ARENE PLAZER OPPOSITE ST. STEPHEN'S PRO- CATHEDRAL, CHRIST ARMY CHURCH. ADA GEORGE RING ROAD, OGOLOMA. BEFORE TUESDAY MARKET. OKRIKA",
+    "landmark": "ST. STEPHEN'S PRO- CATHEDRAL",
+    "latitude": 4.7306933,
+    "longitude": 7.08178,
+    "is_active": true
+  },
+  {
+    "id": "6639048d-10fb-4c37-a642-b887d4ba41d4",
+    "name": "Jumia Pickup Station Onne",
+    "state": "Rivers",
+    "address": "3, Harcourt Road, Onne, Port Harcourt, Rivers State.",
+    "landmark": "Living Faith Church Onne",
+    "latitude": 4.7238157,
+    "longitude": 7.1516182,
+    "is_active": true
+  },
+  {
+    "id": "70802350-ba76-4151-8710-01a36fae1d52",
+    "name": "Jumia Pickup Station Pepperoni Junction",
+    "state": "Rivers",
+    "address": "150 Ada-George Road. Beside Rumukpakani Police Divisional Headquaters",
+    "landmark": "Rumukpakani Police Divisional Headquaters",
+    "latitude": 4.8261125,
+    "longitude": 6.9766719,
+    "is_active": true
+  },
+  {
+    "id": "c32e50b4-c111-45da-a92d-9fae0b07a53c",
+    "name": "Jumia Pickup Station Peter Odili Rd",
+    "state": "Rivers",
+    "address": "2 Kenneth avenue off Peter odili road portharcourt",
+    "landmark": "Brown Dew Honey Farm",
+    "latitude": 4.796612,
+    "longitude": 7.0417714,
+    "is_active": true
+  },
+  {
+    "id": "759d0a37-52c1-49cc-803b-e7d272c760d4",
+    "name": "Jumia Pickup Station PHC-Agip",
+    "state": "Rivers",
+    "address": "Shop 2, minikwu plaza, agip. after mgbousimini junction, rumueme, port harcourt",
+    "landmark": "NIGERIAN ARMY CHECKPOINT",
+    "latitude": 4.8128141,
+    "longitude": 6.9820995,
+    "is_active": true
+  },
+  {
+    "id": "8ae22901-3cb4-46da-9d7a-f650f441175d",
+    "name": "Jumia Pickup Station Rumuahgaolu",
+    "state": "Rivers",
+    "address": "No 167 Rumuagholu Road by Dannyway Filling Station, Port Harcourt",
+    "landmark": "By Dannyway Filling Station, Beside Car Wash",
+    "latitude": 4.8860278,
+    "longitude": 6.9610187,
+    "is_active": true
+  },
+  {
+    "id": "2f04ef8b-76fa-459b-bb91-80767152a42e",
+    "name": "Jumia Pickup Station Rumuokwuta",
+    "state": "Rivers",
+    "address": "No 464, Ikwerre Road, Rumuokwuta",
+    "landmark": "Beside Seventh-day Adventist Church",
+    "latitude": 4.8426606,
+    "longitude": 6.9881239,
+    "is_active": true
+  },
+  {
+    "id": "ba4b9787-76ab-4766-b37b-54a272a5e95a",
+    "name": "Jumia Pickup Station Rumuosi Mkt",
+    "state": "Rivers",
+    "address": "NO 39 OZUOBA - RUMUOSI LINK ROAD, ( FORMER GENTIS SUPERMARKET) BEFORE JUDU FILLING STATION, OZUOBA, PORT HARCOURT.",
+    "landmark": "Phat Makeup studio",
+    "latitude": 4.8655771,
+    "longitude": 6.9346524,
+    "is_active": true
+  },
+  {
+    "id": "9f95c666-66a9-48a4-82ad-eb27dd1e5c25",
+    "name": "Jumia Pickup Station Stadium Rd",
+    "state": "Rivers",
+    "address": "Shop 109 Omasichirim Plaza, beside MTN Shop Benjack, Ken Saro Wiwa Road or Stadium Road. Port Harcout",
+    "landmark": "MTN Shop Benjack",
+    "latitude": 4.8340188,
+    "longitude": 7.0155793,
+    "is_active": true
+  },
+  {
+    "id": "b4abe225-0272-4b8d-8dca-7371b9e0b952",
+    "name": "Jumia Pickup Station Trans amadi",
+    "state": "Rivers",
+    "address": "185 Peter Odili Rd, Trans Amadi, Port Harcourt 500251, Rivers",
+    "landmark": "Beside OPM Church and adjacent new slaughter Market",
+    "latitude": 4.8021875,
+    "longitude": 7.0503125,
+    "is_active": true
+  },
+  {
+    "id": "7cd761c3-7e5f-4111-bf57-0b3afc892431",
+    "name": "Jumia Pickup Station Woji",
+    "state": "Rivers",
+    "address": "Suite 4,Oke Daniel's Plaza, 36 old Aba Road, Woji Junction, Port harcourt",
+    "landmark": "LOVE FM",
+    "latitude": 4.84332,
+    "longitude": 7.0403724,
+    "is_active": true
+  },
+  {
+    "id": "3f5d936c-bacb-40e4-ab56-4b7cd8c57c1b",
+    "name": "Jumia Pickup Station-Rukpokwu",
+    "state": "Rivers",
+    "address": "No 55 Airport Road, EastGate Plaza by Shell Manifold, Rukpokwu Last bus Stop, Port Harcourt.",
+    "landmark": "East Gate Plaza before manifold Pipeline",
+    "latitude": 4.9109875,
+    "longitude": 6.9985156,
+    "is_active": true
+  },
+  {
+    "id": "39ad190b-4b3e-4ba9-8dc7-a70bf972b5ce",
+    "name": "Jumia Pickup Station Danbuwa",
+    "state": "Sokoto",
+    "address": "Shop 4, Danbuwa area, opposite NIMC office, Sokoto, along Gusau road, Dange Shuni, Sokoto state",
+    "landmark": "Sokoto NIMC Office",
+    "latitude": 13.0049615,
+    "longitude": 5.2503796,
+    "is_active": true
+  },
+  {
+    "id": "66918494-e1d5-4b4a-82fc-a527c4b2249b",
+    "name": "Jumia Pickup Station Diplomat",
+    "state": "Sokoto",
+    "address": "Shop 16 & 17, City view plaza, opposite Rijia Dorawa flyover, Diplomat area, Sultan Abubakar road, Sokoto south, Sokoto state.",
+    "landmark": "Dorawa Flyover",
+    "latitude": 13.0452589,
+    "longitude": 5.2455,
+    "is_active": true
+  },
+  {
+    "id": "e582d494-c28f-4c73-a329-5705643428ff",
+    "name": "Jumia Pickup Station Sokoto",
+    "state": "Sokoto",
+    "address": "Shop 5 & 6, Opposite dandima flyover exit bridge, runji sambo road.",
+    "landmark": "Runji sambo flyover exit",
+    "latitude": 13.0639217,
+    "longitude": 5.2162283,
+    "is_active": true
+  },
+  {
+    "id": "7eb32c01-8c62-415e-bb88-be05bce9883d",
+    "name": "Jumia Pickup Station Damaturu",
+    "state": "Yobe",
+    "address": "Barema Nigerian Limited ,Besides Ministry of Works and Yobe State Federal Secretariat , Gashua Road , Damaturu, Yobe State",
+    "landmark": "Ministry of Works, Yobe State Federal Secretariat",
+    "latitude": 11.7593414,
+    "longitude": 11.957794,
+    "is_active": true
+  },
+  {
+    "id": "3709b8f1-e389-4765-b8e2-ebf6e270e4eb",
+    "name": "Jumia Pickup Station Potiskum",
+    "state": "Yobe",
+    "address": "Shop 2, Signal Barrack Close, along General Abubakar Waziri Street, Besides Hady Laboratory, close to Annajm Learners' Academy, Potiskum-Maiduguri Road, Potiskum, Yobe State.",
+    "landmark": "Signal Barrack, Hady Laboratory",
+    "latitude": 11.7072595,
+    "longitude": 11.0850443,
+    "is_active": true
+  }
+]
