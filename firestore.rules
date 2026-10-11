@@ -353,7 +353,12 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    // Subcategories — the service listings, each with its own price per unit.
+    // Subcategories — the plans shoppers order, each with its own price per unit,
+    // optional order limits (minQuantity, maxQuantity where 0/blank means no
+    // maximum) and an average delivery time. The limits are enforced in the
+    // app's order transaction, which re-reads the plan; the rules below still
+    // pin the price, names and wallet debit, so bypassing a limit cannot change
+    // what is charged (unit price × quantity).
     match /boostSubcategories/{subcategoryId} {
       allow read: if resource.data.active == true || isAdmin();
       allow create: if isAdmin()
@@ -365,6 +370,9 @@ service cloud.firestore {
         && isText(request.resource.data.unit, 60)
         && request.resource.data.price is int
         && request.resource.data.price >= 1
+        && (!('minQuantity' in request.resource.data) || (request.resource.data.minQuantity is int && request.resource.data.minQuantity >= 1))
+        && (!('maxQuantity' in request.resource.data) || (request.resource.data.maxQuantity is int && request.resource.data.maxQuantity >= 0))
+        && (!('averageTime' in request.resource.data) || (request.resource.data.averageTime is string && request.resource.data.averageTime.size() <= 120))
         && request.resource.data.active is bool;
       allow update: if isAdmin();
       allow delete: if isAdmin();

@@ -101,6 +101,10 @@ h1, h2, h3, h4 { font-family: 'Sora', sans-serif; letter-spacing: -.02em; line-h
 .empty { padding: 26px; border: 1.5px dashed #d3dbe7; border-radius: 14px; color: var(--muted); text-align: center; background: #fbfcfe; }
 .empty b { display: block; color: var(--navy); font-family: 'Sora', sans-serif; margin-bottom: 4px; }
 
+/* ---------- Boost order form ---------- */
+.info-box { padding: 14px 16px; border-radius: 12px; background: #eef4ff; border: 1px solid #d6e4ff; color: #1d4478; font-size: 14px; line-height: 1.7; }
+.req { color: var(--bad); font-weight: 700; }
+
 /* ---------- Forms ---------- */
 .field { display: grid; gap: 7px; margin-bottom: 16px; font-size: 13px; font-weight: 600; color: #3a4a63; }
 .field small { font-weight: 400; color: var(--faint); }

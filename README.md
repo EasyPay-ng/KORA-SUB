@@ -8,7 +8,7 @@ There is no server. The site is static files plus Firebase (Auth and Firestore).
 
 ## Roles
 
-- **Administrators**: `beniwealth70@gmail.com` and `okogbagideon28@gmail.com`, each with a verified email. Either admin can list, price, stock and hide products; upload up to 5 photos per product; set search keywords, slashed original prices, clothing variations with their own prices and the "Recommended" flag; publish the deposit bank account; set the checkout fee schedule; approve funding; and move orders through packing, shipping and delivery. They also run the **social media boosting** catalogue: platforms, categories, subcategories and prices.
+- **Administrators**: `beniwealth70@gmail.com` and `okogbagideon28@gmail.com`, each with a verified email. Either admin can list, price, stock and hide products; upload up to 5 photos per product; set search keywords, slashed original prices, clothing variations with their own prices and the "Recommended" flag; publish the deposit bank account; set the checkout fee schedule; approve funding; and move orders through packing, shipping and delivery. They also run the **social media boosting** catalogue: categories (e.g. Twitter Views) and plans with prices, min/max quantities and average delivery times. They can search the product list by Product ID (typing an exact ID and pressing Enter jumps straight to editing it).
 - **Customers**: anyone who registers. They browse, add to cart, fund their wallet, check out, set delivery location and track orders. They cannot list products, change their own balance upward, or edit other people's data.
 - **Visitors**: can browse the shop without an account. Checkout and funding require sign-in.
 
@@ -28,13 +28,14 @@ The **Recommended** section sits at the top of the shop. The admin flags a produ
 
 ## Social media boosting
 
-Alongside the product catalogue, the store sells **social media boosting services** (Facebook, TikTok, YouTube and more). The catalogue has three levels, all managed under **Admin → Boosting** (`admin-boost.html`):
+Alongside the product catalogue, the store sells **social media boosting services** (Facebook, TikTok, YouTube and more) through a single order form on `boost.html`, styled like a classic SMM panel: **Category** dropdown (e.g. Twitter Views) → **Plans** dropdown (e.g. Twitter Video Views | No Refill - ₦17) → Min/Max line → average-time info box → link → quantity → amount → pay from wallet. (`boost-platform.html` only exists to forward old per-platform links to the order form with the platform preselected.)
 
-- **Platforms** — e.g. Facebook, TikTok, YouTube. Each has a **description** that appears on its public page (`boost-platform.html?id=<platformId>`), together with its services and prices.
-- **Categories** — e.g. Followers, Likes, Views — grouping the services inside a platform.
-- **Services (subcategories)** — the listings themselves, each with a **name, a unit** (e.g. "1,000 followers") **and a price per unit**.
+The catalogue has three levels, all managed under **Admin → Boosting** (`admin-boost.html`), but the admin only thinks in two:
 
-Shoppers browse `boost.html` (all platforms with their descriptions) or a platform page, pick a service, enter the link/username to boost and the quantity, and pay **from their KORASTORE wallet**. A boost order is `boostOrders/<uid>_<requestId>`: the total is **unit price × quantity** — no checkout fees and no delivery. The security rules re-read the catalogue at purchase time, so the price charged is always the admin's current price. The admin moves orders through **paid → processing → delivered**, and cancelling refunds the wallet in one transaction. Boost orders appear on `orders.html` next to product orders.
+- **Categories** — what shoppers pick first, e.g. Twitter Views. The form asks for a platform (e.g. Twitter) plus a category (e.g. Views) and shows a live "shoppers will see" preview. New platform names are created automatically — the Platforms section at the bottom of the page exists only to rename a platform or hide everything under it.
+- **Plans** — the listings themselves, each with a **name, a unit** (e.g. "followers"), **a price per unit** (whole naira), a **minimum and maximum quantity** (blank maximum means no maximum) and an **average delivery time** (e.g. "1 minute") shown on the order form.
+
+Shoppers pick a category and plan, enter the link/username to boost and the quantity (kept within the plan's Min–Max), and pay **from their KORASTORE wallet**. A boost order is `boostOrders/<uid>_<requestId>`: the total is **unit price × quantity** — no checkout fees and no delivery. The order transaction re-reads the plan at purchase time, so the price charged is always the admin's current price and the quantity always honours the plan's limits; the security rules re-verify the price, names and wallet debit. The admin moves orders through **paid → processing → delivered**, and cancelling refunds the wallet in one transaction. Boost orders appear on `orders.html` next to product orders.
 
 ## Money flow
 
@@ -73,6 +74,7 @@ The admin can change the amounts and which state counts as "local" under **Admin
 - **The admin is trusted with balances.** The rules let the admin set any balance. Protect the admin Google/email account (use 2-step verification).
 - **Stock decrease is not forced by the order rule.** The order rule doesn't require the matching product updates in the same batch. The normal app always does both, but a modified browser could create a paid order without reducing stock (overselling risk, not a way to get goods for free). Fixing this needs one more `getAfter()` per line, which may exceed Firestore's per-request rule lookup limit. Check it when you test the rules.
 - **Carts are capped at 5 lines per order.** Firestore rules can't loop over a list, so each line is checked by index.
+- **Boost plan limits (min/max quantity) are enforced in the app's order transaction**, which re-reads the plan at purchase time — not in the security rules, which pin the price, names and wallet debit instead. A modified browser could order outside the limits but would still pay the correct unit price × quantity.
 - **Rules are not tested in this repo.** Test them before going live (see Setup, step 3).
 - **Delivery locations** are checked in the browser against `data/ng-locations.json`. The rules only check that they're strings. The delivery location itself is stored in Firestore (`users/{uid}`), not in browser storage.
 - **Product photos are compressed client-side** (JPEG, max 5) and stored as base64 inside the product document — Firestore's 1 MB per-document limit is why the uploader compresses them. Very photo-heavy products (5 large photos) push that limit; the uploader blocks oversized sets.
@@ -81,10 +83,10 @@ The admin can change the amounts and which state counts as "local" under **Admin
 
 ## Pages
 
-- Storefront: `index.html` (home), `shop.html` (catalogue with search, categories and sorting), `product.html`, `boost.html` (boosting platforms), `boost-platform.html` (platform description + services), `cart.html`
+- Storefront: `index.html` (home), `shop.html` (catalogue with search, categories and sorting), `product.html`, `boost.html` (boost order form: category → plan → link → quantity → pay), `boost-platform.html` (forwards old platform links to the order form), `cart.html`
 - Accounts: `login.html`, `register.html`
 - Customer: `dashboard.html` (overview), `wallet.html` (fund), `orders.html`, `profile.html` (delivery location)
-- Admin: `admin.html` (overview), `admin-products.html`, `admin-boost.html` (boosting platforms, categories, services, orders), `admin-funding.html`, `admin-orders.html`, `admin-fees.html` (checkout fees), `admin-settings.html` (deposit bank details)
+- Admin: `admin.html` (overview), `admin-products.html` (searchable by Product ID), `admin-boost.html` (boosting categories, plans with min/max and average times, orders), `admin-funding.html`, `admin-orders.html`, `admin-fees.html` (checkout fees), `admin-settings.html` (deposit bank details)
 
 Shared client code is in `store.js`, styles in `store.css`. Nigerian states and LGAs are in `data/ng-locations.json` (from the MIT-licensed `nigeria-state-lga-data` package, 37 entries, 777 LGAs). Non-Nigerian addresses use free text for state and area.
 
@@ -97,7 +99,7 @@ Shared client code is in `store.js`, styles in `store.css`. Nigerian states and 
 | `products/{productId}` | admin (listing, prices, stock, photos, keywords, variations, recommended); customer (stock and `sold` on purchase only) | anyone (active only); admin (all) |
 | `boostPlatforms/{id}` | admin (platform name + description, visibility) | anyone (active only); admin (all) |
 | `boostCategories/{id}` | admin (category inside a platform) | anyone (active only); admin (all) |
-| `boostSubcategories/{id}` | admin (service listing: name, unit, price) | anyone (active only); admin (all) |
+| `boostSubcategories/{id}` | admin (plan: name, unit, price, min/max quantity, average time) | anyone (active only); admin (all) |
 | `boostOrders/{uid}_{requestId}` | customer (create once); admin (status) | owner, admin |
 | `settings/payment` | admin | signed-in users |
 | `settings/fees` | admin (checkout fee schedule) | signed-in users |
@@ -106,7 +108,7 @@ Shared client code is in `store.js`, styles in `store.css`. Nigerian states and 
 | `notifications/{id}` | admin (recommended-product announcements) | everyone |
 | `ledger/{id}` | customer (purchase entries only); admin (all) | admin |
 
-Money is stored as whole naira (integers). Product documents hold the admin-chosen `productId` as their id plus `name`, `category`, `price` (selling), `compareAtPrice` (slashed original, optional), `stock`, `minOrderQuantity`, `sold`, `description`, `keywords[]`, `images[]` (base64), `variations[]` (each `{name, price}` — clothing options with their own prices), `recommended`, `active`. Orders hold `items[]` (with quantity and optional `variant` name and `variantIndex` per line), `subtotal`, `serviceFee`, `deliveryFee`, `total` and the `delivery` snapshot. Boosting: `boostPlatforms` (`name`, `description`, `active`), `boostCategories` (`platformId`, `name`, `description`, `active`), `boostSubcategories` (`categoryId`, `name`, `description`, `unit`, `price`, `active`) and `boostOrders` (`uid`, `requestId`, platform/category/service names and ids, `unit`, `unitPrice`, `quantity`, `total`, `link`, `status`).
+Money is stored as whole naira (integers). Product documents hold the admin-chosen `productId` as their id plus `name`, `category`, `price` (selling), `compareAtPrice` (slashed original, optional), `stock`, `minOrderQuantity`, `sold`, `description`, `keywords[]`, `images[]` (base64), `variations[]` (each `{name, price}` — clothing options with their own prices), `recommended`, `active`. Orders hold `items[]` (with quantity and optional `variant` name and `variantIndex` per line), `subtotal`, `serviceFee`, `deliveryFee`, `total` and the `delivery` snapshot. Boosting: `boostPlatforms` (`name`, `description`, `active` — created automatically from the category form), `boostCategories` (`platformId`, `name`, `description`, `active`), `boostSubcategories` (`categoryId`, `name`, `description`, `unit`, `price`, `minQuantity`, `maxQuantity` where 0 means no maximum, `averageTime`, `active`) and `boostOrders` (`uid`, `requestId`, platform/category/service names and ids, `unit`, `unitPrice`, `quantity`, `total`, `link`, `status`).
 
 ## Setup and deployment
 

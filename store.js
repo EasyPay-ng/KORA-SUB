@@ -850,12 +850,43 @@ export const NEXT_ORDER_ACTIONS = {
 };
 
 // ---------- Social media boosting ----------
-// The admin runs a boosting catalogue: platforms (Facebook, TikTok, YouTube, …) with
-// descriptions, categories (Followers, Likes, Views, …), and subcategories — the
-// actual service listings, each with its own price per unit. Customers order from a
-// platform page and pay from the wallet; there is no delivery and no checkout fee on
+// The admin runs a boosting catalogue: platforms (Facebook, TikTok, YouTube, …),
+// categories inside them (Followers, Likes, Views, …), and plans — the actual
+// service listings, each with its own price per unit, optional min/max quantity
+// and an average delivery time. Shoppers see one order form (Category → Plan →
+// link → quantity → pay from wallet); there is no delivery and no checkout fee on
 // boost orders.
 export const BOOST_ID_PATTERN = /^[A-Za-z0-9_-]{2,40}$/;
+// Hard ceiling for any boost quantity. A plan can narrow it with minQuantity /
+// maxQuantity (maxQuantity 0 or missing means "no maximum").
+export const BOOST_MAX_QUANTITY = 100000;
+
+// Effective order limits for a plan, honouring the catalogue fields when set.
+export function boostServiceLimits(service = {}) {
+  const minRaw = Number(service.minQuantity);
+  const min = Number.isInteger(minRaw) && minRaw >= 1 ? Math.min(minRaw, BOOST_MAX_QUANTITY) : 1;
+  const maxRaw = Number(service.maxQuantity);
+  const max = Number.isInteger(maxRaw) && maxRaw >= min ? Math.min(maxRaw, BOOST_MAX_QUANTITY) : BOOST_MAX_QUANTITY;
+  return { min, max };
+}
+
+// "Twitter" + "Views" → "Twitter Views" (without doubling when the category name
+// already starts with the platform name). Used anywhere a category is picked.
+export function boostCategoryTitle(platform, category) {
+  const platformName = String(platform?.name || '').trim();
+  const categoryName = String(category?.name || '').trim() || 'Category';
+  if (!platformName) return categoryName;
+  return categoryName.toLowerCase().startsWith(platformName.toLowerCase())
+    ? categoryName
+    : `${platformName} ${categoryName}`;
+}
+
+// "Min: 100 | Max: 2,000,000" (the max is hidden when the plan sets none).
+export function formatBoostLimits(service = {}) {
+  const { min, max } = boostServiceLimits(service);
+  const low = `Min: ${min.toLocaleString('en-NG')}`;
+  return max >= BOOST_MAX_QUANTITY ? low : `${low} | Max: ${max.toLocaleString('en-NG')}`;
+}
 const BOOST_COLLECTIONS = {
   platform: "boostPlatforms",
   category: "boostCategories",
@@ -900,8 +931,8 @@ export async function placeBoostOrder(requestId, { subcategoryId, quantity, link
     throw new Error("Request ID is invalid.");
   }
   const amount = Number(quantity);
-  if (!Number.isSafeInteger(amount) || amount < 1 || amount > 100000) {
-    throw new Error("Quantity must be a positive whole number (up to 100,000 units).");
+  if (!Number.isSafeInteger(amount) || amount < 1 || amount > BOOST_MAX_QUANTITY) {
+    throw new Error(`Quantity must be a positive whole number (up to ${BOOST_MAX_QUANTITY.toLocaleString('en-NG')} units).`);
   }
   const target = String(link || "").trim().slice(0, 300);
   if (!target) throw new Error("Enter the link or username to boost.");
@@ -933,6 +964,10 @@ export async function placeBoostOrder(requestId, { subcategoryId, quantity, link
 
     const unitPrice = Number(service.price);
     if (!Number.isInteger(unitPrice) || unitPrice < 1) throw new Error("This service has no valid price.");
+    // The plan's own limits, read inside the transaction so they cannot be stale.
+    const { min, max } = boostServiceLimits(service);
+    if (amount < min) throw new Error(`This plan needs a quantity of at least ${min.toLocaleString('en-NG')}.`);
+    if (amount > max) throw new Error(`This plan allows a quantity of at most ${max.toLocaleString('en-NG')}.`);
     const total = unitPrice * amount;
     if (!Number.isSafeInteger(total) || total < 1) throw new Error("That quantity is too large.");
 

@@ -15,6 +15,10 @@
     <div class="admin-grid">
       <section class="card">
         <div class="card-head"><div><h2>All products</h2><small id="count">Loading…</small></div></div>
+        <div class="toolbar" style="margin-bottom:14px">
+          <input id="product-search" class="input" type="search" placeholder="Search by Product ID…" aria-label="Search products by Product ID" autocomplete="off" style="max-width:320px">
+          <button class="btn btn-sm btn-ghost" type="button" id="clear-search" hidden>Clear</button>
+        </div>
         <div class="table-wrap"><table class="table"><thead><tr><th>Product ID</th><th>Product</th><th>Price</th><th>Stock</th><th>Sold</th><th>Status</th><th></th></tr></thead><tbody id="rows"><tr><td colspan="7">Loading…</td></tr></tbody></table></div>
       </section>
       <section class="card">
@@ -75,6 +79,7 @@
   let images = [];          // base64 data URLs, max 5
   let editing = null;       // product currently being edited (for recommended detection)
   let variationRows = [];   // { name, price } while editing — price '' means base price
+  let productSearch = '';   // admin search term — matches Product ID (and name as a fallback)
 
   // ---------- Image upload → compressed base64 ----------
   const MAX_IMAGES = 5;
@@ -233,9 +238,37 @@
     renderThumbs();
   }
 
+  function filteredProducts() {
+    const term = productSearch.trim().toLowerCase();
+    if (!term) return [...products];
+    return products.filter(p =>
+      String(p.id || '').toLowerCase().includes(term) ||
+      String(p.name || '').toLowerCase().includes(term)
+    );
+  }
+
   function render() {
-    $('#count').textContent = `${products.length} product${products.length === 1 ? '' : 's'} · ${products.filter(p => p.active).length} listed`;
-    $('#rows').innerHTML = products.length ? products.sort((a, b) => a.name.localeCompare(b.name)).map(p => `
+    const term = productSearch.trim();
+    const list = filteredProducts();
+    const listed = products.filter(p => p.active).length;
+    $('#count').textContent = term
+      ? `${list.length} of ${products.length} product${products.length === 1 ? '' : 's'} · ${listed} listed`
+      : `${products.length} product${products.length === 1 ? '' : 's'} · ${listed} listed`;
+    $('#clear-search').hidden = !term;
+    if (!products.length) {
+      $('#rows').innerHTML = '<tr><td colspan="7">No products yet. Create your first one.</td></tr>';
+      return;
+    }
+    if (!list.length) {
+      $('#rows').innerHTML = `<tr><td colspan="7">No products match “${esc(term)}”. Try another Product ID or <button class="link" type="button" id="clear-search-inline" style="background:none;border:0;padding:0;cursor:pointer">clear the search</button>.</td></tr>`;
+      $('#clear-search-inline')?.addEventListener('click', () => {
+        productSearch = '';
+        $('#product-search').value = '';
+        render();
+      });
+      return;
+    }
+    $('#rows').innerHTML = [...list].sort((a, b) => a.name.localeCompare(b.name)).map(p => `
       <tr>
         <td class="mono"><b>${esc(p.id)}</b></td>
         <td><b>${esc(p.name)}</b><small>${esc(p.category || 'Store')}${p.recommended ? ' · ★ Recommended' : ''}</small></td>
@@ -244,7 +277,7 @@
         <td class="mono">${Number(p.sold || 0)}</td>
         <td><span class="badge ${p.active ? 'ok' : ''}">${p.active ? 'Listed' : 'Hidden'}</span></td>
         <td><div class="table-actions"><button class="btn btn-sm btn-ghost" data-edit="${esc(p.id)}">Edit</button><button class="btn btn-sm btn-ghost" data-toggle="${esc(p.id)}">${p.active ? 'Hide' : 'List'}</button></div></td>
-      </tr>`).join('') : '<tr><td colspan="7">No products yet. Create your first one.</td></tr>';
+      </tr>`).join('');
   }
 
   $('#rows').addEventListener('click', async (event) => {
@@ -258,6 +291,27 @@
   });
   $('#new').addEventListener('click', () => fill(null));
   $('#reset').addEventListener('click', () => fill(null));
+
+  // ---------- Search products by Product ID ----------
+  $('#product-search').addEventListener('input', (event) => {
+    productSearch = event.target.value;
+    render();
+  });
+  $('#product-search').addEventListener('keydown', (event) => {
+    // Pressing Enter with an exact Product ID match jumps straight to editing it.
+    if (event.key !== 'Enter') return;
+    event.preventDefault();
+    const term = productSearch.trim().toLowerCase();
+    if (!term) return;
+    const exact = products.find(p => String(p.id || '').toLowerCase() === term);
+    if (exact) fill(exact);
+  });
+  $('#clear-search').addEventListener('click', () => {
+    productSearch = '';
+    $('#product-search').value = '';
+    render();
+    $('#product-search').focus();
+  });
 
   $('#form').addEventListener('submit', async (event) => {
     event.preventDefault();

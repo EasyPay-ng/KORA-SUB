@@ -11,37 +11,22 @@
 <div class="admin-shell" id="admin-content" hidden>
   <aside class="admin-side" id="admin-sidebar"></aside>
   <main class="admin-main">
-    <div class="page-head"><div><span class="eyebrow">Social media marketing</span><h1>Boosting services</h1><p>Platforms (Facebook, TikTok, YouTube, …) → categories (Followers, Likes, Views, …) → subcategories: the service listings with their prices. Shoppers see the platform descriptions on the public boost pages and order from there.</p></div></div>
+    <div class="page-head"><div><span class="eyebrow">Social media marketing</span><h1>Boosting services</h1><p>Shoppers see one order form: <b>Category</b> (e.g. Twitter Views) → <b>Plan</b> (e.g. Twitter Video Views | No Refill) → link → quantity → pay from wallet. Add categories in step 1, plans with prices and limits in step 2, and fulfil orders at the bottom.</p></div></div>
 
     <section class="card">
-      <div class="card-head"><div><h2>Platforms</h2><small id="platform-count">Loading…</small></div></div>
-      <div class="table-wrap"><table class="table"><thead><tr><th>ID</th><th>Name</th><th>Description</th><th>Status</th><th></th></tr></thead><tbody id="platform-rows"><tr><td colspan="5">Loading…</td></tr></tbody></table></div>
-      <form id="platform-form" class="panel-form" style="margin-top:16px" novalidate>
-        <b id="platform-form-title">Add platform</b>
-        <div class="field-row">
-          <label class="field">Platform ID <small>2–40 letters, numbers, – or _ · cannot change later</small><input class="input" id="platform-id" maxlength="40" placeholder="e.g. facebook"></label>
-          <label class="field">Name <small>shown to shoppers</small><input class="input" id="platform-name" maxlength="80" placeholder="e.g. Facebook"></label>
-        </div>
-        <label class="field">Platform description <small>appears on the platform's boost page</small><textarea class="textarea" id="platform-description" maxlength="2000" placeholder="What this platform is and what boosting it achieves…"></textarea></label>
-        <label class="toggle"><input type="checkbox" id="platform-active" checked> Visible in the store</label>
-        <div id="platform-error" class="error-text" role="alert" style="margin-top:8px"></div>
-        <div class="row" style="margin-top:10px"><button class="btn btn-gold" type="submit">Save platform</button><button class="btn btn-ghost" type="button" id="platform-clear">Clear</button></div>
-      </form>
-    </section>
-
-    <section class="card" style="margin-top:20px">
-      <div class="card-head"><div><h2>Categories</h2><small id="category-count">Loading…</small></div></div>
-      <div class="table-wrap"><table class="table"><thead><tr><th>ID</th><th>Platform</th><th>Name</th><th>Status</th><th></th></tr></thead><tbody id="category-rows"><tr><td colspan="5">Loading…</td></tr></tbody></table></div>
+      <div class="card-head"><div><h2>Step 1 · Categories</h2><small id="category-count">Loading…</small></div></div>
+      <div class="table-wrap"><table class="table"><thead><tr><th>Category</th><th>Plans</th><th>Status</th><th></th></tr></thead><tbody id="category-rows"><tr><td colspan="4">Loading…</td></tr></tbody></table></div>
       <form id="category-form" class="panel-form" style="margin-top:16px" novalidate>
         <b id="category-form-title">Add category</b>
         <div class="field-row">
-          <label class="field">Category ID <small>2–40 letters, numbers, – or _</small><input class="input" id="category-id" maxlength="40" placeholder="e.g. fb-followers"></label>
-          <label class="field">Platform<select class="select" id="category-platform"></select></label>
+          <label class="field">Category ID <small>auto-suggested · 2–40 letters, numbers, – or _ · cannot change later</small><input class="input" id="category-id" maxlength="40" placeholder="e.g. twitter-views"></label>
+          <label class="field">Platform <small>pick one or type a new name — it is created automatically</small><input class="input" id="category-platform" maxlength="80" list="platform-list" placeholder="e.g. Twitter" autocomplete="off"><datalist id="platform-list"></datalist></label>
         </div>
         <div class="field-row">
-          <label class="field">Name <small>e.g. Followers, Likes, Views</small><input class="input" id="category-name" maxlength="80"></label>
+          <label class="field">Category <small>e.g. Views, Followers, Likes</small><input class="input" id="category-name" maxlength="80" placeholder="e.g. Views"></label>
           <label class="field">Short description <small>optional</small><input class="input" id="category-description" maxlength="500"></label>
         </div>
+        <p class="small muted" style="margin:2px 0 12px">Shoppers will see: <b id="category-preview" style="color:var(--navy)">—</b></p>
         <label class="toggle"><input type="checkbox" id="category-active" checked> Visible in the store</label>
         <div id="category-error" class="error-text" role="alert" style="margin-top:8px"></div>
         <div class="row" style="margin-top:10px"><button class="btn btn-gold" type="submit">Save category</button><button class="btn btn-ghost" type="button" id="category-clear">Clear</button></div>
@@ -49,25 +34,46 @@
     </section>
 
     <section class="card" style="margin-top:20px">
-      <div class="card-head"><div><h2>Services &amp; prices</h2><small id="service-count">Loading…</small></div></div>
-      <div class="table-wrap"><table class="table"><thead><tr><th>ID</th><th>Category</th><th>Service</th><th>Unit</th><th>Price</th><th>Status</th><th></th></tr></thead><tbody id="service-rows"><tr><td colspan="7">Loading…</td></tr></tbody></table></div>
+      <div class="card-head"><div><h2>Step 2 · Plans &amp; prices</h2><small id="service-count">Loading…</small></div></div>
+      <div class="table-wrap"><table class="table"><thead><tr><th>ID</th><th>Category</th><th>Plan</th><th>Unit</th><th>Price</th><th>Limits</th><th>Status</th><th></th></tr></thead><tbody id="service-rows"><tr><td colspan="8">Loading…</td></tr></tbody></table></div>
       <form id="service-form" class="panel-form" style="margin-top:16px" novalidate>
-        <b id="service-form-title">Add service</b>
+        <b id="service-form-title">Add plan</b>
         <div class="field-row">
-          <label class="field">Service ID <small>2–40 letters, numbers, – or _</small><input class="input" id="service-id" maxlength="40" placeholder="e.g. tiktok-followers-real"></label>
+          <label class="field">Plan ID <small>auto-suggested · 2–40 letters, numbers, – or _ · cannot change later</small><input class="input" id="service-id" maxlength="40" placeholder="e.g. twitter-video-views"></label>
           <label class="field">Category<select class="select" id="service-category"></select></label>
         </div>
         <div class="field-row">
-          <label class="field">Service name <small>what the shopper is buying</small><input class="input" id="service-name" maxlength="120" placeholder="e.g. Real followers"></label>
-          <label class="field">Unit <small>what one quantity buys</small><input class="input" id="service-unit" maxlength="60" placeholder="e.g. 1,000 followers"></label>
+          <label class="field">Plan name <small>shown with the price, e.g. “Twitter Video Views | No Refill”</small><input class="input" id="service-name" maxlength="120" placeholder="e.g. Twitter Video Views | No Refill"></label>
+          <label class="field">Unit <small>what one quantity buys</small><input class="input" id="service-unit" maxlength="60" placeholder="e.g. followers"></label>
         </div>
         <div class="field-row">
-          <label class="field">Price per unit (₦)<input class="input" id="service-price" type="number" min="1" step="1"></label>
-          <label class="field">Short description <small>optional</small><input class="input" id="service-description" maxlength="500"></label>
+          <label class="field">Price per unit (₦) <small>whole naira</small><input class="input" id="service-price" type="number" min="1" step="1" placeholder="e.g. 17"></label>
+          <label class="field">Average time <small>optional · e.g. 1 minute</small><input class="input" id="service-average" maxlength="120" placeholder="e.g. 1 minute"></label>
         </div>
+        <div class="field-row">
+          <label class="field">Minimum quantity <small>smallest order accepted</small><input class="input" id="service-min" type="number" min="1" step="1" value="1"></label>
+          <label class="field">Maximum quantity <small>blank = no maximum</small><input class="input" id="service-max" type="number" min="1" step="1" placeholder="e.g. 2000000"></label>
+        </div>
+        <label class="field">Short description <small>optional · shown under the plan on the order form</small><input class="input" id="service-description" maxlength="500"></label>
         <label class="toggle"><input type="checkbox" id="service-active" checked> Visible in the store</label>
         <div id="service-error" class="error-text" role="alert" style="margin-top:8px"></div>
-        <div class="row" style="margin-top:10px"><button class="btn btn-gold" type="submit">Save service</button><button class="btn btn-ghost" type="button" id="service-clear">Clear</button></div>
+        <div class="row" style="margin-top:10px"><button class="btn btn-gold" type="submit">Save plan</button><button class="btn btn-ghost" type="button" id="service-clear">Clear</button></div>
+      </form>
+    </section>
+
+    <section class="card" style="margin-top:20px">
+      <div class="card-head"><div><h2>Platforms (automatic)</h2><small id="platform-count">Loading…</small></div></div>
+      <p class="small muted" style="margin:-6px 0 14px">Platforms are created automatically when you save a category with a new platform name. Come here only to rename one or to hide everything under it.</p>
+      <div class="table-wrap"><table class="table"><thead><tr><th>ID</th><th>Name</th><th>Categories</th><th>Status</th><th></th></tr></thead><tbody id="platform-rows"><tr><td colspan="5">Loading…</td></tr></tbody></table></div>
+      <form id="platform-form" class="panel-form" style="margin-top:16px" novalidate>
+        <b id="platform-form-title">Edit platform</b>
+        <div class="field-row">
+          <label class="field">Platform ID <small>set automatically · cannot change</small><input class="input" id="platform-id" maxlength="40" disabled placeholder="Pick “Edit” on a platform above"></label>
+          <label class="field">Name <small>shown to shoppers in front of each category</small><input class="input" id="platform-name" maxlength="80" placeholder="e.g. Twitter"></label>
+        </div>
+        <label class="toggle"><input type="checkbox" id="platform-active" checked> Visible in the store</label>
+        <div id="platform-error" class="error-text" role="alert" style="margin-top:8px"></div>
+        <div class="row" style="margin-top:10px"><button class="btn btn-gold" type="submit">Save platform</button><button class="btn btn-ghost" type="button" id="platform-clear">Clear</button></div>
       </form>
     </section>
 
@@ -78,19 +84,20 @@
   </main>
 </div>
 <script type="module">
-  import { mountAdminSidebar, requireAdmin, watchBoostPlatforms, watchBoostCategories, watchBoostSubcategories, watchAllBoostOrders, saveBoostItem, setBoostOrderStatus, BOOST_ID_PATTERN, NEXT_BOOST_ACTIONS, naira, esc, formatDateTime, STATUS_LABEL, statusClass } from './store.js';
+  import { mountAdminSidebar, requireAdmin, watchBoostPlatforms, watchBoostCategories, watchBoostSubcategories, watchAllBoostOrders, saveBoostItem, setBoostOrderStatus, BOOST_ID_PATTERN, NEXT_BOOST_ACTIONS, naira, esc, formatDateTime, STATUS_LABEL, statusClass, boostCategoryTitle, formatBoostLimits, boostServiceLimits } from './store.js';
   mountAdminSidebar('admin-boost.html');
   const $ = (id) => document.querySelector(id);
 
   let platforms = [], categories = [], subcategories = [], orders = [];
   const editing = { platform: '', category: '', subcategory: '' };
+  const autoId = { category: true, service: true };
   const listReady = { platforms: false, categories: false, subcategories: false, orders: false };
   const listErrors = {};
   let listTimeout;
   const listLabels = {
     platforms: 'platforms',
     categories: 'categories',
-    subcategories: 'services',
+    subcategories: 'plans',
     orders: 'boost orders'
   };
 
@@ -125,45 +132,67 @@
     render();
   }
 
-  const platformName = (id) => platforms.find(p => p.id === id)?.name || id;
+  const platformOf = (id) => platforms.find(p => p.id === id);
+  const platformName = (id) => platformOf(id)?.name || id;
+  const categoryOf = (id) => categories.find(c => c.id === id);
+  // What shoppers pick first, e.g. "Twitter Views".
+  const categoryTitle = (cat) => boostCategoryTitle(platformOf(cat?.platformId), cat);
   const categoryLabel = (id) => {
-    const c = categories.find(x => x.id === id);
-    return c ? `${platformName(c.platformId)} · ${c.name}` : id;
+    const c = categoryOf(id);
+    return c ? categoryTitle(c) : id;
   };
+  const slugify = (value) => String(value || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
+
+  // Find the platform with this name (ignoring case) or create it, so the
+  // category form never asks the admin to manage platforms separately.
+  async function ensurePlatformId(platformNameRaw) {
+    const name = String(platformNameRaw || '').trim().slice(0, 80);
+    if (!name) throw new Error('Enter the platform, e.g. “Twitter”.');
+    const hit = platforms.find(p => p.name.toLowerCase() === name.toLowerCase());
+    if (hit) return hit.id;
+    let base = slugify(name) || 'platform';
+    if (base.length < 2) base = `platform-${base}`;
+    let id = base, n = 2;
+    while (platforms.some(p => p.id === id) && n < 100) id = `${base.slice(0, 36)}-${n++}`;
+    if (platforms.some(p => p.id === id)) id = `${base.slice(0, 30)}-${Date.now().toString(36)}`;
+    await saveBoostItem('platform', id, { name, description: '', active: true }, { isNew: true });
+    platforms.push({ id, name, description: '', active: true });
+    return id;
+  }
 
   // ---------- Lists ----------
   function render() {
     $('#platform-count').textContent = listCount('platforms', platforms.length, 'platform', 'platforms');
-    const platformFallback = listPlaceholder('platforms', platforms, 5, 'No platforms yet. Add Facebook, TikTok, YouTube…');
+    const platformFallback = listPlaceholder('platforms', platforms, 5, 'No platforms yet. Save a category above and its platform appears here automatically.');
     $('#platform-rows').innerHTML = platformFallback ?? [...platforms].sort((a, b) => a.name.localeCompare(b.name)).map(p => `
       <tr>
         <td class="mono"><b>${esc(p.id)}</b></td>
         <td><b>${esc(p.name)}</b></td>
-        <td><small class="muted">${esc(String(p.description || '').slice(0, 80))}${String(p.description || '').length > 80 ? '…' : ''}</small></td>
+        <td class="mono">${categories.filter(c => c.platformId === p.id).length}</td>
         <td><span class="badge ${p.active ? 'ok' : ''}">${p.active ? 'Visible' : 'Hidden'}</span></td>
         <td><div class="table-actions"><button class="btn btn-sm btn-ghost" data-pedit="${esc(p.id)}">Edit</button><button class="btn btn-sm btn-ghost" data-ptoggle="${esc(p.id)}">${p.active ? 'Hide' : 'Show'}</button></div></td>
       </tr>`).join('');
 
     $('#category-count').textContent = listCount('categories', categories.length, 'category', 'categories');
-    const categoryFallback = listPlaceholder('categories', categories, 5, 'No categories yet.');
-    $('#category-rows').innerHTML = categoryFallback ?? [...categories].sort((a, b) => a.name.localeCompare(b.name)).map(c => `
+    const categoryFallback = listPlaceholder('categories', categories, 4, 'No categories yet. Add “Twitter / Views” below to offer Twitter Views.');
+    $('#category-rows').innerHTML = categoryFallback ?? [...categories].sort((a, b) => categoryTitle(a).localeCompare(categoryTitle(b))).map(c => `
       <tr>
-        <td class="mono"><b>${esc(c.id)}</b></td>
-        <td>${esc(platformName(c.platformId))}</td>
-        <td><b>${esc(c.name)}</b></td>
+        <td><b>${esc(categoryTitle(c))}</b><small class="mono">${esc(c.platformId)} / ${esc(c.id)}</small></td>
+        <td class="mono">${subcategories.filter(s => s.categoryId === c.id).length}</td>
         <td><span class="badge ${c.active ? 'ok' : ''}">${c.active ? 'Visible' : 'Hidden'}</span></td>
         <td><div class="table-actions"><button class="btn btn-sm btn-ghost" data-cedit="${esc(c.id)}">Edit</button><button class="btn btn-sm btn-ghost" data-ctoggle="${esc(c.id)}">${c.active ? 'Hide' : 'Show'}</button></div></td>
       </tr>`).join('');
 
-    $('#service-count').textContent = listCount('subcategories', subcategories.length, 'service', 'services');
-    const serviceFallback = listPlaceholder('subcategories', subcategories, 7, 'No services yet.');
+    $('#service-count').textContent = listCount('subcategories', subcategories.length, 'plan', 'plans');
+    const serviceFallback = listPlaceholder('subcategories', subcategories, 8, 'No plans yet.');
     $('#service-rows').innerHTML = serviceFallback ?? [...subcategories].sort((a, b) => a.name.localeCompare(b.name)).map(s => `
       <tr>
         <td class="mono"><b>${esc(s.id)}</b></td>
         <td>${esc(categoryLabel(s.categoryId))}</td>
-        <td><b>${esc(s.name)}</b></td>
+        <td><b>${esc(s.name)}</b>${s.averageTime ? `<small>Avg: ${esc(s.averageTime)}</small>` : ''}</td>
         <td><small>${esc(s.unit || '—')}</small></td>
         <td class="mono"><b>${naira(s.price)}</b></td>
+        <td><small class="mono">${esc(formatBoostLimits(s))}</small></td>
         <td><span class="badge ${s.active ? 'ok' : ''}">${s.active ? 'Visible' : 'Hidden'}</span></td>
         <td><div class="table-actions"><button class="btn btn-sm btn-ghost" data-sedit="${esc(s.id)}">Edit</button><button class="btn btn-sm btn-ghost" data-stoggle="${esc(s.id)}">${s.active ? 'Hide' : 'Show'}</button></div></td>
       </tr>`).join('');
@@ -181,28 +210,62 @@
         <td><div class="table-actions">${(NEXT_BOOST_ACTIONS[o.status] || []).map(([next, label]) => `<button class="btn btn-sm btn-ghost" data-boost="${esc(o.id)}" data-next="${next}">${esc(label)}</button>`).join('') || '<small class="muted">Closed</small>'}</div></td>
       </tr>`).join('');
 
-    // Selects for the category and service forms
-    $('#category-platform').innerHTML = platforms.map(p => `<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('') || '<option value="">Add a platform first</option>';
-    $('#service-category').innerHTML = categories.map(c => `<option value="${esc(c.id)}">${esc(categoryLabel(c.id))}</option>`).join('') || '<option value="">Add a category first</option>';
+    // Datalist of platform names for the category form, and the plan form's
+    // category dropdown (keeping whatever the admin had picked).
+    $('#platform-list').innerHTML = [...platforms].sort((a, b) => a.name.localeCompare(b.name)).map(p => `<option value="${esc(p.name)}">`).join('');
+    const keepServiceCat = $('#service-category').value;
+    const sortedCats = [...categories].sort((a, b) => categoryTitle(a).localeCompare(categoryTitle(b)));
+    $('#service-category').innerHTML = sortedCats.map(c => `<option value="${esc(c.id)}">${esc(categoryTitle(c))}</option>`).join('') || '<option value="">Add a category first</option>';
+    if ([...$('#service-category').options].some(o => o.value === keepServiceCat)) $('#service-category').value = keepServiceCat;
   }
 
   // ---------- Forms ----------
+  function paintCategoryPreview() {
+    const seen = [$('#category-platform').value.trim(), $('#category-name').value.trim()].filter(Boolean).join(' ');
+    $('#category-preview').textContent = seen || '—';
+  }
+
+  function suggestCategoryId() {
+    if (!autoId.category || editing.category) return;
+    const suggestion = slugify(`${$('#category-platform').value} ${$('#category-name').value}`);
+    if (suggestion.length >= 2) $('#category-id').value = suggestion;
+  }
+
+  function suggestServiceId() {
+    if (!autoId.service || editing.subcategory) return;
+    const suggestion = slugify($('#service-name').value);
+    if (suggestion.length >= 2) $('#service-id').value = suggestion;
+  }
+
   function fill(kind, item) {
     editing[kind] = item?.id || '';
+    if (kind === 'platform') {
+      $('#platform-form-title').textContent = item ? `Edit: ${item.name}` : 'Edit platform';
+      $('#platform-id').value = item?.id || '';
+      $('#platform-name').value = item?.name || '';
+      $('#platform-active').checked = item ? item.active === true : true;
+      $('#platform-error').textContent = '';
+      return;
+    }
     const pfx = kind === 'subcategory' ? 'service' : kind;
-    $(`#${pfx}-form-title`).textContent = item ? `Edit: ${item.name}` : `Add ${kind}`;
+    $(`#${pfx}-form-title`).textContent = item ? `Edit: ${item.name}` : (kind === 'category' ? 'Add category' : 'Add plan');
     $(`#${pfx}-id`).value = item?.id || '';
     $(`#${pfx}-id`).disabled = Boolean(item);
     $(`#${pfx}-name`).value = item?.name || '';
-    if (kind === 'platform') {
-      $('#platform-description').value = item?.description || '';
-    } else if (kind === 'category') {
+    if (kind === 'category') {
+      autoId.category = !item;
+      $('#category-platform').value = item ? platformName(item.platformId) : '';
       $('#category-description').value = item?.description || '';
-      if (item) $('#category-platform').value = item.platformId;
+      paintCategoryPreview();
     } else {
+      autoId.service = !item;
       $('#service-description').value = item?.description || '';
       $('#service-unit').value = item?.unit || '';
       $('#service-price').value = item?.price ?? '';
+      $('#service-average').value = item?.averageTime || '';
+      const limits = boostServiceLimits(item || {});
+      $('#service-min').value = item ? limits.min : 1;
+      $('#service-max').value = item && Number(item.maxQuantity) > 0 ? limits.max : '';
       if (item) $('#service-category').value = item.categoryId;
     }
     $(`#${pfx}-active`).checked = item ? item.active === true : true;
@@ -214,6 +277,9 @@
     const pfx = kind === 'subcategory' ? 'service' : kind;
     const error = $(`#${pfx}-error`);
     error.textContent = '';
+    if (kind === 'platform' && !editing.platform) {
+      return error.textContent = 'Pick “Edit” on a platform above first — new platforms are created automatically when you save a category with a new platform name.';
+    }
     const isNew = !editing[kind];
     const id = $(`#${pfx}-id`).value.trim();
     const name = $(`#${pfx}-name`).value.trim();
@@ -226,19 +292,39 @@
 
     const data = { name, active };
     if (kind === 'platform') {
-      data.description = $('#platform-description').value.trim().slice(0, 2000);
+      // Rename / visibility only — description stays as stored.
     } else if (kind === 'category') {
-      data.platformId = $('#category-platform').value;
-      if (!data.platformId) return error.textContent = 'Add a platform first.';
+      if (!listReady.platforms) return error.textContent = 'Still loading the catalogue — try again in a moment.';
+      let platformId;
+      try {
+        platformId = await ensurePlatformId($('#category-platform').value);
+      } catch (problem) {
+        return error.textContent = problem.message || 'Could not set the platform.';
+      }
+      data.platformId = platformId;
       data.description = $('#category-description').value.trim().slice(0, 500);
     } else {
+      if (!listReady.categories) return error.textContent = 'Still loading the catalogue — try again in a moment.';
       data.categoryId = $('#service-category').value;
       if (!data.categoryId) return error.textContent = 'Add a category first.';
       data.unit = $('#service-unit').value.trim().slice(0, 60);
-      if (!data.unit) return error.textContent = 'Enter the unit, e.g. “1,000 followers”.';
+      if (!data.unit) return error.textContent = 'Enter the unit, e.g. “followers”.';
       const price = Math.round(Number($('#service-price').value));
       if (!Number.isFinite(price) || price < 1) return error.textContent = 'Price must be at least ₦1 per unit.';
       data.price = price;
+      const minRaw = $('#service-min').value.trim();
+      const min = minRaw === '' ? 1 : Math.round(Number(minRaw));
+      if (!Number.isSafeInteger(min) || min < 1) return error.textContent = 'Minimum quantity must be 1 or more.';
+      data.minQuantity = min;
+      const maxRaw = $('#service-max').value.trim();
+      if (maxRaw === '') {
+        data.maxQuantity = 0;
+      } else {
+        const max = Math.round(Number(maxRaw));
+        if (!Number.isSafeInteger(max) || max < min) return error.textContent = 'Maximum must be blank (no maximum) or at least the minimum.';
+        data.maxQuantity = max;
+      }
+      data.averageTime = $('#service-average').value.trim().slice(0, 120);
       data.description = $('#service-description').value.trim().slice(0, 500);
     }
 
@@ -261,6 +347,14 @@
   $('#category-clear').addEventListener('click', () => fill('category', null));
   $('#service-clear').addEventListener('click', () => fill('subcategory', null));
 
+  // Live "shoppers will see" preview plus automatic ID suggestions (until the
+  // admin types an ID by hand).
+  $('#category-platform').addEventListener('input', () => { paintCategoryPreview(); suggestCategoryId(); });
+  $('#category-name').addEventListener('input', () => { paintCategoryPreview(); suggestCategoryId(); });
+  $('#category-id').addEventListener('input', () => { autoId.category = false; });
+  $('#service-name').addEventListener('input', suggestServiceId);
+  $('#service-id').addEventListener('input', () => { autoId.service = false; });
+
   // ---------- List actions ----------
   $('#platform-rows').addEventListener('click', async (event) => {
     const edit = event.target.closest('[data-pedit]');
@@ -268,7 +362,7 @@
     if (edit) return fill('platform', platforms.find(p => p.id === edit.dataset.pedit));
     if (toggle) {
       const p = platforms.find(x => x.id === toggle.dataset.ptoggle);
-      try { await saveBoostItem('platform', p.id, { name: p.name, description: p.description || '', active: !p.active }); }
+      try { await saveBoostItem('platform', p.id, { active: !p.active }); }
       catch (problem) { alert(problem.message); }
     }
   });
@@ -278,7 +372,7 @@
     if (edit) return fill('category', categories.find(c => c.id === edit.dataset.cedit));
     if (toggle) {
       const c = categories.find(x => x.id === toggle.dataset.ctoggle);
-      try { await saveBoostItem('category', c.id, { name: c.name, description: c.description || '', platformId: c.platformId, active: !c.active }); }
+      try { await saveBoostItem('category', c.id, { active: !c.active }); }
       catch (problem) { alert(problem.message); }
     }
   });
@@ -288,7 +382,7 @@
     if (edit) return fill('subcategory', subcategories.find(s => s.id === edit.dataset.sedit));
     if (toggle) {
       const s = subcategories.find(x => x.id === toggle.dataset.stoggle);
-      try { await saveBoostItem('subcategory', s.id, { name: s.name, description: s.description || '', unit: s.unit || '', price: Number(s.price) || 1, categoryId: s.categoryId, active: !s.active }); }
+      try { await saveBoostItem('subcategory', s.id, { active: !s.active }); }
       catch (problem) { alert(problem.message); }
     }
   });
