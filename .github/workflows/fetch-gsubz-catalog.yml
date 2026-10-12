@@ -1,0 +1,26 @@
+# One-shot / repeatable fetch of the GSUBZ "Socials Media Market" service catalogue.
+# The catalogue is a large JSON payload (thousands of plans), so it is downloaded by the
+# runner and returned as an artifact instead of being scraped page-by-page.
+name: Fetch GSUBZ socials catalogue
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/fetch-gsubz-catalog.yml"
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download the catalogue JSON
+        run: curl -fsSL --retry 3 "https://gsubz.com/api/plans?service=socials" -o gsubz-socials-raw.json
+
+      - name: Report size
+        run: wc -c gsubz-socials-raw.json && head -c 300 gsubz-socials-raw.json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gsubz-socials-raw
+          path: gsubz-socials-raw.json
+          retention-days: 30
