@@ -374,6 +374,12 @@ export function mountPickupPicker(host, { selectedId = "", onSelect = noop } = {
   let needle = "";
   let selected = String(selectedId || "");
   let failure = "";
+  // Serialises every async load: a slow reply can never overwrite a newer one, so the
+  // state selector and the station list always agree.
+  let sequence = 0;
+  // The selection we last followed to its state. Ordinary refreshes never yank the
+  // customer out of a state they are browsing — only a newly seen selection moves them.
+  let followed = "";
 
   host.innerHTML = `
     <div class="pickup-tools">
@@ -394,11 +400,25 @@ export function mountPickupPicker(host, { selectedId = "", onSelect = noop } = {
   const setNote = (text) => { noteEl.textContent = text || ""; };
 
   function renderStates() {
-    const entries = Array.isArray(catalog?.states) ? catalog.states : [];
+    const entries = (Array.isArray(catalog?.states) ? catalog.states : []).filter((entry) => entry && entry.state);
     stateSelect.innerHTML = '<option value="">Choose a state</option>'
       + entries.map((entry) => `<option value="${esc(entry.state)}">${esc(entry.state)} (${Number(entry.stations) || 0})</option>`).join('');
-    stateSelect.value = entries.some((entry) => entry.state === state) ? state : "";
     stateSelect.disabled = !entries.length;
+    syncStateSelect();
+  }
+
+  // The selector must always offer the state whose stations are listed, even when the
+  // catalogue summary is stale and does not mention it (a station chosen via "use my
+  // location", or a state the summary write missed).
+  function syncStateSelect() {
+    if (state && ![...stateSelect.options].some((option) => option.value === state)) {
+      const option = document.createElement('option');
+      option.value = state;
+      option.textContent = state;
+      stateSelect.appendChild(option);
+      stateSelect.disabled = false;
+    }
+    if (stateSelect.value !== state) stateSelect.value = state;
   }
 
   function syncRows() {
@@ -445,11 +465,18 @@ export function mountPickupPicker(host, { selectedId = "", onSelect = noop } = {
   }
 
   async function showState(nextState, nextOrigin = null) {
-    state = String(nextState || "");
+    const seq = ++sequence;
+    const opened = String(nextState || "");
+    const changed = opened !== state;
+    state = opened;
     origin = nextOrigin || null;
-    needle = "";
-    searchInput.value = "";
-    stateSelect.value = state;
+    // An in-progress search survives a re-read of the same state (a profile refresh);
+    // only actually switching states clears it.
+    if (changed) {
+      needle = "";
+      searchInput.value = "";
+    }
+    syncStateSelect();
     if (!state) {
       stations = [];
       setNote("");
@@ -458,10 +485,13 @@ export function mountPickupPicker(host, { selectedId = "", onSelect = noop } = {
     }
     listHost.innerHTML = '<div class="empty"><b>Loading stations…</b></div>';
     try {
-      stations = orderStations(await fetchPickupStations(state), origin);
+      const rows = orderStations(await fetchPickupStations(state), origin);
+      if (seq !== sequence) return; // a newer state (or refresh) is already loading
+      stations = rows;
       failure = "";
       setNote(`${stations.length} station${stations.length === 1 ? '' : 's'} in ${state}${origin ? ' · closest first' : ''}`);
     } catch (problem) {
+      if (seq !== sequence) return;
       stations = [];
       failure = problem?.message || 'Could not load the station list.';
       setNote("");
@@ -473,15 +503,20 @@ export function mountPickupPicker(host, { selectedId = "", onSelect = noop } = {
     const station = stations.find((item) => item.id === id);
     if (!station) return;
     selected = id;
+    followed = id; // chosen here — the customer already knows its state, never yank them
     syncRows();
     onSelect(station);
   }
 
   async function load({ keepSelection = false } = {}) {
+    const seq = ++sequence;
     try {
       catalog = await fetchPickupCatalog();
-      failure = catalog ? "" : "The station list has not been published yet.";
+      if (seq !== sequence) return;
+      // A missing catalogue is the friendly empty state below, not an error.
+      failure = "";
     } catch (problem) {
+      if (seq !== sequence) return;
       catalog = null;
       failure = problem?.message || 'Could not load the station list.';
     }
@@ -491,15 +526,20 @@ export function mountPickupPicker(host, { selectedId = "", onSelect = noop } = {
       renderList();
       return;
     }
-    // Follow the station saved on the profile: open its state and keep it selected.
+    // Follow a selection that is new to the picker (first load, or a station just saved
+    // from elsewhere): open its state and keep it selected. Ordinary refreshes leave the
+    // customer in the state they are browsing.
     let wanted = state;
-    if (selected && !stations.some((station) => station.id === selected)) {
+    if (selected && selected !== followed && !stations.some((station) => station.id === selected)) {
       try {
         const all = await fetchAllPickupStations();
+        if (seq !== sequence) return;
         const match = all.find((station) => station.id === selected);
         if (match) wanted = match.state;
+        followed = selected; // handled — don't move the customer again on every refresh
       } catch { /* the picker still works without the saved row */ }
     }
+    if (!selected) followed = "";
     if (wanted) await showState(wanted, keepSelection ? origin : null);
     else renderList();
     if (keepSelection) syncRows();
@@ -517,15 +557,17 @@ export function mountPickupPicker(host, { selectedId = "", onSelect = noop } = {
     locateButton.textContent = 'Finding you…';
     setNote('Waiting for your location…');
     navigator.geolocation.getCurrentPosition(async (position) => {
+      const seq = ++sequence;
       const point = { latitude: position.coords.latitude, longitude: position.coords.longitude };
       try {
         const all = orderStations(await fetchAllPickupStations(), point);
+        if (seq !== sequence) return; // the customer moved on while the list loaded
         const nearest = all.find((station) => station.distance != null) || all[0];
         if (!nearest) return setNote('No stations to compare with yet.');
         state = nearest.state;
         origin = point;
         stations = all.filter((station) => station.state === state);
-        stateSelect.value = state;
+        syncStateSelect();
         setNote(`${stations.length} station${stations.length === 1 ? '' : 's'} in ${state} · closest first`);
         renderList();
         pick(nearest.id);
@@ -548,7 +590,8 @@ export function mountPickupPicker(host, { selectedId = "", onSelect = noop } = {
   });
 
   return {
-    // Re-reads the catalogue (e.g. after the admin publishes) and follows the saved station.
+    // Re-reads the catalogue (e.g. after the admin publishes). A newly saved station is
+    // followed to its state; the customer's own browsing is left alone.
     refresh: (nextSelectedId = selected) => {
       selected = String(nextSelectedId || "");
       return load({ keepSelection: true });
