@@ -204,32 +204,46 @@
     infoEl.innerHTML = `<div>Average time: <b>${esc(avg || 'Varies')}</b></div>${desc ? `<div>${esc(desc)}</div>` : ''}`;
     qtyInput.min = String(min);
     qtyInput.max = String(max);
-    let qty = Math.round(Number(qtyInput.value) || min);
-    if (resetQty || !Number.isFinite(qty)) qty = min;
-    qty = Math.min(Math.max(qty, min), max);
+    // Keep whatever the shopper typed so the price follows it; the plan's
+    // limits are enforced when the order is placed (submitOrder).
+    let qty = Math.round(Number(qtyInput.value));
+    if (resetQty || !Number.isSafeInteger(qty) || qty < 1) qty = min;
     qtyInput.value = String(qty);
     paintAmount();
   }
 
+  // The quantity exactly as typed (0 when it is not a usable whole number).
+  // Deliberately NOT clamped, so the price updates for any quantity.
   function orderQty() {
     const service = currentService();
     if (!service) return 0;
-    const { min, max } = boostServiceLimits(service);
     const qty = Math.round(Number(host.querySelector('#boost-qty').value));
-    if (!Number.isSafeInteger(qty)) return 0;
-    return Math.min(Math.max(qty, min), max);
+    return Number.isSafeInteger(qty) && qty >= 1 ? qty : 0;
   }
 
   function paintAmount() {
     const service = currentService();
     const amountInput = host.querySelector('#boost-amount');
+    const error = host.querySelector('#boost-error');
     if (!service) {
       amountInput.value = '';
       paintPayArea();
       return;
     }
-    const qty = orderQty() || boostServiceLimits(service).min;
+    const { min, max } = boostServiceLimits(service);
+    const typed = orderQty();
+    const qty = typed || min;
     amountInput.value = naira(boostOrderTotal(service.price, qty));
+    // Live hint when the typed quantity is outside the plan's limits; the same
+    // rule is enforced again when the order is placed.
+    const outOfRange = typed < min || typed > max;
+    if (outOfRange) {
+      error.textContent = max >= BOOST_MAX_QUANTITY
+        ? `Quantity must be at least ${min.toLocaleString('en-NG')}.`
+        : `Quantity must be between ${min.toLocaleString('en-NG')} and ${max.toLocaleString('en-NG')}.`;
+    } else if (error.textContent.startsWith('Quantity must')) {
+      error.textContent = '';
+    }
     paintPayArea();
   }
 
@@ -248,8 +262,11 @@
       payButton.textContent = 'Pay';
       return;
     }
-    const total = boostOrderTotal(service.price, orderQty() || boostServiceLimits(service).min);
-    payButton.disabled = false;
+    const { min, max } = boostServiceLimits(service);
+    const typed = orderQty();
+    const total = boostOrderTotal(service.price, typed || min);
+    // Out-of-limit quantities still show their price, but cannot be paid for.
+    payButton.disabled = typed < min || typed > max;
     payButton.textContent = `Pay ${naira(total)} from wallet`;
   }
 

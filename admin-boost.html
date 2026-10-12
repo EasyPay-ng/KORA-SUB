@@ -11,7 +11,7 @@
 <div class="admin-shell" id="admin-content" hidden>
   <aside class="admin-side" id="admin-sidebar"></aside>
   <main class="admin-main">
-    <div class="page-head"><div><span class="eyebrow">Social media marketing</span><h1>Boosting services</h1><p>The catalogue selects the <b>cheapest qualifying GSUBZ plan(s)</b> in each category, with a KORASTORE rate of <b>₦500–₦50,000 per 1,000 units</b> (4× the source rate). Each plan keeps its GSUBZ quantity limits. You edit just the <b>rate</b> and the <b>average time</b> — names, units and limits are synced. Average times are never below 1 hour.</p></div></div>
+    <div class="page-head"><div><span class="eyebrow">Social media marketing</span><h1>Boosting services</h1><p>The catalogue selects the <b>cheapest qualifying GSUBZ plan(s)</b> in each category, with a KORASTORE rate of <b>₦500–₦50,000 per 1,000 units</b> (2× the source rate). Each plan keeps its GSUBZ quantity limits. You edit just the <b>rate</b> and the <b>average time</b> — names, units and limits are synced. Average times are never below 1 hour.</p></div></div>
 
     <div id="notice"></div>
 
@@ -105,7 +105,7 @@
     if (built && !$('#publish-summary').dataset.busy) {
       const hidden = (categories.length + subcategories.length + platforms.length)
         - (built.categories.length + built.plans.length + built.platforms.length);
-      $('#publish-summary').textContent = `Ready: ${built.categories.length.toLocaleString('en-NG')} categories and ${built.plans.length.toLocaleString('en-NG')} cheapest eligible plan(s) (4× GSUBZ rate per 1,000, ₦500–₦50,000).`
+      $('#publish-summary').textContent = `Ready: ${built.categories.length.toLocaleString('en-NG')} categories and ${built.plans.length.toLocaleString('en-NG')} cheapest eligible plan(s) (2× GSUBZ rate per 1,000, ₦500–₦50,000).`
         + (hidden > 0 ? ` ${hidden.toLocaleString('en-NG')} existing item(s) not in the snapshot will be hidden.` : '');
     }
   }
@@ -117,7 +117,7 @@
     const hidden = (categories.length + subcategories.length + platforms.length)
       - (built.categories.length + built.plans.length + built.platforms.length);
     const message = `Publish ${built.categories.length} categories and ${built.plans.length} cheapest qualifying plans?\n\n`
-      + `Rates are 4× GSUBZ, between ₦500 and ₦50,000 per 1,000 units. Legacy per-unit price overrides reset once; average-time edits and future valid rate edits are kept. GSUBZ quantity limits are retained. ${hidden > 0 ? `${hidden} item(s) not selected by this snapshot will be hidden.` : ''}`;
+      + `Rates are 2× GSUBZ, between ₦500 and ₦50,000 per 1,000 units. Legacy per-unit price overrides reset once; average-time edits and future valid rate edits are kept. GSUBZ quantity limits are retained. ${hidden > 0 ? `${hidden} item(s) not selected by this snapshot will be hidden.` : ''}`;
     if (!confirm(message)) return;
     button.disabled = true;
     button.textContent = 'Publishing…';
