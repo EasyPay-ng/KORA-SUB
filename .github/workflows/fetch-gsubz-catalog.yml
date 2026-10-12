@@ -14,13 +14,34 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download the catalogue JSON
-        run: curl -fsSL --retry 3 "https://gsubz.com/api/plans?service=socials" -o gsubz-socials-raw.json
-
-      - name: Report size
-        run: wc -c gsubz-socials-raw.json && head -c 300 gsubz-socials-raw.json
+        run: |
+          set +e
+          for url in \
+            "https://gsubz.com/api/plans?service=socials" \
+            "https://api.gsubz.com/api/plans?service=socials" \
+            "https://www.gsubz.com/api/plans?service=socials"; do
+            echo "== GET $url" >> attempt-log.txt
+            curl -4 -sS -L --retry 2 --max-time 120 \
+              -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126 Safari/537.36" \
+              -o gsubz-socials-raw.json \
+              -w "http=%{http_code} bytes=%{size_download} time=%{time_total}\n" \
+              "$url" >> attempt-log.txt 2>&1
+            echo "exit=$?" >> attempt-log.txt
+            if [ -s gsubz-socials-raw.json ] && head -c 20 gsubz-socials-raw.json | grep -q "{"; then
+              echo "OK" >> attempt-log.txt
+              break
+            fi
+          done
+          wc -c gsubz-socials-raw.json >> attempt-log.txt 2>&1
+          echo "-- head --" >> attempt-log.txt
+          head -c 500 gsubz-socials-raw.json >> attempt-log.txt 2>&1
 
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: gsubz-socials-raw
-          path: gsubz-socials-raw.json
+          path: |
+            gsubz-socials-raw.json
+            attempt-log.txt
           retention-days: 30
+          if-no-files-found: warn
