@@ -4,77 +4,38 @@
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Boosting — KORASTORE Admin</title>
   <link rel="stylesheet" href="store.css">
-  <link rel="icon" href="assets/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png"><meta name="theme-color" content="#0b2545">
+  <link rel="icon" href="assets/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32" href="assets/favicon-32.png"><meta name="theme-color" content="#0b2545">
 </head>
 <body>
 <div id="gate" class="gate"><div class="gate-card"><span class="gate-mark">K</span><h2>Checking admin access…</h2><p>Verifying your account before any store data loads.</p></div></div>
 <div class="admin-shell" id="admin-content" hidden>
   <aside class="admin-side" id="admin-sidebar"></aside>
   <main class="admin-main">
-    <div class="page-head"><div><span class="eyebrow">Social media marketing</span><h1>Boosting services</h1><p>Shoppers see one order form: <b>Category</b> (e.g. Twitter Views) → <b>Plan</b> (e.g. Twitter Video Views | No Refill) → link → quantity → pay from wallet. Add categories in step 1, plans with prices and limits in step 2, and fulfil orders at the bottom.</p></div></div>
+    <div class="page-head"><div><span class="eyebrow">Social media marketing</span><h1>Boosting services</h1><p>The catalogue is imported from the store's GSUBZ snapshot: <b>every category</b>, each with only its <b>most expensive service(s)</b>, priced at <b>4× the GSUBZ price</b>. You edit just the <b>price</b> and the <b>average time</b> — everything else is synced. Average times are never below 1 hour, and a unit price under ₦1 needs at least 50 units per order.</p></div></div>
+
+    <div id="notice"></div>
 
     <section class="card">
-      <div class="card-head"><div><h2>Step 1 · Categories</h2><small id="category-count">Loading…</small></div></div>
-      <div class="table-wrap"><table class="table"><thead><tr><th>Category</th><th>Plans</th><th>Status</th><th></th></tr></thead><tbody id="category-rows"><tr><td colspan="4">Loading…</td></tr></tbody></table></div>
-      <form id="category-form" class="panel-form" style="margin-top:16px" novalidate>
-        <b id="category-form-title">Add category</b>
-        <div class="field-row">
-          <label class="field">Category ID <small>auto-suggested · 2–40 letters, numbers, – or _ · cannot change later</small><input class="input" id="category-id" maxlength="40" placeholder="e.g. twitter-views"></label>
-          <label class="field">Platform <small>pick one or type a new name — it is created automatically</small><input class="input" id="category-platform" maxlength="80" list="platform-list" placeholder="e.g. Twitter" autocomplete="off"><datalist id="platform-list"></datalist></label>
-        </div>
-        <div class="field-row">
-          <label class="field">Category <small>e.g. Views, Followers, Likes</small><input class="input" id="category-name" maxlength="80" placeholder="e.g. Views"></label>
-          <label class="field">Short description <small>optional</small><input class="input" id="category-description" maxlength="500"></label>
-        </div>
-        <p class="small muted" style="margin:2px 0 12px">Shoppers will see: <b id="category-preview" style="color:var(--navy)">—</b></p>
-        <label class="toggle"><input type="checkbox" id="category-active" checked> Visible in the store</label>
-        <div id="category-error" class="error-text" role="alert" style="margin-top:8px"></div>
-        <div class="row" style="margin-top:10px"><button class="btn btn-gold" type="submit">Save category</button><button class="btn btn-ghost" type="button" id="category-clear">Clear</button></div>
-      </form>
+      <div class="card-head"><div><h2>Catalogue</h2><small id="catalogue-count">Loading…</small></div></div>
+      <p class="small muted" style="margin:-6px 0 14px">Sourced from <b>data/gsubz-socials-services.json</b> (shipped with the site). Publishing upserts every category and plan, keeps your price / average-time edits, and hides catalogue items that are not in the snapshot (the old manual ones). Free-service categories are not sold here.</p>
+      <div class="field-row">
+        <label class="field">In the snapshot<input class="input" id="catalogue-file" disabled></label>
+        <label class="field">Published in the store<input class="input" id="catalogue-live" disabled></label>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn btn-gold" id="publish" type="button">Publish catalogue</button>
+        <small class="muted" id="publish-summary">Reading data/gsubz-socials-services.json…</small>
+      </div>
     </section>
 
     <section class="card" style="margin-top:20px">
-      <div class="card-head"><div><h2>Step 2 · Plans &amp; prices</h2><small id="service-count">Loading…</small></div></div>
-      <div class="table-wrap"><table class="table"><thead><tr><th>ID</th><th>Category</th><th>Plan</th><th>Unit</th><th>Price</th><th>Limits</th><th>Status</th><th></th></tr></thead><tbody id="service-rows"><tr><td colspan="8">Loading…</td></tr></tbody></table></div>
-      <form id="service-form" class="panel-form" style="margin-top:16px" novalidate>
-        <b id="service-form-title">Add plan</b>
-        <div class="field-row">
-          <label class="field">Plan ID <small>auto-suggested · 2–40 letters, numbers, – or _ · cannot change later</small><input class="input" id="service-id" maxlength="40" placeholder="e.g. twitter-video-views"></label>
-          <label class="field">Category<select class="select" id="service-category"></select></label>
-        </div>
-        <div class="field-row">
-          <label class="field">Plan name <small>shown with the price, e.g. “Twitter Video Views | No Refill”</small><input class="input" id="service-name" maxlength="120" placeholder="e.g. Twitter Video Views | No Refill"></label>
-          <label class="field">Unit <small>what one quantity buys</small><input class="input" id="service-unit" maxlength="60" placeholder="e.g. followers"></label>
-        </div>
-        <div class="field-row">
-          <label class="field">Price per unit (₦) <small>e.g. 17, or as little as 0.1 — shoppers pay whole naira, so the amount is rounded to the nearest ₦</small><input class="input" id="service-price" type="number" min="0.1" step="0.01" placeholder="e.g. 17 or 0.1"></label>
-          <label class="field">Average time <small>optional · e.g. 1 minute</small><input class="input" id="service-average" maxlength="120" placeholder="e.g. 1 minute"></label>
-        </div>
-        <div class="field-row">
-          <label class="field">Minimum quantity <small>smallest order accepted</small><input class="input" id="service-min" type="number" min="1" step="1" value="1"></label>
-          <label class="field">Maximum quantity <small>blank = no maximum</small><input class="input" id="service-max" type="number" min="1" step="1" placeholder="e.g. 2000000"></label>
-        </div>
-        <label class="field">Short description <small>optional · shown under the plan on the order form</small><input class="input" id="service-description" maxlength="500"></label>
-        <label class="toggle"><input type="checkbox" id="service-active" checked> Visible in the store</label>
-        <div id="service-error" class="error-text" role="alert" style="margin-top:8px"></div>
-        <div class="row" style="margin-top:10px"><button class="btn btn-gold" type="submit">Save plan</button><button class="btn btn-ghost" type="button" id="service-clear">Clear</button></div>
-      </form>
-    </section>
-
-    <section class="card" style="margin-top:20px">
-      <div class="card-head"><div><h2>Platforms (automatic)</h2><small id="platform-count">Loading…</small></div></div>
-      <p class="small muted" style="margin:-6px 0 14px">Platforms are created automatically when you save a category with a new platform name. Come here only to rename one or to hide everything under it.</p>
-      <div class="table-wrap"><table class="table"><thead><tr><th>ID</th><th>Name</th><th>Categories</th><th>Status</th><th></th></tr></thead><tbody id="platform-rows"><tr><td colspan="5">Loading…</td></tr></tbody></table></div>
-      <form id="platform-form" class="panel-form" style="margin-top:16px" novalidate>
-        <b id="platform-form-title">Edit platform</b>
-        <div class="field-row">
-          <label class="field">Platform ID <small>set automatically · cannot change</small><input class="input" id="platform-id" maxlength="40" disabled placeholder="Pick “Edit” on a platform above"></label>
-          <label class="field">Name <small>shown to shoppers in front of each category</small><input class="input" id="platform-name" maxlength="80" placeholder="e.g. Twitter"></label>
-        </div>
-        <label class="toggle"><input type="checkbox" id="platform-active" checked> Visible in the store</label>
-        <div id="platform-error" class="error-text" role="alert" style="margin-top:8px"></div>
-        <div class="row" style="margin-top:10px"><button class="btn btn-gold" type="submit">Save platform</button><button class="btn btn-ghost" type="button" id="platform-clear">Clear</button></div>
-      </form>
+      <div class="card-head"><div><h2>Plans &amp; prices</h2><small id="plan-count">Loading…</small></div></div>
+      <p class="small muted" style="margin:-6px 0 14px">Only the price and the average time are editable — names, units and quantity limits come from GSUBZ. The minimum shown is the effective one (a unit price under ₦1 always needs at least 50 units).</p>
+      <div class="field-row">
+        <label class="field">Search<input class="input" id="plan-filter" placeholder="Plan or category name" autocomplete="off"></label>
+      </div>
+      <div class="table-wrap"><table class="table"><thead><tr><th>Category</th><th>Plan</th><th>Unit</th><th>Price (₦ per unit)</th><th>Average time</th><th>Min</th><th>Max</th><th></th></tr></thead><tbody id="plan-rows"><tr><td colspan="8">Loading…</td></tr></tbody></table></div>
+      <div class="row" style="margin-top:12px"><button class="btn btn-ghost" id="plan-more" type="button" hidden>Show more</button></div>
     </section>
 
     <section class="card" style="margin-top:20px">
@@ -84,345 +45,275 @@
   </main>
 </div>
 <script type="module">
-  import { mountAdminSidebar, requireAdmin, watchBoostPlatforms, watchBoostCategories, watchBoostSubcategories, watchAllBoostOrders, saveBoostItem, setBoostOrderStatus, BOOST_ID_PATTERN, BOOST_MIN_UNIT_PRICE, NEXT_BOOST_ACTIONS, naira, esc, formatDateTime, STATUS_LABEL, statusClass, boostCategoryTitle, formatBoostLimits, boostServiceLimits, parseBoostPrice, formatBoostPrice } from './store.js';
+  import { mountAdminSidebar, requireAdmin, watchBoostPlatforms, watchBoostCategories, watchBoostSubcategories, watchAllBoostOrders, publishBoostCatalog, buildBoostCatalogFromGsubz, saveBoostItem, setBoostOrderStatus, parseBoostPrice, validateBoostAverageTime, boostServiceLimits, BOOST_MAX_QUANTITY, formatBoostPrice, naira, esc, formatDateTime, STATUS_LABEL, statusClass, NEXT_BOOST_ACTIONS } from './store.js';
   mountAdminSidebar('admin-boost.html');
   const $ = (id) => document.querySelector(id);
 
   let platforms = [], categories = [], subcategories = [], orders = [];
-  const editing = { platform: '', category: '', subcategory: '' };
-  const autoId = { category: true, service: true };
-  const listReady = { platforms: false, categories: false, subcategories: false, orders: false };
-  const listErrors = {};
-  let listTimeout;
-  const listLabels = {
-    platforms: 'platforms',
-    categories: 'categories',
-    subcategories: 'plans',
-    orders: 'boost orders'
-  };
+  let file = null;          // the bundled snapshot: data/gsubz-socials-services.json
+  let built = null;         // what publishing would write
+  let planFilter = '';
+  let planShown = 150;
+  const drafts = new Map();     // planId → { price, averageTime } while the admin types
+  const rowStatus = new Map();  // planId → { ok, text } after a save
+  const ready = { platforms: false, categories: false, subcategories: false, orders: false };
+  const errors = {};
+  let readyTimeout;
+
+  function setNotice(kind, title, text) {
+    $('#notice').innerHTML = `<div class="notice ${kind}"><span class="notice-icon">${kind === 'ok' ? '✓' : '!'}</span><div><b>${esc(title)}</b>${esc(text)}</div></div>`;
+  }
+
+  function receive(key, rows) {
+    if (key === 'platforms') platforms = rows;
+    if (key === 'categories') categories = rows;
+    if (key === 'subcategories') subcategories = rows;
+    if (key === 'orders') orders = rows;
+    ready[key] = true;
+    delete errors[key];
+    if (Object.values(ready).every(Boolean)) clearTimeout(readyTimeout);
+    render();
+  }
+
+  function fail(key, problem) {
+    errors[key] = problem?.message || 'Unknown Firestore error.';
+    render();
+  }
+
+  const categoryOf = (id) => categories.find(c => c.id === id);
+  const categoryLabel = (id) => categoryOf(id)?.name || id;
 
   function listCount(key, count, singular, plural) {
-    if (listErrors[key]) return 'Unavailable';
-    if (!listReady[key]) return 'Loading…';
-    return `${count} ${count === 1 ? singular : plural}`;
+    if (errors[key]) return 'Unavailable';
+    if (!ready[key]) return 'Loading…';
+    return `${count.toLocaleString('en-NG')} ${count === 1 ? singular : plural}`;
   }
 
-  function listPlaceholder(key, items, colspan, emptyMessage) {
-    if (listErrors[key]) return `<tr><td colspan="${colspan}">
-      <b>Could not load ${esc(listLabels[key])}.</b>
-      <div class="error-text" style="margin:6px 0">${esc(listErrors[key])}</div>
-      <small class="muted">Check your connection, admin access and published Firestore rules.</small>
-      <div style="margin-top:8px"><a class="btn btn-sm btn-ghost" href="admin-boost.html">Reload page</a></div>
-    </td></tr>`;
-    if (!listReady[key]) return `<tr><td colspan="${colspan}">Loading…</td></tr>`;
-    if (!items.length) return `<tr><td colspan="${colspan}">${emptyMessage}</td></tr>`;
-    return null;
+  // ---------- Catalogue ----------
+  function renderCatalogue() {
+    const activeCategories = categories.filter(c => c.active === true).length;
+    const activePlans = subcategories.filter(s => s.active === true).length;
+    $('#catalogue-count').textContent = built
+      ? `${built.categories.length} categories · ${built.plans.length} plans in the snapshot`
+      : 'Reading the snapshot…';
+    $('#catalogue-file').value = built
+      ? `${built.categories.length.toLocaleString('en-NG')} categories · ${built.plans.length.toLocaleString('en-NG')} plans`
+      : '—';
+    $('#catalogue-live').value = ready.subcategories && ready.categories
+      ? `${activeCategories.toLocaleString('en-NG')} categories · ${activePlans.toLocaleString('en-NG')} plans live`
+      : '—';
+    if (built && !$('#publish-summary').dataset.busy) {
+      const hidden = (categories.length + subcategories.length + platforms.length)
+        - (built.categories.length + built.plans.length + built.platforms.length);
+      $('#publish-summary').textContent = `Ready: ${built.categories.length.toLocaleString('en-NG')} categories and ${built.plans.length.toLocaleString('en-NG')} plans (4× GSUBZ prices, average times at least 1 hour).`
+        + (hidden > 0 ? ` ${hidden.toLocaleString('en-NG')} existing item(s) not in the snapshot will be hidden.` : '');
+    }
   }
 
-  function receiveList(key, setter, rows) {
-    setter(rows);
-    listReady[key] = true;
-    delete listErrors[key];
-    if (Object.values(listReady).every(Boolean)) clearTimeout(listTimeout);
-    render();
+  async function publishCatalogue() {
+    const button = $('#publish');
+    const summary = $('#publish-summary');
+    if (!built) return setNotice('warn', 'Snapshot not ready', 'Wait for data/gsubz-socials-services.json to load, then try again.');
+    const hidden = (categories.length + subcategories.length + platforms.length)
+      - (built.categories.length + built.plans.length + built.platforms.length);
+    const message = `Publish ${built.categories.length} categories and ${built.plans.length} plans at 4× the GSUBZ prices?\n\n`
+      + `Your price and average-time edits are kept. ${hidden > 0 ? `${hidden} item(s) not in the snapshot (the old manual catalogue) will be hidden.` : ''}`;
+    if (!confirm(message)) return;
+    button.disabled = true;
+    button.textContent = 'Publishing…';
+    summary.dataset.busy = '1';
+    summary.textContent = 'Writing the catalogue to the store…';
+    try {
+      const result = await publishBoostCatalog({
+        platforms: built.platforms, categories: built.categories, plans: built.plans,
+        existing: { platforms, categories, plans: subcategories },
+        hideOthers: true
+      });
+      setNotice('ok', 'Catalogue published', `${result.written.toLocaleString('en-NG')} items written${result.hidden ? `, ${result.hidden.toLocaleString('en-NG')} old items hidden` : ''}. Shoppers see the new catalogue now.`);
+    } catch (problem) {
+      setNotice('error', 'Could not publish the catalogue', problem.message || 'Check your connection and try again.');
+    } finally {
+      button.disabled = false;
+      button.textContent = 'Publish catalogue';
+      delete summary.dataset.busy;
+      renderCatalogue();
+    }
   }
 
-  function failList(key, problem) {
-    listErrors[key] = problem?.message || 'Unknown Firestore error.';
-    render();
+  // ---------- Plans table (price + average time are the only edits) ----------
+  function planRows() {
+    const text = planFilter.trim().toLowerCase();
+    return [...subcategories]
+      .map(plan => ({ plan, category: categoryLabel(plan.categoryId) }))
+      .filter(({ plan, category }) => !text
+        || String(plan.name || '').toLowerCase().includes(text)
+        || category.toLowerCase().includes(text))
+      .sort((a, b) => a.category.localeCompare(b.category) || String(a.plan.name).localeCompare(String(b.plan.name)));
   }
 
-  const platformOf = (id) => platforms.find(p => p.id === id);
-  const platformName = (id) => platformOf(id)?.name || id;
-  const categoryOf = (id) => categories.find(c => c.id === id);
-  // What shoppers pick first, e.g. "Twitter Views".
-  const categoryTitle = (cat) => boostCategoryTitle(platformOf(cat?.platformId), cat);
-  const categoryLabel = (id) => {
-    const c = categoryOf(id);
-    return c ? categoryTitle(c) : id;
-  };
-  const slugify = (value) => String(value || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
-
-  // Find the platform with this name (ignoring case) or create it, so the
-  // category form never asks the admin to manage platforms separately.
-  async function ensurePlatformId(platformNameRaw) {
-    const name = String(platformNameRaw || '').trim().slice(0, 80);
-    if (!name) throw new Error('Enter the platform, e.g. “Twitter”.');
-    const hit = platforms.find(p => p.name.toLowerCase() === name.toLowerCase());
-    if (hit) return hit.id;
-    let base = slugify(name) || 'platform';
-    if (base.length < 2) base = `platform-${base}`;
-    let id = base, n = 2;
-    while (platforms.some(p => p.id === id) && n < 100) id = `${base.slice(0, 36)}-${n++}`;
-    if (platforms.some(p => p.id === id)) id = `${base.slice(0, 30)}-${Date.now().toString(36)}`;
-    await saveBoostItem('platform', id, { name, description: '', active: true }, { isNew: true });
-    platforms.push({ id, name, description: '', active: true });
-    return id;
+  function renderPlans() {
+    if (errors.subcategories) {
+      $('#plan-count').textContent = 'Unavailable';
+      $('#plan-rows').innerHTML = `<tr><td colspan="8"><b>Could not load plans.</b><div class="error-text" style="margin:6px 0">${esc(errors.subcategories)}</div><small class="muted">Check your connection, admin access and published Firestore rules.</small></td></tr>`;
+      return;
+    }
+    const rows = ready.subcategories ? planRows() : [];
+    $('#plan-count').textContent = listCount('subcategories', subcategories.length, 'plan', 'plans')
+      + (rows.length !== subcategories.length ? ` · ${rows.length} match` : '');
+    if (!ready.subcategories) {
+      $('#plan-rows').innerHTML = '<tr><td colspan="8">Loading…</td></tr>';
+      return;
+    }
+    if (!rows.length) {
+      $('#plan-rows').innerHTML = `<tr><td colspan="8">${planFilter ? 'No plans match that search.' : 'No plans published yet — publish the catalogue above.'}</td></tr>`;
+      $('#plan-more').hidden = true;
+      return;
+    }
+    const visible = rows.slice(0, planShown);
+    $('#plan-rows').innerHTML = visible.map(({ plan, category }) => {
+      const draft = drafts.get(plan.id) || {};
+      const merged = { ...plan, ...draft };
+      const limits = boostServiceLimits(merged);
+      const status = rowStatus.get(plan.id);
+      return `<tr data-plan="${esc(plan.id)}">
+        <td><small>${esc(category)}</small></td>
+        <td><b>${esc(plan.name)}</b></td>
+        <td><small>${esc(plan.unit || '—')}</small></td>
+        <td><input class="input" style="max-width:110px" type="number" min="0.1" step="0.01" value="${esc(String(merged.price ?? ''))}" data-field="price"></td>
+        <td><input class="input" style="min-width:150px" maxlength="120" value="${esc(String(merged.averageTime ?? ''))}" data-field="averageTime"></td>
+        <td class="mono">${limits.min.toLocaleString('en-NG')}</td>
+        <td class="mono">${limits.max >= BOOST_MAX_QUANTITY ? '—' : limits.max.toLocaleString('en-NG')}</td>
+        <td><div class="table-actions"><button class="btn btn-sm btn-ghost" data-save="${esc(plan.id)}">Save</button>${status ? `<small style="color:${status.ok ? 'var(--ok, #1a7f37)' : 'var(--bad)'}">${esc(status.text)}</small>` : ''}</div></td>
+      </tr>`;
+    }).join('');
+    $('#plan-more').hidden = rows.length <= planShown;
+    $('#plan-more').textContent = `Show more (${Math.min(150, rows.length - planShown)} of ${rows.length - planShown} left)`;
   }
 
-  // ---------- Lists ----------
-  function render() {
-    $('#platform-count').textContent = listCount('platforms', platforms.length, 'platform', 'platforms');
-    const platformFallback = listPlaceholder('platforms', platforms, 5, 'No platforms yet. Save a category above and its platform appears here automatically.');
-    $('#platform-rows').innerHTML = platformFallback ?? [...platforms].sort((a, b) => a.name.localeCompare(b.name)).map(p => `
-      <tr>
-        <td class="mono"><b>${esc(p.id)}</b></td>
-        <td><b>${esc(p.name)}</b></td>
-        <td class="mono">${categories.filter(c => c.platformId === p.id).length}</td>
-        <td><span class="badge ${p.active ? 'ok' : ''}">${p.active ? 'Visible' : 'Hidden'}</span></td>
-        <td><div class="table-actions"><button class="btn btn-sm btn-ghost" data-pedit="${esc(p.id)}">Edit</button><button class="btn btn-sm btn-ghost" data-ptoggle="${esc(p.id)}">${p.active ? 'Hide' : 'Show'}</button></div></td>
-      </tr>`).join('');
+  async function savePlan(id, button) {
+    const plan = subcategories.find(s => s.id === id);
+    if (!plan) return;
+    const row = $(`#plan-rows tr[data-plan="${CSS.escape(id)}"]`);
+    const priceText = row?.querySelector('[data-field="price"]')?.value ?? '';
+    const averageText = row?.querySelector('[data-field="averageTime"]')?.value ?? '';
+    const price = parseBoostPrice(priceText);
+    if (price == null) {
+      rowStatus.set(id, { ok: false, text: 'Price must be ₦0.10 or more, at most 2 decimals.' });
+      renderPlans();
+      return;
+    }
+    const averageProblem = validateBoostAverageTime(averageText);
+    if (averageProblem) {
+      rowStatus.set(id, { ok: false, text: averageProblem });
+      renderPlans();
+      return;
+    }
+    button.disabled = true;
+    try {
+      // The only two fields the store keeps for a plan — nothing else is editable.
+      await saveBoostItem('subcategory', id, { price, averageTime: String(averageText).trim() });
+      drafts.delete(id);
+      rowStatus.set(id, { ok: true, text: 'Saved ✓' });
+    } catch (problem) {
+      rowStatus.set(id, { ok: false, text: problem.message || 'Could not save.' });
+    } finally {
+      renderPlans();
+    }
+  }
 
-    $('#category-count').textContent = listCount('categories', categories.length, 'category', 'categories');
-    const categoryFallback = listPlaceholder('categories', categories, 4, 'No categories yet. Add “Twitter / Views” below to offer Twitter Views.');
-    $('#category-rows').innerHTML = categoryFallback ?? [...categories].sort((a, b) => categoryTitle(a).localeCompare(categoryTitle(b))).map(c => `
-      <tr>
-        <td><b>${esc(categoryTitle(c))}</b><small class="mono">${esc(c.platformId)} / ${esc(c.id)}</small></td>
-        <td class="mono">${subcategories.filter(s => s.categoryId === c.id).length}</td>
-        <td><span class="badge ${c.active ? 'ok' : ''}">${c.active ? 'Visible' : 'Hidden'}</span></td>
-        <td><div class="table-actions"><button class="btn btn-sm btn-ghost" data-cedit="${esc(c.id)}">Edit</button><button class="btn btn-sm btn-ghost" data-ctoggle="${esc(c.id)}">${c.active ? 'Hide' : 'Show'}</button></div></td>
-      </tr>`).join('');
-
-    $('#service-count').textContent = listCount('subcategories', subcategories.length, 'plan', 'plans');
-    const serviceFallback = listPlaceholder('subcategories', subcategories, 8, 'No plans yet.');
-    $('#service-rows').innerHTML = serviceFallback ?? [...subcategories].sort((a, b) => a.name.localeCompare(b.name)).map(s => `
-      <tr>
-        <td class="mono"><b>${esc(s.id)}</b></td>
-        <td>${esc(categoryLabel(s.categoryId))}</td>
-        <td><b>${esc(s.name)}</b>${s.averageTime ? `<small>Avg: ${esc(s.averageTime)}</small>` : ''}</td>
-        <td><small>${esc(s.unit || '—')}</small></td>
-        <td class="mono"><b>${formatBoostPrice(s.price)}</b></td>
-        <td><small class="mono">${esc(formatBoostLimits(s))}</small></td>
-        <td><span class="badge ${s.active ? 'ok' : ''}">${s.active ? 'Visible' : 'Hidden'}</span></td>
-        <td><div class="table-actions"><button class="btn btn-sm btn-ghost" data-sedit="${esc(s.id)}">Edit</button><button class="btn btn-sm btn-ghost" data-stoggle="${esc(s.id)}">${s.active ? 'Hide' : 'Show'}</button></div></td>
-      </tr>`).join('');
-
+  // ---------- Orders (unchanged fulfilment) ----------
+  function renderOrders() {
     $('#order-count').textContent = listCount('orders', orders.length, 'order', 'orders');
-    const orderFallback = listPlaceholder('orders', orders, 7, 'No boost orders yet.');
-    $('#order-rows').innerHTML = orderFallback ?? orders.map(o => `
+    if (errors.orders) {
+      $('#order-rows').innerHTML = `<tr><td colspan="7"><b>Could not load boost orders.</b><div class="error-text" style="margin:6px 0">${esc(errors.orders)}</div></td></tr>`;
+      return;
+    }
+    if (!ready.orders) {
+      $('#order-rows').innerHTML = '<tr><td colspan="7">Loading…</td></tr>';
+      return;
+    }
+    $('#order-rows').innerHTML = orders.length ? orders.map(o => `
       <tr>
         <td><b class="mono">${esc(o.id.slice(-8).toUpperCase())}</b><small>${esc(formatDateTime(o.createdAt))}</small></td>
         <td><b>${esc(o.subcategoryName)}</b><small>${esc(categoryLabel(o.categoryId))}</small></td>
-        <td class="mono">${Number(o.quantity || 0)}${o.unit ? ` <small class="muted">${esc(o.unit)}</small>` : ''}</td>
+        <td class="mono">${Number(o.quantity || 0).toLocaleString('en-NG')}${o.unit ? ` <small class="muted">${esc(o.unit)}</small>` : ''}</td>
         <td><small class="mono">${esc(o.link || '')}</small></td>
         <td class="mono"><b>${naira(o.total)}</b></td>
         <td><span class="badge ${statusClass(o.status)}">${esc(STATUS_LABEL[o.status] || o.status)}</span></td>
         <td><div class="table-actions">${(NEXT_BOOST_ACTIONS[o.status] || []).map(([next, label]) => `<button class="btn btn-sm btn-ghost" data-boost="${esc(o.id)}" data-next="${next}">${esc(label)}</button>`).join('') || '<small class="muted">Closed</small>'}</div></td>
-      </tr>`).join('');
-
-    // Datalist of platform names for the category form, and the plan form's
-    // category dropdown (keeping whatever the admin had picked).
-    $('#platform-list').innerHTML = [...platforms].sort((a, b) => a.name.localeCompare(b.name)).map(p => `<option value="${esc(p.name)}">`).join('');
-    const keepServiceCat = $('#service-category').value;
-    const sortedCats = [...categories].sort((a, b) => categoryTitle(a).localeCompare(categoryTitle(b)));
-    $('#service-category').innerHTML = sortedCats.map(c => `<option value="${esc(c.id)}">${esc(categoryTitle(c))}</option>`).join('') || '<option value="">Add a category first</option>';
-    if ([...$('#service-category').options].some(o => o.value === keepServiceCat)) $('#service-category').value = keepServiceCat;
+      </tr>`).join('') : '<tr><td colspan="7">No boost orders yet.</td></tr>';
   }
 
-  // ---------- Forms ----------
-  function paintCategoryPreview() {
-    const seen = [$('#category-platform').value.trim(), $('#category-name').value.trim()].filter(Boolean).join(' ');
-    $('#category-preview').textContent = seen || '—';
+  function render() {
+    renderCatalogue();
+    renderPlans();
+    renderOrders();
   }
 
-  function suggestCategoryId() {
-    if (!autoId.category || editing.category) return;
-    const suggestion = slugify(`${$('#category-platform').value} ${$('#category-name').value}`);
-    if (suggestion.length >= 2) $('#category-id').value = suggestion;
-  }
-
-  function suggestServiceId() {
-    if (!autoId.service || editing.subcategory) return;
-    const suggestion = slugify($('#service-name').value);
-    if (suggestion.length >= 2) $('#service-id').value = suggestion;
-  }
-
-  function fill(kind, item) {
-    editing[kind] = item?.id || '';
-    if (kind === 'platform') {
-      $('#platform-form-title').textContent = item ? `Edit: ${item.name}` : 'Edit platform';
-      $('#platform-id').value = item?.id || '';
-      $('#platform-name').value = item?.name || '';
-      $('#platform-active').checked = item ? item.active === true : true;
-      $('#platform-error').textContent = '';
-      return;
-    }
-    const pfx = kind === 'subcategory' ? 'service' : kind;
-    $(`#${pfx}-form-title`).textContent = item ? `Edit: ${item.name}` : (kind === 'category' ? 'Add category' : 'Add plan');
-    $(`#${pfx}-id`).value = item?.id || '';
-    $(`#${pfx}-id`).disabled = Boolean(item);
-    $(`#${pfx}-name`).value = item?.name || '';
-    if (kind === 'category') {
-      autoId.category = !item;
-      $('#category-platform').value = item ? platformName(item.platformId) : '';
-      $('#category-description').value = item?.description || '';
-      paintCategoryPreview();
-    } else {
-      autoId.service = !item;
-      $('#service-description').value = item?.description || '';
-      $('#service-unit').value = item?.unit || '';
-      $('#service-price').value = item?.price ?? '';
-      $('#service-average').value = item?.averageTime || '';
-      const limits = boostServiceLimits(item || {});
-      $('#service-min').value = item ? limits.min : 1;
-      $('#service-max').value = item && Number(item.maxQuantity) > 0 ? limits.max : '';
-      if (item) $('#service-category').value = item.categoryId;
-    }
-    $(`#${pfx}-active`).checked = item ? item.active === true : true;
-    $(`#${pfx}-error`).textContent = '';
-  }
-
-  async function save(kind, event) {
-    event.preventDefault();
-    const pfx = kind === 'subcategory' ? 'service' : kind;
-    const error = $(`#${pfx}-error`);
-    error.textContent = '';
-    if (kind === 'platform' && !editing.platform) {
-      return error.textContent = 'Pick “Edit” on a platform above first — new platforms are created automatically when you save a category with a new platform name.';
-    }
-    const isNew = !editing[kind];
-    const id = $(`#${pfx}-id`).value.trim();
-    const name = $(`#${pfx}-name`).value.trim();
-    const active = $(`#${pfx}-active`).checked;
-
-    const list = kind === 'platform' ? platforms : kind === 'category' ? categories : subcategories;
-    if (!BOOST_ID_PATTERN.test(id)) return error.textContent = 'ID must be 2–40 letters, numbers, dashes or underscores.';
-    if (isNew && list.some(x => x.id === id)) return error.textContent = `ID “${id}” is already used. Pick another one.`;
-    if (!name) return error.textContent = 'Enter a name.';
-
-    const data = { name, active };
-    if (kind === 'platform') {
-      // Rename / visibility only — description stays as stored.
-    } else if (kind === 'category') {
-      if (!listReady.platforms) return error.textContent = 'Still loading the catalogue — try again in a moment.';
-      let platformId;
-      try {
-        platformId = await ensurePlatformId($('#category-platform').value);
-      } catch (problem) {
-        return error.textContent = problem.message || 'Could not set the platform.';
-      }
-      data.platformId = platformId;
-      data.description = $('#category-description').value.trim().slice(0, 500);
-    } else {
-      if (!listReady.categories) return error.textContent = 'Still loading the catalogue — try again in a moment.';
-      data.categoryId = $('#service-category').value;
-      if (!data.categoryId) return error.textContent = 'Add a category first.';
-      data.unit = $('#service-unit').value.trim().slice(0, 60);
-      if (!data.unit) return error.textContent = 'Enter the unit, e.g. “followers”.';
-      const price = parseBoostPrice($('#service-price').value);
-      if (price === null) {
-        return error.textContent = `Price per unit must be at least ${formatBoostPrice(BOOST_MIN_UNIT_PRICE)} (e.g. 17 or 0.1), with up to 2 decimals.`;
-      }
-      data.price = price;
-      const minRaw = $('#service-min').value.trim();
-      const min = minRaw === '' ? 1 : Math.round(Number(minRaw));
-      if (!Number.isSafeInteger(min) || min < 1) return error.textContent = 'Minimum quantity must be 1 or more.';
-      data.minQuantity = min;
-      const maxRaw = $('#service-max').value.trim();
-      if (maxRaw === '') {
-        data.maxQuantity = 0;
-      } else {
-        const max = Math.round(Number(maxRaw));
-        if (!Number.isSafeInteger(max) || max < min) return error.textContent = 'Maximum must be blank (no maximum) or at least the minimum.';
-        data.maxQuantity = max;
-      }
-      data.averageTime = $('#service-average').value.trim().slice(0, 120);
-      data.description = $('#service-description').value.trim().slice(0, 500);
-    }
-
-    const saveButton = $(`#${pfx}-form`).querySelector('button[type="submit"]');
-    saveButton.disabled = true;
-    try {
-      await saveBoostItem(kind, id, data, { isNew });
-      fill(kind, null);
-    } catch (problem) {
-      error.textContent = problem.message || 'Could not save.';
-    } finally {
-      saveButton.disabled = false;
-    }
-  }
-
-  $('#platform-form').addEventListener('submit', (e) => save('platform', e));
-  $('#category-form').addEventListener('submit', (e) => save('category', e));
-  $('#service-form').addEventListener('submit', (e) => save('subcategory', e));
-  $('#platform-clear').addEventListener('click', () => fill('platform', null));
-  $('#category-clear').addEventListener('click', () => fill('category', null));
-  $('#service-clear').addEventListener('click', () => fill('subcategory', null));
-
-  // Live "shoppers will see" preview plus automatic ID suggestions (until the
-  // admin types an ID by hand).
-  $('#category-platform').addEventListener('input', () => { paintCategoryPreview(); suggestCategoryId(); });
-  $('#category-name').addEventListener('input', () => { paintCategoryPreview(); suggestCategoryId(); });
-  $('#category-id').addEventListener('input', () => { autoId.category = false; });
-  $('#service-name').addEventListener('input', suggestServiceId);
-  $('#service-id').addEventListener('input', () => { autoId.service = false; });
-
-  // ---------- List actions ----------
-  $('#platform-rows').addEventListener('click', async (event) => {
-    const edit = event.target.closest('[data-pedit]');
-    const toggle = event.target.closest('[data-ptoggle]');
-    if (edit) return fill('platform', platforms.find(p => p.id === edit.dataset.pedit));
-    if (toggle) {
-      const p = platforms.find(x => x.id === toggle.dataset.ptoggle);
-      try { await saveBoostItem('platform', p.id, { active: !p.active }); }
-      catch (problem) { alert(problem.message); }
+  // ---------- Events ----------
+  $('#publish').addEventListener('click', publishCatalogue);
+  $('#plan-filter').addEventListener('input', (event) => {
+    planFilter = event.target.value;
+    planShown = 150;
+    renderPlans();
+  });
+  $('#plan-more').addEventListener('click', () => {
+    planShown += 150;
+    renderPlans();
+  });
+  $('#plan-rows').addEventListener('input', (event) => {
+    const row = event.target.closest('tr[data-plan]');
+    const field = event.target.dataset.field;
+    if (!row || !field) return;
+    const id = row.dataset.plan;
+    const plan = subcategories.find(s => s.id === id);
+    if (!plan) return;
+    const draft = drafts.get(id) || {};
+    draft[field] = event.target.value;
+    drafts.set(id, draft);
+    // The minimum reacts live: a sub-₦1 price shows the 50-unit floor straight away.
+    if (field === 'price') {
+      const limits = boostServiceLimits({ ...plan, ...draft });
+      const minCell = row.children[5];
+      if (minCell) minCell.textContent = limits.min.toLocaleString('en-NG');
     }
   });
-  $('#category-rows').addEventListener('click', async (event) => {
-    const edit = event.target.closest('[data-cedit]');
-    const toggle = event.target.closest('[data-ctoggle]');
-    if (edit) return fill('category', categories.find(c => c.id === edit.dataset.cedit));
-    if (toggle) {
-      const c = categories.find(x => x.id === toggle.dataset.ctoggle);
-      try { await saveBoostItem('category', c.id, { active: !c.active }); }
-      catch (problem) { alert(problem.message); }
-    }
-  });
-  $('#service-rows').addEventListener('click', async (event) => {
-    const edit = event.target.closest('[data-sedit]');
-    const toggle = event.target.closest('[data-stoggle]');
-    if (edit) return fill('subcategory', subcategories.find(s => s.id === edit.dataset.sedit));
-    if (toggle) {
-      const s = subcategories.find(x => x.id === toggle.dataset.stoggle);
-      try { await saveBoostItem('subcategory', s.id, { active: !s.active }); }
-      catch (problem) { alert(problem.message); }
-    }
+  $('#plan-rows').addEventListener('click', (event) => {
+    const button = event.target.closest('[data-save]');
+    if (button) savePlan(button.dataset.save, button);
   });
   $('#order-rows').addEventListener('click', async (event) => {
     const button = event.target.closest('[data-boost]');
     if (!button) return;
     button.disabled = true;
-    try { await setBoostOrderStatus(button.dataset.boost, button.dataset.next); }
-    catch (problem) { alert(problem.message); button.disabled = false; }
+    try {
+      await setBoostOrderStatus(button.dataset.boost, button.dataset.next);
+    } catch (problem) {
+      setNotice('error', 'Could not update the order', problem.message || 'Check your connection and try again.');
+      button.disabled = false;
+    }
   });
 
   if (await requireAdmin('admin-boost.html')) {
-    listTimeout = setTimeout(() => {
-      for (const [key, ready] of Object.entries(listReady)) {
-        if (!ready && !listErrors[key]) listErrors[key] = 'Timed out while waiting for Firestore.';
+    readyTimeout = setTimeout(() => {
+      for (const [key, ok] of Object.entries(ready)) {
+        if (!ok && !errors[key]) errors[key] = 'Timed out while waiting for Firestore.';
       }
       render();
     }, 15000);
 
-    watchBoostPlatforms(
-      (rows) => receiveList('platforms', (value) => { platforms = value; }, rows),
-      (problem) => failList('platforms', problem),
-      { includeInactive: true }
-    );
-    watchBoostCategories(
-      (rows) => receiveList('categories', (value) => { categories = value; }, rows),
-      (problem) => failList('categories', problem),
-      { includeInactive: true }
-    );
-    watchBoostSubcategories(
-      (rows) => receiveList('subcategories', (value) => { subcategories = value; }, rows),
-      (problem) => failList('subcategories', problem),
-      { includeInactive: true }
-    );
-    watchAllBoostOrders(
-      (rows) => receiveList('orders', (value) => { orders = value; }, rows),
-      (problem) => failList('orders', problem)
-    );
+    watchBoostPlatforms((rows) => receive('platforms', rows), (problem) => fail('platforms', problem), { includeInactive: true });
+    watchBoostCategories((rows) => receive('categories', rows), (problem) => fail('categories', problem), { includeInactive: true });
+    watchBoostSubcategories((rows) => receive('subcategories', rows), (problem) => fail('subcategories', problem), { includeInactive: true });
+    watchAllBoostOrders((rows) => receive('orders', rows), (problem) => fail('orders', problem));
+
+    try {
+      file = await (await fetch('data/gsubz-socials-services.json')).json();
+      built = buildBoostCatalogFromGsubz(file);
+    } catch (problem) {
+      $('#publish-summary').innerHTML = `<b style="color:var(--bad)">Could not read data/gsubz-socials-services.json</b> — ${esc(problem.message || 'check the file is deployed')}.`;
+    }
+    render();
   }
 </script>
 </body>

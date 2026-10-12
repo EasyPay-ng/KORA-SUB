@@ -25,7 +25,7 @@
 </main>
 <div id="site-footer"></div>
 <script type="module">
-  import { mountHeader, mountFooter, watchBoostPlatforms, watchBoostCategories, watchBoostSubcategories, placeBoostOrder, newRequestId, auth, onAuthStateChanged, watchProfile, naira, esc, readParam, showToast, boostCategoryTitle, formatBoostLimits, boostServiceLimits, boostOrderTotal, boostPriceKobo, formatBoostPrice, BOOST_MAX_QUANTITY } from './store.js';
+  import { mountHeader, mountFooter, watchBoostPlatforms, watchBoostCategories, watchBoostSubcategories, placeBoostOrder, newRequestId, auth, onAuthStateChanged, watchProfile, naira, esc, readParam, showToast, formatBoostLimits, boostServiceLimits, boostOrderTotal, boostPriceKobo, formatBoostPrice, BOOST_MAX_QUANTITY } from './store.js';
   mountHeader('boost.html');
   mountFooter();
 
@@ -44,7 +44,9 @@
 
   const platformOf = (id) => platforms.find(p => p.id === id);
   const visibleCategories = () => categories.filter(c => c.active === true && platformOf(c.platformId)?.active === true);
-  const categoryTitle = (cat) => boostCategoryTitle(platformOf(cat?.platformId), cat);
+  // Imported category names are self-describing ("Twitter Views", "Instagram Likes
+  // [Country Targeted]") — shown as-is, grouped by platform family for browsing.
+  const categoryTitle = (cat) => String(cat?.name || '').trim() || 'Category';
   const servicesOf = (catId) => subcategories.filter(s => s.categoryId === catId && s.active === true);
   const currentService = () => subcategories.find(s => s.id === serviceId && s.active === true) || null;
   const serviceLabel = (s) => `${s.name} - ${formatBoostPrice(s.price)}${s.unit ? ` per ${s.unit}` : ''}`;
@@ -86,7 +88,9 @@
 
   // ---------- Form ----------
   function buildOrSync() {
-    const cats = [...visibleCategories()].sort((a, b) => categoryTitle(a).localeCompare(categoryTitle(b)));
+    const cats = [...visibleCategories()].sort((a, b) =>
+      (platformOf(a.platformId)?.name || '').localeCompare(platformOf(b.platformId)?.name || '')
+      || categoryTitle(a).localeCompare(categoryTitle(b)));
     if (!cats.length) {
       formBuilt = false;
       host.innerHTML = '<div class="empty"><b>No boost services yet</b>Boosting services are coming soon. Check back shortly.</div>';

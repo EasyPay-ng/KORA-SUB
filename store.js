@@ -1298,31 +1298,33 @@ export const NEXT_ORDER_ACTIONS = {
 // boost orders.
 export const BOOST_ID_PATTERN = /^[A-Za-z0-9_-]{2,40}$/;
 // Hard ceiling for any boost quantity. A plan can narrow it with minQuantity /
-// maxQuantity (maxQuantity 0 or missing means "no maximum").
-export const BOOST_MAX_QUANTITY = 100000;
+// maxQuantity (maxQuantity 0 or missing means "no maximum"). GSUBZ's own maximums
+// go far higher — its "unlimited" marker is 2,147,483,647, which the import stores
+// as 0 (= no maximum) instead of a number the money maths cannot hold.
+export const BOOST_MAX_QUANTITY = 10000000;
 // Smallest price per unit the admin can set: ₦0.10 (cheap units such as views).
 // The wallet only ever holds whole naira, so all boost money is worked out in
 // kobo (exact integers) and an order total is rounded to the nearest naira.
 export const BOOST_MIN_UNIT_PRICE = 0.1;
+// A unit price under ₦1 is only sold in packs of 50 or more, so a whole-naira
+// order total is always worth processing.
+export const BOOST_CHEAP_MIN_QUANTITY = 50;
+// No average time promised on the site is shorter than an hour, whatever the
+// source catalogue claims.
+export const BOOST_MIN_AVERAGE_TIME_MINUTES = 60;
 
-// Effective order limits for a plan, honouring the catalogue fields when set.
+// Effective order limits for a plan. The minimum follows the catalogue (imported
+// from GSUBZ), with one exception: a unit price under ₦1 needs at least 50 units.
+// The check reads the plan's CURRENT price, so an admin price edit below ₦1
+// raises the minimum automatically, and lifting the price puts it back down.
 export function boostServiceLimits(service = {}) {
   const minRaw = Number(service.minQuantity);
-  const min = Number.isInteger(minRaw) && minRaw >= 1 ? Math.min(minRaw, BOOST_MAX_QUANTITY) : 1;
+  let min = Number.isInteger(minRaw) && minRaw >= 1 ? Math.min(minRaw, BOOST_MAX_QUANTITY) : 1;
+  const kobo = boostPriceKobo(service.price);
+  if (kobo > 0 && kobo < 100) min = Math.max(min, BOOST_CHEAP_MIN_QUANTITY);
   const maxRaw = Number(service.maxQuantity);
   const max = Number.isInteger(maxRaw) && maxRaw >= min ? Math.min(maxRaw, BOOST_MAX_QUANTITY) : BOOST_MAX_QUANTITY;
   return { min, max };
-}
-
-// "Twitter" + "Views" → "Twitter Views" (without doubling when the category name
-// already starts with the platform name). Used anywhere a category is picked.
-export function boostCategoryTitle(platform, category) {
-  const platformName = String(platform?.name || '').trim();
-  const categoryName = String(category?.name || '').trim() || 'Category';
-  if (!platformName) return categoryName;
-  return categoryName.toLowerCase().startsWith(platformName.toLowerCase())
-    ? categoryName
-    : `${platformName} ${categoryName}`;
 }
 
 // "Min: 100 | Max: 2,000,000" (the max is hidden when the plan sets none).
@@ -1360,6 +1362,7 @@ export function boostOrderTotal(price, quantity) {
   const units = Number(quantity);
   if (!kobo || kobo < boostPriceKobo(BOOST_MIN_UNIT_PRICE)) return 0;
   if (!Number.isSafeInteger(units) || units < 1 || units > BOOST_MAX_QUANTITY) return 0;
+  if (!Number.isSafeInteger(kobo * units)) return 0; // too large to price exactly
   const total = Math.round((kobo * units) / 100);
   return total < 1 ? 1 : total;
 }
@@ -1371,6 +1374,229 @@ export function formatBoostPrice(price) {
   const whole = Math.floor(kobo / 100);
   const rest = kobo % 100;
   return rest ? `₦${whole.toLocaleString('en-NG')}.${String(rest).padStart(2, '0')}` : naira(whole);
+}
+
+// ---------- GSUBZ catalogue import (Admin → Boosting) ----------
+// The boosting catalogue is a snapshot of GSUBZ's "Socials Media Market"
+// (data/gsubz-socials-services.json): every category, and — per category — only
+// its most expensive service(s), priced at 4× GSUBZ. The admin edits just the
+// price and the average time afterwards; everything else is synced.
+
+// Parses "3 hours 42 minutes", "45 minutes", "1h 30m" … into total minutes, or
+// null when the text does not describe a duration.
+export function boostAverageMinutes(text) {
+  const t = String(text || "").toLowerCase();
+  const hours = t.match(/(\d+)\s*h(?:ou)?r?s?/);
+  const minutes = t.match(/(\d+)\s*m(?:in)?(?:ute)?s?/);
+  if (!hours && !minutes) return null;
+  const total = (hours ? Number(hours[1]) * 60 : 0) + (minutes ? Number(minutes[1]) : 0);
+  return Number.isFinite(total) ? total : null;
+}
+
+// Minutes → "1 hour", "2 hours 20 minutes", "45 minutes".
+export function formatBoostAverageMinutes(minutes) {
+  const total = Math.max(0, Math.round(Number(minutes) || 0));
+  const hours = Math.floor(total / 60);
+  const rest = total % 60;
+  if (hours && rest) return `${hours} hour${hours === 1 ? "" : "s"} ${rest} minute${rest === 1 ? "" : "s"}`;
+  if (hours) return `${hours} hour${hours === 1 ? "" : "s"}`;
+  return `${rest} minute${rest === 1 ? "" : "s"}`;
+}
+
+// The site never promises faster than an hour: source times below the floor (or
+// missing entirely) are published as "1 hour".
+export function normalizeBoostAverageTime(text) {
+  const minutes = boostAverageMinutes(String(text || "").replace(/^average time:\s*/i, ""));
+  return formatBoostAverageMinutes(Math.max(minutes ?? 0, BOOST_MIN_AVERAGE_TIME_MINUTES));
+}
+
+// Admin-edited average times keep the admin's own wording — but when the text
+// parses as a duration it must not promise less than the site minimum (1 hour).
+// Returns an error message, or null when the value is fine.
+export function validateBoostAverageTime(text) {
+  const raw = String(text ?? "").trim();
+  if (!raw) return "Enter an average time, e.g. “1 hour”.";
+  if (raw.length > 120) return "Average time must be 120 characters or fewer.";
+  const minutes = boostAverageMinutes(raw);
+  if (minutes != null && minutes < BOOST_MIN_AVERAGE_TIME_MINUTES) {
+    return "The minimum average time on KORASTORE is 1 hour.";
+  }
+  return null;
+}
+
+// "Instagram Video Views …" → "views": the service noun in the plan/category name.
+export function boostUnitFromName(name) {
+  const text = String(name || "");
+  const rules = [
+    [/\bviews?\b/i, "views"],
+    [/\bfollowers?\b/i, "followers"],
+    [/\blikes?\b/i, "likes"],
+    [/\bsubscribers?\b/i, "subscribers"],
+    [/\bmembers?\b/i, "members"],
+    [/\bplays?\b/i, "plays"],
+    [/\bcomments?\b/i, "comments"],
+    [/\bshares?\b/i, "shares"],
+    [/\bretweets?\b/i, "retweets"],
+    [/\breactions?\b/i, "reactions"],
+    [/\bclicks?\b/i, "clicks"],
+    [/\bvotes?\b/i, "votes"],
+    [/\bsaves?\b/i, "saves"],
+    [/\bimpressions?\b/i, "impressions"],
+    [/\bstreams?\b/i, "streams"],
+    [/\blisteners?\b/i, "listeners"],
+    [/\bbookmarks?\b/i, "bookmarks"],
+    [/\bmentions?\b/i, "mentions"],
+    [/\bvisitors?\b/i, "visitors"],
+    [/\bvisits?\b/i, "visits"],
+    [/\btraffic\b/i, "visits"],
+    [/\bfans?\b/i, "fans"],
+    [/\bfriends?\b/i, "friends"],
+    [/\bjoins?\b/i, "joins"],
+    [/\bstarts?\b/i, "starts"],
+    // Watch-time products are priced in hours — but only when no concrete noun
+    // above already named the unit ("Facebook Watch Time Views" is a views plan,
+    // while "YouTube Watch Hours" sells hours).
+    [/\bwatch\s*(?:time|hours?)\b/i, "hours"]
+  ];
+  for (const [pattern, unit] of rules) if (pattern.test(text)) return unit;
+  return "unit";
+}
+
+// The platform family behind a GSUBZ category name ("Twitter Brazil 🇧🇷 Services"
+// → Twitter). Platforms are plumbing only — category names are self-describing.
+const BOOST_PLATFORM_FAMILIES = [
+  ["Instagram", /instagram/i],
+  ["Facebook", /facebook/i],
+  ["Twitter", /twitter/i],
+  ["Telegram", /telegram/i],
+  ["TikTok", /tiktok/i],
+  ["YouTube", /youtube/i],
+  ["Spotify", /spotify/i],
+  ["WhatsApp", /whats\s?app/i],
+  ["Twitch", /twitch/i],
+  ["Kick", /\bkick\b/i],
+  ["LinkedIn", /linkedin/i],
+  ["Threads", /\bthreads\b/i],
+  ["Discord", /discord/i],
+  ["Reddit", /reddit/i],
+  ["Pinterest", /pinterest/i],
+  ["Snapchat", /snapchat/i],
+  ["Bluesky", /bluesky/i],
+  ["Quora", /quora/i],
+  ["Medium", /\bmedium\b/i],
+  ["Audiomack", /audiomack/i],
+  ["Boomplay", /boomplay/i],
+  ["Apple Music", /apple\s?music/i],
+  ["Deezer", /deezer/i],
+  ["Mixcloud", /mixcloud/i],
+  ["Genius", /\bgenius\b/i],
+  ["Website & SEO", /web\s?site|\bseo\b|google|traffic|backlink|linktree|ranking/i],
+  ["E-Commerce", /e-?commerce|amazon|ebay|shopee|play\s?store|app\s?store/i]
+];
+
+export function boostPlatformFromName(name) {
+  const text = String(name || "");
+  for (const [family, pattern] of BOOST_PLATFORM_FAMILIES) {
+    if (pattern.test(text)) return family;
+  }
+  return "Other";
+}
+
+// Truncates to a byte budget (the Firestore rules measure strings in bytes, and
+// GSUBZ names carry emoji that take up to 4 bytes each). Never returns "".
+function truncateUtf8(text, maxBytes, fallback = "—") {
+  const source = String(text || "");
+  let out = "";
+  let bytes = 0;
+  for (const ch of source) {
+    const size = new TextEncoder().encode(ch).length;
+    if (bytes + size > maxBytes) break;
+    out += ch;
+    bytes += size;
+  }
+  out = out.trim();
+  return out || fallback;
+}
+
+const boostSlug = (text, max) => String(text || "").toLowerCase()
+  .normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, max);
+
+// Small deterministic hash (djb2 → 6 base36 chars) so category ids are stable
+// across re-publishes and cannot collide after name truncation.
+function boostHash(text) {
+  let hash = 5381;
+  for (const ch of String(text)) hash = ((hash * 33) ^ ch.codePointAt(0)) >>> 0;
+  return hash.toString(36).padStart(6, "0").slice(0, 6);
+}
+
+// GSUBZ marks "no maximum" as 2,147,483,647; the site stores 0 = no maximum.
+function boostSourceMax(value) {
+  const max = Math.floor(Number(value) || 0);
+  return (max < 1 || max >= BOOST_MAX_QUANTITY) ? 0 : max;
+}
+
+// Turns the GSUBZ snapshot into the three collections the store sells from.
+// Pure: ids are deterministic (a re-publish upserts the same documents), each
+// category keeps only its most expensive service(s) — ties share the top price —
+// and the site price is 4× the GSUBZ per-unit price. Free-service categories are
+// not sold here.
+export function buildBoostCatalogFromGsubz(raw) {
+  const services = Array.isArray(raw?.services) ? raw.services : [];
+  const byCategory = new Map();
+  for (const service of services) {
+    const categoryName = String(service?.category || "").trim();
+    if (!categoryName || /free\s*services/i.test(categoryName)) continue;
+    if (!byCategory.has(categoryName)) byCategory.set(categoryName, []);
+    byCategory.get(categoryName).push(service);
+  }
+  const platforms = new Map();
+  const categories = [];
+  const plans = [];
+  for (const [categoryName, rows] of [...byCategory.entries()].sort(([a], [b]) => a.localeCompare(b))) {
+    const topPrice = Math.max(...rows.map((row) => Number(row.price) || 0));
+    const winners = rows
+      .filter((row) => Number(row.price) === topPrice && boostPriceKobo(row.price) > 0)
+      .sort((a, b) => Number(a.id) - Number(b.id));
+    if (!winners.length) continue;
+    const family = boostPlatformFromName(categoryName);
+    const platformId = boostSlug(family, 40) || "other";
+    if (!platforms.has(platformId)) {
+      platforms.set(platformId, { id: platformId, name: family, description: "", active: true });
+    }
+    const categoryId = `gcat-${boostSlug(categoryName, 26)}-${boostHash(categoryName)}`;
+    categories.push({
+      id: categoryId,
+      platformId,
+      name: truncateUtf8(categoryName, 80, "Category"),
+      description: "",
+      active: true
+    });
+    for (const row of winners) {
+      const sourcePrice = Number(row.price) || 0;
+      const detail = String(row.description || "").split("\n")
+        .filter((line) => line.trim() && !/^average time:/i.test(line.trim()))
+        .join(" ").trim();
+      const averageTime = normalizeBoostAverageTime(row.description);
+      const price = Math.round(sourcePrice * 4 * 100) / 100;
+      plans.push({
+        id: `gsvc-${row.id}`,
+        categoryId,
+        name: truncateUtf8(String(row.name || "Service"), 120, "Service"),
+        description: truncateUtf8(detail, 500, ""),
+        unit: boostUnitFromName(`${row.name || ""} ${categoryName}`),
+        price,
+        // The defaults are remembered so a re-publish only overwrites a price or
+        // average time the admin has NOT edited.
+        defaultPrice: price,
+        minQuantity: Math.max(1, Math.floor(Number(row.min) || 1), sourcePrice < 1 ? BOOST_CHEAP_MIN_QUANTITY : 0),
+        maxQuantity: boostSourceMax(row.max),
+        averageTime,
+        defaultAverageTime: averageTime,
+        active: true
+      });
+    }
+  }
+  return { platforms: [...platforms.values()], categories, plans };
 }
 const BOOST_COLLECTIONS = {
   platform: "boostPlatforms",
@@ -1404,6 +1630,52 @@ export function saveBoostItem(kind, id, data, { isNew = false } = {}) {
   const payload = { ...data, updatedAt: serverTimestamp() };
   if (isNew) return setDoc(doc(db, collectionName, id), { ...payload, createdAt: serverTimestamp() });
   return updateDoc(doc(db, collectionName, id), payload);
+}
+
+// Publishes an imported GSUBZ catalogue (buildBoostCatalogFromGsubz output):
+// upserts platforms, categories and plans in batches, then hides anything else
+// that is still live (the old manual catalogue). Price and averageTime belong to
+// the store, not to GSUBZ — a re-publish keeps the admin's values for those two
+// fields (tracked against the defaultPrice / defaultAverageTime it first wrote)
+// and refreshes everything else.
+export async function publishBoostCatalog({ platforms = [], categories = [], plans = [], existing = {}, hideOthers = true } = {}) {
+  const before = new Map((existing.plans || []).map((row) => [row.id, row]));
+  const upserts = [
+    ...platforms.map((row) => ({ id: row.id, collection: "boostPlatforms", data: row })),
+    ...categories.map((row) => ({ id: row.id, collection: "boostCategories", data: row })),
+    ...plans.map((plan) => {
+      const data = { ...plan };
+      const old = before.get(plan.id);
+      if (old) {
+        if (old.price != null && old.price !== old.defaultPrice) data.price = old.price;
+        if (old.averageTime && old.averageTime !== old.defaultAverageTime) data.averageTime = old.averageTime;
+      }
+      return { id: plan.id, collection: "boostSubcategories", data };
+    })
+  ];
+  const keep = {
+    boostPlatforms: new Set(platforms.map((row) => row.id)),
+    boostCategories: new Set(categories.map((row) => row.id)),
+    boostSubcategories: new Set(plans.map((row) => row.id))
+  };
+  const collectionFor = { platforms: "boostPlatforms", categories: "boostCategories", plans: "boostSubcategories" };
+  const hides = [];
+  if (hideOthers) {
+    for (const [key, rows] of Object.entries({ platforms: [], categories: [], plans: [], ...existing })) {
+      const collection = collectionFor[key];
+      if (!collection) continue;
+      for (const row of rows) if (!keep[collection].has(row.id)) hides.push({ id: row.id, collection, data: { active: false } });
+    }
+  }
+  const writes = [...upserts, ...hides];
+  for (let start = 0; start < writes.length; start += 400) {
+    const batch = writeBatch(db);
+    for (const write of writes.slice(start, start + 400)) {
+      batch.set(doc(db, write.collection, write.id), { ...write.data, updatedAt: serverTimestamp() }, { merge: true });
+    }
+    await batch.commit();
+  }
+  return { written: upserts.length, hidden: hides.length };
 }
 
 // Buys one boosting service: the catalogue's price × quantity, paid from the wallet.
