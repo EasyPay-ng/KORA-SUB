@@ -2,14 +2,14 @@
   {
     "category": "New! Telegram Reactions | Auto",
     "services": 105,
-    "min_price": 102.20,
-    "max_price": 102.20
+    "min_price": 102.2,
+    "max_price": 102.2
   },
   {
     "category": "🌐 Website Traffic | Mixed Referrer",
     "services": 95,
     "min_price": 1163.38,
-    "max_price": 2221.00
+    "max_price": 2221.0
   },
   {
     "category": "Spotify → Country Targeted Track Plays",
@@ -33,7 +33,7 @@
     "category": "Spotify Album Plays [Country Targeted]",
     "services": 77,
     "min_price": 1142.88,
-    "max_price": 2308.50
+    "max_price": 2308.5
   },
   {
     "category": "Telegram Reaction Emoji + Post Views",
@@ -56,7 +56,7 @@
   {
     "category": "Twitch → Live Stream Viewers",
     "services": 53,
-    "min_price": 177.60,
+    "min_price": 177.6,
     "max_price": 362813.12
   },
   {
@@ -86,7 +86,7 @@
   {
     "category": "Facebook Post Reactions",
     "services": 39,
-    "min_price": 227.00,
+    "min_price": 227.0,
     "max_price": 20252.38
   },
   {
@@ -152,7 +152,7 @@
   {
     "category": "Spotify Country Targeted Power Plays",
     "services": 33,
-    "min_price": 2308.50,
+    "min_price": 2308.5,
     "max_price": 2408.15
   },
   {
@@ -177,7 +177,7 @@
     "category": "Telegram Reactions | Auto",
     "services": 32,
     "min_price": 405.75,
-    "max_price": 406.10
+    "max_price": 406.1
   },
   {
     "category": "Spotify → Country Targeted Plays (High Rate)",
@@ -267,7 +267,7 @@
     "category": "Telegram Views [Country Targeted]",
     "services": 22,
     "min_price": 76.94,
-    "max_price": 1536.40
+    "max_price": 1536.4
   },
   {
     "category": "Telegram → Bot Starts",
@@ -302,14 +302,14 @@
   {
     "category": "Telegram Post Views",
     "services": 21,
-    "min_price": 3.60,
+    "min_price": 3.6,
     "max_price": 1961.62
   },
   {
     "category": "Telegram → Auto Reaction Emoji + Post Views",
     "services": 21,
     "min_price": 23.77,
-    "max_price": 775.60
+    "max_price": 775.6
   },
   {
     "category": "Facebook → Page Likes + Followers",
@@ -333,7 +333,7 @@
     "category": "YouTube Live Stream Viewers",
     "services": 20,
     "min_price": 119.55,
-    "max_price": 20482.80
+    "max_price": 20482.8
   },
   {
     "category": "YouTube Livestream Views | Concurrent",
@@ -369,7 +369,7 @@
     "category": "Telegram Premium Star Group/Channel Members [Country Targeted]",
     "services": 19,
     "min_price": 9572.24,
-    "max_price": 30724.10
+    "max_price": 30724.1
   },
   {
     "category": "TikTok Live Stream Views",
@@ -410,8 +410,8 @@
   {
     "category": "TikTok Share - Save",
     "services": 18,
-    "min_price": 59.20,
-    "max_price": 229.90
+    "min_price": 59.2,
+    "max_price": 229.9
   },
   {
     "category": "Facebook Live Stream Views",
@@ -435,7 +435,7 @@
     "category": "YouTube Subscribers [Guaranteed]",
     "services": 17,
     "min_price": 8508.75,
-    "max_price": 49633.90
+    "max_price": 49633.9
   },
   {
     "category": "Facebook → Comments",
@@ -458,7 +458,7 @@
   {
     "category": "Github Services",
     "services": 15,
-    "min_price": 31907.10,
+    "min_price": 31907.1,
     "max_price": 261586.65
   },
   {
@@ -471,7 +471,7 @@
     "category": "Telegram Group / Channel Members [Guaranteeed]",
     "services": 15,
     "min_price": 563.43,
-    "max_price": 3175.00
+    "max_price": 3175.0
   },
   {
     "category": "Twitter [X] Space Listener",
@@ -506,7 +506,7 @@
   {
     "category": "Tiktok Likes [Country Targeted]",
     "services": 14,
-    "min_price": 640.70,
+    "min_price": 640.7,
     "max_price": 3072.41
   },
   {
@@ -549,7 +549,7 @@
     "category": "Facebook → Views",
     "services": 13,
     "min_price": 44.86,
-    "max_price": 1089.40
+    "max_price": 1089.4
   },
   {
     "category": "LinkedIn",
@@ -560,7 +560,7 @@
   {
     "category": "Telegram → Premium Global Services",
     "services": 13,
-    "min_price": 1352.70,
+    "min_price": 1352.7,
     "max_price": 81863.37
   },
   {
@@ -626,14 +626,14 @@
   {
     "category": "Telegram Views",
     "services": 12,
-    "min_price": 2.90,
+    "min_price": 2.9,
     "max_price": 1510.95
   },
   {
     "category": "Telegram → Post Views on Old Posts",
     "services": 12,
     "min_price": 69.97,
-    "max_price": 23635.20
+    "max_price": 23635.2
   },
   {
     "category": "Threads Repost",
@@ -657,7 +657,7 @@
     "category": "YouTube → Watch Time",
     "services": 12,
     "min_price": 23537.72,
-    "max_price": 61646.40
+    "max_price": 61646.4
   },
   {
     "category": "Bing Traffic visitors With Keywords Services",
@@ -752,7 +752,7 @@
   {
     "category": "Twitter Statistics | Poll | Clicks | Views",
     "services": 11,
-    "min_price": 2.10,
+    "min_price": 2.1,
     "max_price": 7356.05
   },
   {
@@ -765,7 +765,7 @@
     "category": "Website Traffic",
     "services": 11,
     "min_price": 48.29,
-    "max_price": 640.90
+    "max_price": 640.9
   },
   {
     "category": "Whatsapp Channel Country Target Followers",
@@ -836,14 +836,14 @@
   {
     "category": "Telegram Last Posts Reactions",
     "services": 10,
-    "min_price": 768.20,
+    "min_price": 768.2,
     "max_price": 15362.05
   },
   {
     "category": "Telegram Premium | Other Services",
     "services": 10,
     "min_price": 337.28,
-    "max_price": 1349091.90
+    "max_price": 1349091.9
   },
   {
     "category": "Tiktok Comments - Comment Like",
@@ -860,14 +860,14 @@
   {
     "category": "Website Cheap Traffic WorldWide Speed ~5,000/Day",
     "services": 10,
-    "min_price": 593.00,
-    "max_price": 640.90
+    "min_price": 593.0,
+    "max_price": 640.9
   },
   {
     "category": "Website Traffic from South Korea + Choose Referrer",
     "services": 10,
-    "min_price": 593.00,
-    "max_price": 593.00
+    "min_price": 593.0,
+    "max_price": 593.0
   },
   {
     "category": "Website Traffic from South Korea 🇰🇷 [ + Choose Referrer ]",
@@ -914,7 +914,7 @@
   {
     "category": "Instagram → Provider Services 100% Real EU - USA 🇪🇺🇺🇸 | Fast | Businnes | No/Low Drop",
     "services": 9,
-    "min_price": 21127.80,
+    "min_price": 21127.8,
     "max_price": 63606.79
   },
   {
@@ -981,7 +981,7 @@
     "category": "Tiktok Likes [Guaranteed]",
     "services": 9,
     "min_price": 616.94,
-    "max_price": 640.70
+    "max_price": 640.7
   },
   {
     "category": "Web Site Global Traffic",
@@ -999,19 +999,19 @@
     "category": "Website Traffic from USA + Choose Referrer Speed ~15,000/Day",
     "services": 9,
     "min_price": 591.56,
-    "max_price": 593.00
+    "max_price": 593.0
   },
   {
     "category": "X (Twitter) - Comments &amp; Quotes",
     "services": 9,
-    "min_price": 51206.90,
+    "min_price": 51206.9,
     "max_price": 5120681.74
   },
   {
     "category": "YouTube Country Targeted Shares",
     "services": 9,
-    "min_price": 384.10,
-    "max_price": 384.10
+    "min_price": 384.1,
+    "max_price": 384.1
   },
   {
     "category": "Deezer → Services",
@@ -1064,8 +1064,8 @@
   {
     "category": "Instagram → Repost",
     "services": 8,
-    "min_price": 544.20,
-    "max_price": 80568.60
+    "min_price": 544.2,
+    "max_price": 80568.6
   },
   {
     "category": "Telegram Auto Views - Future Posts",
@@ -1143,7 +1143,7 @@
     "category": "Website Traffic from Germany + Choose Referrer",
     "services": 8,
     "min_price": 591.56,
-    "max_price": 593.00
+    "max_price": 593.0
   },
   {
     "category": "Website Traffic from India  🇮🇳 [ + Choose Referrer ]",
@@ -1155,7 +1155,7 @@
     "category": "Website Traffic from Turkey + Choose Referrer",
     "services": 8,
     "min_price": 591.56,
-    "max_price": 593.00
+    "max_price": 593.0
   },
   {
     "category": "Website Traffic from Turkey 🇹🇷 [ + Choose Referrer ]",
@@ -1170,12 +1170,6 @@
     "max_price": 6718.36
   },
   {
-    "category": "❤️ Free Services { Instagram, Facebook, Tiktok, X, Youtube }",
-    "services": 8,
-    "min_price": 0.30,
-    "max_price": 0.90
-  },
-  {
     "category": "📣 Instagram Mentions",
     "services": 8,
     "min_price": 3262.91,
@@ -1184,14 +1178,14 @@
   {
     "category": "Facebook Live Stream | Server 666",
     "services": 7,
-    "min_price": 888.50,
+    "min_price": 888.5,
     "max_price": 14215.98
   },
   {
     "category": "Facebook Post Reactions | Server 333",
     "services": 7,
     "min_price": 155.38,
-    "max_price": 155.50
+    "max_price": 155.5
   },
   {
     "category": "Facebook Post Reactions | Server 999",
@@ -1238,13 +1232,13 @@
   {
     "category": "Instagram → Provider Services 100% Real EU - USA  🇪🇺🇺🇸  | Fast | Promotion | No/low Drop",
     "services": 7,
-    "min_price": 2110.00,
+    "min_price": 2110.0,
     "max_price": 10601.14
   },
   {
     "category": "Instagram → Provider Services 100% Real Spanish 🇪🇸  | Fast | Promotion | No/low Drop",
     "services": 7,
-    "min_price": 2110.00,
+    "min_price": 2110.0,
     "max_price": 25372.48
   },
   {
@@ -1256,7 +1250,7 @@
   {
     "category": "Spotify Organic Services",
     "services": 7,
-    "min_price": 42240.00,
+    "min_price": 42240.0,
     "max_price": 276184.24
   },
   {
@@ -1268,7 +1262,7 @@
   {
     "category": "Spotify Premium Mobile Plays",
     "services": 7,
-    "min_price": 2308.50,
+    "min_price": 2308.5,
     "max_price": 2408.15
   },
   {
@@ -1352,7 +1346,7 @@
   {
     "category": "Twitter Livestream",
     "services": 7,
-    "min_price": 3643.00,
+    "min_price": 3643.0,
     "max_price": 76100.49
   },
   {
@@ -1371,7 +1365,7 @@
     "category": "Website Traffic from Brazil + Choose Referrer",
     "services": 7,
     "min_price": 591.56,
-    "max_price": 593.00
+    "max_price": 593.0
   },
   {
     "category": "Website Traffic from Brazil 🇧🇷 [ + Choose Referrer ]",
@@ -1389,7 +1383,7 @@
     "category": "Website Traffic from India + Choose Referrer 500+/day",
     "services": 7,
     "min_price": 591.56,
-    "max_price": 593.00
+    "max_price": 593.0
   },
   {
     "category": "Website Traffic from Indonesia 🇮🇩 [ + Choose Referrer ]",
@@ -1407,7 +1401,7 @@
     "category": "YouTube Ads Views",
     "services": 7,
     "min_price": 3693.85,
-    "max_price": 30724.10
+    "max_price": 30724.1
   },
   {
     "category": "YouTube Comments",
@@ -1425,7 +1419,7 @@
     "category": "YouTube →  Ad Views",
     "services": 7,
     "min_price": 651.59,
-    "max_price": 30724.10
+    "max_price": 30724.1
   },
   {
     "category": "YouTube → Comments",
@@ -1449,7 +1443,7 @@
     "category": "Amazon Services",
     "services": 6,
     "min_price": 22416.88,
-    "max_price": 53800.50
+    "max_price": 53800.5
   },
   {
     "category": "Discord Discord Server Boost 1 Month [No Bot]",
@@ -1461,13 +1455,13 @@
     "category": "Facebook Nigerian Services",
     "services": 6,
     "min_price": 7481.46,
-    "max_price": 67333.10
+    "max_price": 67333.1
   },
   {
     "category": "Facebook | US Services",
     "services": 6,
-    "min_price": 7500.00,
-    "max_price": 62500.00
+    "min_price": 7500.0,
+    "max_price": 62500.0
   },
   {
     "category": "Facebook → Comment Emoji Likes",
@@ -1502,7 +1496,7 @@
   {
     "category": "Instagram Post Share",
     "services": 6,
-    "min_price": 2.70,
+    "min_price": 2.7,
     "max_price": 245.85
   },
   {
@@ -1514,8 +1508,8 @@
   {
     "category": "Instagram Views",
     "services": 6,
-    "min_price": 3.50,
-    "max_price": 3.50
+    "min_price": 3.5,
+    "max_price": 3.5
   },
   {
     "category": "Instagram → Global Comment Like",
@@ -1526,7 +1520,7 @@
   {
     "category": "Instagram → Provider Services 100% Real Fast French 🇫🇷 | Fast | Eco | No/Low Drop",
     "services": 6,
-    "min_price": 2110.00,
+    "min_price": 2110.0,
     "max_price": 21202.27
   },
   {
@@ -1605,13 +1599,13 @@
     "category": "Telegram Group / Channel Members [Non Drop] [Guaranteeed]",
     "services": 6,
     "min_price": 535.08,
-    "max_price": 1751.40
+    "max_price": 1751.4
   },
   {
     "category": "Telegram Members",
     "services": 6,
-    "min_price": 709.10,
-    "max_price": 5000.00
+    "min_price": 709.1,
+    "max_price": 5000.0
   },
   {
     "category": "Telegram Post Views | Server 333",
@@ -1634,8 +1628,8 @@
   {
     "category": "TikTok | Nigerian Service",
     "services": 6,
-    "min_price": 12500.00,
-    "max_price": 37500.00
+    "min_price": 12500.0,
+    "max_price": 37500.0
   },
   {
     "category": "TikTok: Nigerian Services 🇳🇬",
@@ -1647,19 +1641,19 @@
     "category": "Tiktok Live Stream Comments",
     "services": 6,
     "min_price": 339.76,
-    "max_price": 1345.70
+    "max_price": 1345.7
   },
   {
     "category": "Tiktok Views | Server 66",
     "services": 6,
     "min_price": 8.66,
-    "max_price": 124.70
+    "max_price": 124.7
   },
   {
     "category": "Twitter (X) Comment",
     "services": 6,
     "min_price": 64008.48,
-    "max_price": 153620.50
+    "max_price": 153620.5
   },
   {
     "category": "Twitter (X) Poll Votes",
@@ -1706,7 +1700,7 @@
   {
     "category": "YouTube Random Comments | Country Specific",
     "services": 6,
-    "min_price": 102588.40,
+    "min_price": 102588.4,
     "max_price": 106323.82
   },
   {
@@ -1748,8 +1742,8 @@
   {
     "category": "Facebook Page Followers | Server 999",
     "services": 5,
-    "min_price": 325.00,
-    "max_price": 1250.00
+    "min_price": 325.0,
+    "max_price": 1250.0
   },
   {
     "category": "Facebook Page Likes + Followers",
@@ -1761,7 +1755,7 @@
     "category": "Facebook Post / Status Likes",
     "services": 5,
     "min_price": 460.85,
-    "max_price": 30724.10
+    "max_price": 30724.1
   },
   {
     "category": "Facebook Video Views | 999",
@@ -1790,7 +1784,7 @@
   {
     "category": "SEO for Specific Sources",
     "services": 5,
-    "min_price": 567.90,
+    "min_price": 567.9,
     "max_price": 1137.61
   },
   {
@@ -1803,13 +1797,13 @@
     "category": "Spotify Monthly Listeners | Country Targeting",
     "services": 5,
     "min_price": 7385.83,
-    "max_price": 7386.70
+    "max_price": 7386.7
   },
   {
     "category": "Telegram Ai Reactions",
     "services": 5,
     "min_price": 256.07,
-    "max_price": 112655.10
+    "max_price": 112655.1
   },
   {
     "category": "Telegram Members |  Server 969",
@@ -1820,20 +1814,20 @@
   {
     "category": "Telegram Members | Country Specific",
     "services": 5,
-    "min_price": 2500.00,
-    "max_price": 3125.00
+    "min_price": 2500.0,
+    "max_price": 3125.0
   },
   {
     "category": "Telegram Members | Server 999",
     "services": 5,
     "min_price": 520.04,
-    "max_price": 1039.60
+    "max_price": 1039.6
   },
   {
     "category": "Telegram Post Views | Future Posts",
     "services": 5,
     "min_price": 639.54,
-    "max_price": 24640.90
+    "max_price": 24640.9
   },
   {
     "category": "Telegram Post Views | Premium Accounts",
@@ -1844,7 +1838,7 @@
   {
     "category": "Telegram Reactions | Future Posts",
     "services": 5,
-    "min_price": 4122.70,
+    "min_price": 4122.7,
     "max_price": 17072.58
   },
   {
@@ -1874,8 +1868,8 @@
   {
     "category": "TikTok Live Stream Views | Server 66",
     "services": 5,
-    "min_price": 2783.10,
-    "max_price": 15152.40
+    "min_price": 2783.1,
+    "max_price": 15152.4
   },
   {
     "category": "Twitch → Views",
@@ -1910,14 +1904,14 @@
   {
     "category": "Twitter Views",
     "services": 5,
-    "min_price": 1.30,
+    "min_price": 1.3,
     "max_price": 16.89
   },
   {
     "category": "Twitter | Nigerian Service",
     "services": 5,
-    "min_price": 18750.00,
-    "max_price": 25000.00
+    "min_price": 18750.0,
+    "max_price": 25000.0
   },
   {
     "category": "WebSite Organic Clicks - Global",
@@ -1946,7 +1940,7 @@
   {
     "category": "YouTube Comment Like",
     "services": 5,
-    "min_price": 384.10,
+    "min_price": 384.1,
     "max_price": 2557.97
   },
   {
@@ -1970,7 +1964,7 @@
   {
     "category": "Audiomack → Comment",
     "services": 4,
-    "min_price": 23322.90,
+    "min_price": 23322.9,
     "max_price": 24323.41
   },
   {
@@ -1994,8 +1988,8 @@
   {
     "category": "Facebook | English Services",
     "services": 4,
-    "min_price": 10000.00,
-    "max_price": 18750.00
+    "min_price": 10000.0,
+    "max_price": 18750.0
   },
   {
     "category": "Google/Yandex Search Ads Click + 30 Min Play",
@@ -2060,13 +2054,13 @@
   {
     "category": "Telegram Members | Online Members",
     "services": 4,
-    "min_price": 2500.00,
-    "max_price": 7500.00
+    "min_price": 2500.0,
+    "max_price": 7500.0
   },
   {
     "category": "Telegram Members | Server 33",
     "services": 4,
-    "min_price": 811.40,
+    "min_price": 811.4,
     "max_price": 3326.37
   },
   {
@@ -2096,7 +2090,7 @@
   {
     "category": "Telegram → Recommended Services🔥",
     "services": 4,
-    "min_price": 443.80,
+    "min_price": 443.8,
     "max_price": 897.04
   },
   {
@@ -2120,8 +2114,8 @@
   {
     "category": "Tiktok Likes [Not Guaranteed]",
     "services": 4,
-    "min_price": 640.70,
-    "max_price": 640.70
+    "min_price": 640.7,
+    "max_price": 640.7
   },
   {
     "category": "Tiktok PK Battle",
@@ -2156,8 +2150,8 @@
   {
     "category": "WebSite Organic Clicks",
     "services": 4,
-    "min_price": 384.10,
-    "max_price": 384.10
+    "min_price": 384.1,
+    "max_price": 384.1
   },
   {
     "category": "Website Traffic from Thailand + Choose Referrer",
@@ -2169,7 +2163,7 @@
     "category": "YouTube Comment Likes",
     "services": 4,
     "min_price": 1870.27,
-    "max_price": 11780.40
+    "max_price": 11780.4
   },
   {
     "category": "🔎 SEO Packages | Premium",
@@ -2186,7 +2180,7 @@
   {
     "category": "🗒 YouTube Comments · 🤖 AI",
     "services": 4,
-    "min_price": 17933.50,
+    "min_price": 17933.5,
     "max_price": 50437.97
   },
   {
@@ -2199,13 +2193,13 @@
     "category": "Discord Discord Server Boost 3 Month [No Bot]",
     "services": 3,
     "min_price": 5560.96,
-    "max_price": 51153.30
+    "max_price": 51153.3
   },
   {
     "category": "Ebay Services",
     "services": 3,
     "min_price": 22416.88,
-    "max_price": 53800.50
+    "max_price": 53800.5
   },
   {
     "category": "Facebook Comments | Custom",
@@ -2222,14 +2216,14 @@
   {
     "category": "Facebook Page Likes",
     "services": 3,
-    "min_price": 465.20,
+    "min_price": 465.2,
     "max_price": 780.75
   },
   {
     "category": "Facebook Page Likes | Server 33",
     "services": 3,
-    "min_price": 1000.00,
-    "max_price": 1250.00
+    "min_price": 1000.0,
+    "max_price": 1250.0
   },
   {
     "category": "Facebook Services USA/EU",
@@ -2246,8 +2240,8 @@
   {
     "category": "Facebook | Nigerian Services",
     "services": 3,
-    "min_price": 18750.00,
-    "max_price": 25000.00
+    "min_price": 18750.0,
+    "max_price": 25000.0
   },
   {
     "category": "Facebook → Page Likes | Country Targeted Services",
@@ -2312,7 +2306,7 @@
   {
     "category": "Kick Followers",
     "services": 3,
-    "min_price": 1066.10,
+    "min_price": 1066.1,
     "max_price": 19458.73
   },
   {
@@ -2384,14 +2378,14 @@
   {
     "category": "Telegram Members | Active Members",
     "services": 3,
-    "min_price": 12500.00,
-    "max_price": 37500.00
+    "min_price": 12500.0,
+    "max_price": 37500.0
   },
   {
     "category": "Telegram Nigerian Services",
     "services": 3,
     "min_price": 25249.91,
-    "max_price": 46759.10
+    "max_price": 46759.1
   },
   {
     "category": "Telegram → Poll Votes",
@@ -2421,7 +2415,7 @@
     "category": "TikTok Likes | Server 99",
     "services": 3,
     "min_price": 616.94,
-    "max_price": 6295.50
+    "max_price": 6295.5
   },
   {
     "category": "TikTok Likes | Server 999",
@@ -2522,7 +2516,7 @@
   {
     "category": "Views For TG Ads",
     "services": 3,
-    "min_price": 768.20,
+    "min_price": 768.2,
     "max_price": 1280.34
   },
   {
@@ -2540,8 +2534,8 @@
   {
     "category": "YouTube Shares",
     "services": 3,
-    "min_price": 384.10,
-    "max_price": 384.10
+    "min_price": 384.1,
+    "max_price": 384.1
   },
   {
     "category": "YouTube Video/Shorts Views [ 𝐑𝐀𝐕-𝐆𝐒™] [GEO Targeted]",
@@ -2552,7 +2546,7 @@
   {
     "category": "YouTube → Auto Like",
     "services": 3,
-    "min_price": 1576.70,
+    "min_price": 1576.7,
     "max_price": 4569.67
   },
   {
@@ -2582,8 +2576,8 @@
   {
     "category": "Youtube | Nigerian Service",
     "services": 3,
-    "min_price": 10000.00,
-    "max_price": 25000.00
+    "min_price": 10000.0,
+    "max_price": 25000.0
   },
   {
     "category": "⏳ YouTube Watch Hours",
@@ -2595,7 +2589,7 @@
     "category": "🌐 Linktree Traffic + Clicks",
     "services": 3,
     "min_price": 2291.51,
-    "max_price": 19953.70
+    "max_price": 19953.7
   },
   {
     "category": "📖 TikTok Story",
@@ -2618,8 +2612,8 @@
   {
     "category": "🗒 YouTube Shorts Comments Reply",
     "services": 3,
-    "min_price": 130142.40,
-    "max_price": 130142.40
+    "min_price": 130142.4,
+    "max_price": 130142.4
   },
   {
     "category": "AppStore Nigerian Services",
@@ -2654,14 +2648,14 @@
   {
     "category": "Facebook Page Followers",
     "services": 2,
-    "min_price": 187.50,
-    "max_price": 225.00
+    "min_price": 187.5,
+    "max_price": 225.0
   },
   {
     "category": "Facebook Page Followers | Server 666",
     "services": 2,
-    "min_price": 1125.00,
-    "max_price": 1500.00
+    "min_price": 1125.0,
+    "max_price": 1500.0
   },
   {
     "category": "Facebook Plays",
@@ -2696,8 +2690,8 @@
   {
     "category": "Instagram Comments | Nigerian Service",
     "services": 2,
-    "min_price": 12500.00,
-    "max_price": 25000.00
+    "min_price": 12500.0,
+    "max_price": 25000.0
   },
   {
     "category": "Instagram Custom Global Comment",
@@ -2744,8 +2738,8 @@
   {
     "category": "Instagram Stats | Nigerian Service",
     "services": 2,
-    "min_price": 37500.00,
-    "max_price": 37500.00
+    "min_price": 37500.0,
+    "max_price": 37500.0
   },
   {
     "category": "Instagram Story Vote",
@@ -2756,8 +2750,8 @@
   {
     "category": "Instagram likes | Nigerian Accounts",
     "services": 2,
-    "min_price": 12500.00,
-    "max_price": 12500.00
+    "min_price": 12500.0,
+    "max_price": 12500.0
   },
   {
     "category": "Instagram → Global Comment",
@@ -2774,7 +2768,7 @@
   {
     "category": "Kick Clip Views",
     "services": 2,
-    "min_price": 24.30,
+    "min_price": 24.3,
     "max_price": 33.56
   },
   {
@@ -2793,7 +2787,7 @@
     "category": "Linkedin Real Organic Likes",
     "services": 2,
     "min_price": 13706.81,
-    "max_price": 20482.80
+    "max_price": 20482.8
   },
   {
     "category": "Medium",
@@ -2810,14 +2804,14 @@
   {
     "category": "Pinterest → Other",
     "services": 2,
-    "min_price": 26791.80,
+    "min_price": 26791.8,
     "max_price": 39133.17
   },
   {
     "category": "Quora Nigerian Services",
     "services": 2,
     "min_price": 14962.91,
-    "max_price": 46759.10
+    "max_price": 46759.1
   },
   {
     "category": "Spotify Podcast",
@@ -2882,8 +2876,8 @@
   {
     "category": "Threads | Nigerian Service",
     "services": 2,
-    "min_price": 12500.00,
-    "max_price": 18750.00
+    "min_price": 12500.0,
+    "max_price": 18750.0
   },
   {
     "category": "TikTok Auto Views",
@@ -2894,8 +2888,8 @@
   {
     "category": "TikTok Story Likes - Views",
     "services": 2,
-    "min_price": 768.20,
-    "max_price": 768.20
+    "min_price": 768.2,
+    "max_price": 768.2
   },
   {
     "category": "TikTok Views | Server 339",
@@ -2942,8 +2936,8 @@
   {
     "category": "USA - Website Traffic",
     "services": 2,
-    "min_price": 768.20,
-    "max_price": 768.20
+    "min_price": 768.2,
+    "max_price": 768.2
   },
   {
     "category": "WhatsApp Service : Nigerian 🇳🇬",
@@ -2972,8 +2966,8 @@
   {
     "category": "YouTube Views | Non Drop",
     "services": 2,
-    "min_price": 3750.00,
-    "max_price": 4375.00
+    "min_price": 3750.0,
+    "max_price": 4375.0
   },
   {
     "category": "🌐 Website Traffic | Residential",
@@ -3044,8 +3038,8 @@
   {
     "category": "Facebook Profile Followers",
     "services": 1,
-    "min_price": 2250.00,
-    "max_price": 2250.00
+    "min_price": 2250.0,
+    "max_price": 2250.0
   },
   {
     "category": "Facebook Reels",
@@ -3062,8 +3056,8 @@
   {
     "category": "Facebook Video likes",
     "services": 1,
-    "min_price": 1500.00,
-    "max_price": 1500.00
+    "min_price": 1500.0,
+    "max_price": 1500.0
   },
   {
     "category": "Google Traffic Hits With Keywords Services 𝐆𝐎𝐎𝐆𝐋𝐄 [Asia",
@@ -3098,14 +3092,14 @@
   {
     "category": "Instagram Exclusive Services",
     "services": 1,
-    "min_price": 1536.40,
-    "max_price": 1536.40
+    "min_price": 1536.4,
+    "max_price": 1536.4
   },
   {
     "category": "Instagram Followers | Nigerian Service",
     "services": 1,
-    "min_price": 10000.00,
-    "max_price": 10000.00
+    "min_price": 10000.0,
+    "max_price": 10000.0
   },
   {
     "category": "Instagram Likes | Nigerian Service",
@@ -3128,14 +3122,14 @@
   {
     "category": "Instagram Stories | Nigerian Accounts",
     "services": 1,
-    "min_price": 250.00,
-    "max_price": 250.00
+    "min_price": 250.0,
+    "max_price": 250.0
   },
   {
     "category": "Kick Views",
     "services": 1,
-    "min_price": 24.30,
-    "max_price": 24.30
+    "min_price": 24.3,
+    "max_price": 24.3
   },
   {
     "category": "Medium Services",
@@ -3186,12 +3180,6 @@
     "max_price": 510.37
   },
   {
-    "category": "Spotify Free Plays",
-    "services": 1,
-    "min_price": 431.45,
-    "max_price": 431.45
-  },
-  {
     "category": "Spotify Monthly Listeners",
     "services": 1,
     "min_price": 5608.72,
@@ -3200,8 +3188,8 @@
   {
     "category": "Spotify Plays [Ads]",
     "services": 1,
-    "min_price": 6980.90,
-    "max_price": 6980.90
+    "min_price": 6980.9,
+    "max_price": 6980.9
   },
   {
     "category": "Spotify Plays [Playlist | Album Playback]",
@@ -3230,14 +3218,14 @@
   {
     "category": "Telegram Group / Channel Members [No Guaranteed]",
     "services": 1,
-    "min_price": 811.40,
-    "max_price": 811.40
+    "min_price": 811.4,
+    "max_price": 811.4
   },
   {
     "category": "Telegram Post Views | Nigerian Service",
     "services": 1,
-    "min_price": 25745.10,
-    "max_price": 25745.10
+    "min_price": 25745.1,
+    "max_price": 25745.1
   },
   {
     "category": "Telegram Votes",
@@ -3248,14 +3236,14 @@
   {
     "category": "Threads Organic Global Services",
     "services": 1,
-    "min_price": 30299.90,
-    "max_price": 30299.90
+    "min_price": 30299.9,
+    "max_price": 30299.9
   },
   {
     "category": "TikTok Followers | Server 636",
     "services": 1,
-    "min_price": 12500.00,
-    "max_price": 12500.00
+    "min_price": 12500.0,
+    "max_price": 12500.0
   },
   {
     "category": "TikTok Repost",
@@ -3296,8 +3284,8 @@
   {
     "category": "Twitter Likes | Nigerian Service",
     "services": 1,
-    "min_price": 124004.60,
-    "max_price": 124004.60
+    "min_price": 124004.6,
+    "max_price": 124004.6
   },
   {
     "category": "Twitter Retweets | Nigerian Service",
@@ -3380,8 +3368,8 @@
   {
     "category": "Youtube Random Comments",
     "services": 1,
-    "min_price": 4203.70,
-    "max_price": 4203.70
+    "min_price": 4203.7,
+    "max_price": 4203.7
   },
   {
     "category": "𝐑𝐔𝐒𝐒𝐈𝐀 𝐅𝐄𝐃𝐄𝐑𝐀𝐓𝐈𝐎𝐍 Visitors With Keywords",

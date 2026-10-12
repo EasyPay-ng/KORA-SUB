@@ -1545,7 +1545,9 @@ export function buildBoostCatalogFromGsubz(raw) {
   const byCategory = new Map();
   for (const service of services) {
     const categoryName = String(service?.category || "").trim();
-    if (!categoryName || /free\s*services/i.test(categoryName)) continue;
+    // Free-service categories are not sold here — anything with "free" in the
+    // category name stays out of the catalogue.
+    if (!categoryName || /free/i.test(categoryName)) continue;
     if (!byCategory.has(categoryName)) byCategory.set(categoryName, []);
     byCategory.get(categoryName).push(service);
   }
