@@ -1,47 +1,97 @@
-# One-shot / repeatable fetch of the GSUBZ "Socials Media Market" service catalogue.
-# The catalogue is a large JSON payload (thousands of plans), so it is downloaded by the
-# runner and returned as an artifact instead of being scraped page-by-page.
 name: Fetch GSUBZ socials catalogue
 
+# Temporary helper: GitHub runners have internet access (this repo's dev sandbox does
+# not), so this job pulls the GSUBZ "Socials Media Market" service catalogue
+# (gsubz.com/api/plans?service=socials), writes it into data/ and commits the result
+# back to the branch it runs on.
+#
+# Runs once when this file is pushed, or on demand from the Actions tab.
+
 on:
-  workflow_dispatch:
   push:
     paths:
       - ".github/workflows/fetch-gsubz-catalog.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   fetch:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
       - name: Download the catalogue JSON
         run: |
-          set +e
+          set -euo pipefail
           for url in \
             "https://gsubz.com/api/plans?service=socials" \
-            "https://api.gsubz.com/api/plans?service=socials" \
-            "https://www.gsubz.com/api/plans?service=socials"; do
-            echo "== GET $url" >> attempt-log.txt
-            curl -4 -sS -L --retry 2 --max-time 120 \
-              -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126 Safari/537.36" \
-              -o gsubz-socials-raw.json \
-              -w "http=%{http_code} bytes=%{size_download} time=%{time_total}\n" \
-              "$url" >> attempt-log.txt 2>&1
-            echo "exit=$?" >> attempt-log.txt
-            if [ -s gsubz-socials-raw.json ] && head -c 20 gsubz-socials-raw.json | grep -q "{"; then
-              echo "OK" >> attempt-log.txt
-              break
+            "https://api.gsubz.com/api/plans?service=socials"; do
+            echo "== GET $url"
+            if curl -4 -sS -L --retry 2 --max-time 120 \
+                 -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126 Safari/537.36" \
+                 -o /tmp/services-raw.json "$url" \
+              && jq -e '.list | length > 0' /tmp/services-raw.json > /dev/null 2>&1; then
+              echo "OK: $(jq '.list | length' /tmp/services-raw.json) services"
+              exit 0
             fi
+            echo "attempt failed"
           done
-          wc -c gsubz-socials-raw.json >> attempt-log.txt 2>&1
-          echo "-- head --" >> attempt-log.txt
-          head -c 500 gsubz-socials-raw.json >> attempt-log.txt 2>&1
+          echo "All attempts failed." >&2
+          exit 1
 
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: gsubz-socials-raw
-          path: |
-            gsubz-socials-raw.json
-            attempt-log.txt
-          retention-days: 30
-          if-no-files-found: warn
+      - name: Write data files
+        run: |
+          set -euo pipefail
+          mkdir -p data
+          jq '{
+                form: {
+                  phone_field: .phone_name,
+                  amount_field: .amount_name,
+                  email_field: .email_name,
+                  plan_field: .plan_name
+                },
+                total: (.list | length),
+                services: ([.list[] | {
+                  id: .value,
+                  category: .category,
+                  name: .display_name,
+                  price: (.price | tonumber),
+                  min: .min,
+                  max: .max,
+                  description: (.description // "")
+                }] | sort_by(.category, .name))
+              }' /tmp/services-raw.json > data/gsubz-socials-services.json
+
+          jq -r '(["id","category","name","price","min","max","description"],
+                 (.services[] | [.id, .category, .name, .price, .min, .max, .description])) | @csv' \
+            data/gsubz-socials-services.json > data/gsubz-socials-services.csv
+
+          jq '[.services[] | {category, price}]
+              | group_by(.category)
+              | map({category: .[0].category,
+                     services: length,
+                     min_price: (map(.price) | min),
+                     max_price: (map(.price) | max)})
+              | sort_by(-.services)' \
+            data/gsubz-socials-services.json > data/gsubz-socials-services-summary.json
+
+          wc -c data/gsubz-socials-services.json data/gsubz-socials-services.csv
+          echo "--- categories: $(jq 'length' data/gsubz-socials-services-summary.json) ---"
+          jq -r '.[:20][] | "\(.services)\t\(.category)"' data/gsubz-socials-services-summary.json
+
+      - name: Commit results
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/gsubz-socials-services.json data/gsubz-socials-services.csv data/gsubz-socials-services-summary.json
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "data: GSUBZ socials media services catalogue (synced $(date -u +%Y-%m-%d))"
+            git push origin HEAD:${{ github.ref_name }}
+          fi
