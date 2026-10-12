@@ -5,7 +5,7 @@ panel — the data behind <https://gsubz.com/service/buy.php?id=socials>.
 
 | File | What it is |
 |---|---|
-| `gsubz-socials-services.json` | All **5,096 services**: `id`, `category`, `name`, `price` (naira per unit), `min`, `max`, `description`, sorted by category then name. The `form` object names the order-form fields the plan id posts under. |
+| `gsubz-socials-services.json` | All **5,096 services**: `id`, `category`, `name`, `price` (naira per 1,000 units), `min`, `max`, `description`, sorted by category then name. The `form` object names the order-form fields the plan id posts under. |
 | `gsubz-socials-services.csv` | The same rows as a spreadsheet-friendly CSV (header: `id,category,name,price,min,max,description`) |
 | `gsubz-socials-services-summary.json` | Service counts and price range per category, largest first |
 
@@ -17,9 +17,9 @@ panel — the data behind <https://gsubz.com/service/buy.php?id=socials>.
 - Fetched from GSUBZ's public, unauthenticated JSON endpoint
   `https://gsubz.com/api/plans?service=socials` (the same data the buy page is built
   from; `api.gsubz.com` mirrors it).
-- `price` is the **per-unit price in naira** (₦1.30 for the cheapest plans up to
+- `price` is the **rate in naira per 1,000 units** (₦1.30 for the cheapest plans up to
   ₦12,338,859.68 for the most expensive premium package); `min`/`max` are the per-order
-  quantity limits.
+  quantity limits. KORASTORE calculates a proportional total: rate × quantity ÷ 1,000.
 - The order form posts the chosen plan id in the `service` field (`phone`, `amount`,
   `email` are the other fields — see `form` in the JSON).
 - Category names are GSUBZ's own (emoji, spelling and casing as published).

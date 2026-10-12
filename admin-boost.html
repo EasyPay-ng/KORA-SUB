@@ -11,13 +11,13 @@
 <div class="admin-shell" id="admin-content" hidden>
   <aside class="admin-side" id="admin-sidebar"></aside>
   <main class="admin-main">
-    <div class="page-head"><div><span class="eyebrow">Social media marketing</span><h1>Boosting services</h1><p>The catalogue is imported from the store's GSUBZ snapshot: <b>every category</b>, each with only its <b>most expensive service(s)</b>, priced at <b>4× the GSUBZ price</b>. You edit just the <b>price</b> and the <b>average time</b> — everything else is synced. Average times are never below 1 hour, and a unit price under ₦1 needs at least 50 units per order.</p></div></div>
+    <div class="page-head"><div><span class="eyebrow">Social media marketing</span><h1>Boosting services</h1><p>The catalogue selects the <b>cheapest qualifying GSUBZ plan(s)</b> in each category, with a KORASTORE rate of <b>₦500–₦50,000 per 1,000 units</b> (4× the source rate). Each plan keeps its GSUBZ quantity limits. You edit just the <b>rate</b> and the <b>average time</b> — names, units and limits are synced. Average times are never below 1 hour.</p></div></div>
 
     <div id="notice"></div>
 
     <section class="card">
       <div class="card-head"><div><h2>Catalogue</h2><small id="catalogue-count">Loading…</small></div></div>
-      <p class="small muted" style="margin:-6px 0 14px">Sourced from <b>data/gsubz-socials-services.json</b> (shipped with the site). Publishing upserts every category and plan, keeps your price / average-time edits, and hides catalogue items that are not in the snapshot (the old manual ones). Free-service categories are not sold here.</p>
+      <p class="small muted" style="margin:-6px 0 14px">Sourced from <b>data/gsubz-socials-services.json</b> (shipped with the site). Publishing migrates legacy prices to the per-1,000 basis, selects the cheapest qualifying plan(s) per category, and hides plans outside the rate range or no longer selected. Later publishes keep valid rate / average-time edits. Free-service categories are not sold here.</p>
       <div class="field-row">
         <label class="field">In the snapshot<input class="input" id="catalogue-file" disabled></label>
         <label class="field">Published in the store<input class="input" id="catalogue-live" disabled></label>
@@ -30,11 +30,11 @@
 
     <section class="card" style="margin-top:20px">
       <div class="card-head"><div><h2>Plans &amp; prices</h2><small id="plan-count">Loading…</small></div></div>
-      <p class="small muted" style="margin:-6px 0 14px">Only the price and the average time are editable — names, units and quantity limits come from GSUBZ. The minimum shown is the effective one (a unit price under ₦1 always needs at least 50 units).</p>
+      <p class="small muted" style="margin:-6px 0 14px">Only the rate per 1,000 and average time are editable — names, units and source quantity limits come from GSUBZ. Rates must stay between ₦500 and ₦50,000 per 1,000 units.</p>
       <div class="field-row">
         <label class="field">Search<input class="input" id="plan-filter" placeholder="Plan or category name" autocomplete="off"></label>
       </div>
-      <div class="table-wrap"><table class="table"><thead><tr><th>Category</th><th>Plan</th><th>Unit</th><th>Price (₦ per unit)</th><th>Average time</th><th>Min</th><th>Max</th><th></th></tr></thead><tbody id="plan-rows"><tr><td colspan="8">Loading…</td></tr></tbody></table></div>
+      <div class="table-wrap"><table class="table"><thead><tr><th>Category</th><th>Plan</th><th>Unit</th><th>Rate (₦ / 1,000 units)</th><th>Average time</th><th>Min</th><th>Max</th><th></th></tr></thead><tbody id="plan-rows"><tr><td colspan="8">Loading…</td></tr></tbody></table></div>
       <div class="row" style="margin-top:12px"><button class="btn btn-ghost" id="plan-more" type="button" hidden>Show more</button></div>
     </section>
 
@@ -105,7 +105,7 @@
     if (built && !$('#publish-summary').dataset.busy) {
       const hidden = (categories.length + subcategories.length + platforms.length)
         - (built.categories.length + built.plans.length + built.platforms.length);
-      $('#publish-summary').textContent = `Ready: ${built.categories.length.toLocaleString('en-NG')} categories and ${built.plans.length.toLocaleString('en-NG')} plans (4× GSUBZ prices, average times at least 1 hour).`
+      $('#publish-summary').textContent = `Ready: ${built.categories.length.toLocaleString('en-NG')} categories and ${built.plans.length.toLocaleString('en-NG')} cheapest eligible plan(s) (4× GSUBZ rate per 1,000, ₦500–₦50,000).`
         + (hidden > 0 ? ` ${hidden.toLocaleString('en-NG')} existing item(s) not in the snapshot will be hidden.` : '');
     }
   }
@@ -116,8 +116,8 @@
     if (!built) return setNotice('warn', 'Snapshot not ready', 'Wait for data/gsubz-socials-services.json to load, then try again.');
     const hidden = (categories.length + subcategories.length + platforms.length)
       - (built.categories.length + built.plans.length + built.platforms.length);
-    const message = `Publish ${built.categories.length} categories and ${built.plans.length} plans at 4× the GSUBZ prices?\n\n`
-      + `Your price and average-time edits are kept. ${hidden > 0 ? `${hidden} item(s) not in the snapshot (the old manual catalogue) will be hidden.` : ''}`;
+    const message = `Publish ${built.categories.length} categories and ${built.plans.length} cheapest qualifying plans?\n\n`
+      + `Rates are 4× GSUBZ, between ₦500 and ₦50,000 per 1,000 units. Legacy per-unit price overrides reset once; average-time edits and future valid rate edits are kept. GSUBZ quantity limits are retained. ${hidden > 0 ? `${hidden} item(s) not selected by this snapshot will be hidden.` : ''}`;
     if (!confirm(message)) return;
     button.disabled = true;
     button.textContent = 'Publishing…';
@@ -179,7 +179,7 @@
         <td><small>${esc(category)}</small></td>
         <td><b>${esc(plan.name)}</b></td>
         <td><small>${esc(plan.unit || '—')}</small></td>
-        <td><input class="input" style="max-width:110px" type="number" min="0.1" step="0.01" value="${esc(String(merged.price ?? ''))}" data-field="price"></td>
+        <td><input class="input" style="max-width:140px" type="number" min="500" max="50000" step="0.01" value="${esc(String(merged.price ?? ''))}" data-field="price"></td>
         <td><input class="input" style="min-width:150px" maxlength="120" value="${esc(String(merged.averageTime ?? ''))}" data-field="averageTime"></td>
         <td class="mono">${limits.min.toLocaleString('en-NG')}</td>
         <td class="mono">${limits.max >= BOOST_MAX_QUANTITY ? '—' : limits.max.toLocaleString('en-NG')}</td>
@@ -198,7 +198,7 @@
     const averageText = row?.querySelector('[data-field="averageTime"]')?.value ?? '';
     const price = parseBoostPrice(priceText);
     if (price == null) {
-      rowStatus.set(id, { ok: false, text: 'Price must be ₦0.10 or more, at most 2 decimals.' });
+      rowStatus.set(id, { ok: false, text: 'Rate must be ₦500–₦50,000 per 1,000 units (max 2 decimals).' });
       renderPlans();
       return;
     }
