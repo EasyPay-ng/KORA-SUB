@@ -1303,6 +1303,8 @@ export const BOOST_MAX_QUANTITY = 10000000;
 // Rate bounds for the imported/admin-editable catalogue, in naira per 1,000 units.
 export const BOOST_MIN_RATE_PER_THOUSAND = 500;
 export const BOOST_MAX_RATE_PER_THOUSAND = 50000;
+// KORASTORE rate = GSUBZ rate × this markup.
+export const BOOST_SITE_MARKUP = 2;
 // No average time promised on the site is shorter than an hour, whatever the
 // source catalogue claims.
 export const BOOST_MIN_AVERAGE_TIME_MINUTES = 60;
@@ -1377,7 +1379,7 @@ export function formatBoostPrice(price) {
 // The boosting catalogue is a snapshot of GSUBZ's "Socials Media Market"
 // (data/gsubz-socials-services.json). It keeps the cheapest qualifying plan(s) in
 // each category whose KORASTORE rate is ₦500–₦50,000 per 1,000 units (the site rate
-// remains 4× GSUBZ). The admin edits just that rate and average time; names, units
+// remains 2× GSUBZ). The admin edits just that rate and average time; names, units
 // and source quantity limits are synced from GSUBZ.
 
 // Parses "3 hours 42 minutes", "45 minutes", "1h 30m" … into total minutes, or
@@ -1536,7 +1538,7 @@ function boostSourceMax(value) {
 
 // Turns the GSUBZ snapshot into the three collections the store sells from.
 // Pure: ids are deterministic (a re-publish upserts the same documents), and for
-// each category it keeps the cheapest plan(s) whose KORASTORE rate (4× the GSUBZ
+// each category it keeps the cheapest plan(s) whose KORASTORE rate (2× the GSUBZ
 // per-1,000 rate) falls within ₦500–₦50,000. Ties all come across. Free-service
 // categories are not sold here; source min/max quantities remain unchanged.
 export function buildBoostCatalogFromGsubz(raw) {
@@ -1557,7 +1559,7 @@ export function buildBoostCatalogFromGsubz(raw) {
     const eligible = rows.map((row) => ({
       row,
       sourcePrice: Number(row.price) || 0,
-      price: Math.round((Number(row.price) || 0) * 4 * 100) / 100
+      price: Math.round((Number(row.price) || 0) * BOOST_SITE_MARKUP * 100) / 100
     })).filter(({ sourcePrice, price }) =>
       boostPriceKobo(sourcePrice) > 0
       && price >= BOOST_MIN_RATE_PER_THOUSAND
@@ -1587,7 +1589,7 @@ export function buildBoostCatalogFromGsubz(raw) {
         .filter((line) => line.trim() && !/^average time:/i.test(line.trim()))
         .join(" ").trim();
       const averageTime = normalizeBoostAverageTime(row.description);
-      const price = Math.round(sourcePrice * 4 * 100) / 100;
+      const price = Math.round(sourcePrice * BOOST_SITE_MARKUP * 100) / 100;
       plans.push({
         id: `gsvc-${row.id}`,
         categoryId,
