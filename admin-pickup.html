@@ -101,7 +101,15 @@
     const states = [...new Set([...live.values()].map((row) => row.state))].sort((a, b) => a.localeCompare(b));
     const keepState = $('#filter-state').value;
     $('#filter-state').innerHTML = '<option value="">All states</option>' + states.map((state) => `<option value="${esc(state)}">${esc(state)}</option>`).join('');
-    if (states.includes(keepState)) $('#filter-state').value = keepState;
+    if (states.includes(keepState)) {
+      $('#filter-state').value = keepState;
+      filter.state = keepState;
+    } else {
+      // The state vanished from the table (e.g. its last station was hidden): drop the
+      // filter too, so the selector and the rows never disagree.
+      $('#filter-state').value = '';
+      filter.state = '';
+    }
 
     const text = filter.text.trim().toLowerCase();
     const rows = [...live.values()]
