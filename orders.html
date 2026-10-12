@@ -74,7 +74,7 @@
           <div class="row"><span class="badge ${statusClass(o.status)}">${esc(STATUS_LABEL[o.status] || o.status)}</span><b class="mono" style="color:var(--navy)">${naira(o.total)}</b></div>
         </div>
         <ul class="order-items">
-          <li><span>${esc(o.subcategoryName)}${o.unit ? ` <small class="muted">per ${esc(o.unit)}</small>` : ''} × ${o.quantity}</span><span>${naira(o.total)}</span></li>
+          <li><span>${esc(o.subcategoryName)}${o.unit ? ` <small class="muted">per ${Number(o.priceBasis) === 1000 ? '1,000 ' : ''}${esc(o.unit)}</small>` : ''} × ${o.quantity}</span><span>${naira(o.total)}</span></li>
           <li><span class="muted">Target</span><span class="small mono">${esc(o.link || '')}</span></li>
         </ul>
         <p class="small muted" style="margin:12px 0 0">${esc(o.platformName || '')}${o.categoryName ? ` · ${esc(o.categoryName)}` : ''}${o.status === 'cancelled' ? ' · Refunded to your wallet' : ''}</p>

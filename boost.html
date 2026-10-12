@@ -25,7 +25,7 @@
 </main>
 <div id="site-footer"></div>
 <script type="module">
-  import { mountHeader, mountFooter, watchBoostPlatforms, watchBoostCategories, watchBoostSubcategories, placeBoostOrder, newRequestId, auth, onAuthStateChanged, watchProfile, naira, esc, readParam, showToast, formatBoostLimits, boostServiceLimits, boostOrderTotal, boostPriceKobo, formatBoostPrice, BOOST_MAX_QUANTITY } from './store.js';
+  import { mountHeader, mountFooter, watchBoostPlatforms, watchBoostCategories, watchBoostSubcategories, placeBoostOrder, newRequestId, auth, onAuthStateChanged, watchProfile, naira, esc, readParam, showToast, formatBoostLimits, boostServiceLimits, boostOrderTotal, formatBoostPrice, BOOST_MAX_QUANTITY } from './store.js';
   mountHeader('boost.html');
   mountFooter();
 
@@ -43,13 +43,18 @@
   let catalogueTimeout;
 
   const platformOf = (id) => platforms.find(p => p.id === id);
-  const visibleCategories = () => categories.filter(c => c.active === true && platformOf(c.platformId)?.active === true);
+  const hasCurrentRateBasis = (service) => Number(service?.priceBasis) === 1000;
+  const visibleCategories = () => categories.filter(c => c.active === true
+    && platformOf(c.platformId)?.active === true
+    && subcategories.some(s => s.categoryId === c.id && s.active === true && hasCurrentRateBasis(s)));
   // Imported category names are self-describing ("Twitter Views", "Instagram Likes
   // [Country Targeted]") — shown as-is, grouped by platform family for browsing.
   const categoryTitle = (cat) => String(cat?.name || '').trim() || 'Category';
-  const servicesOf = (catId) => subcategories.filter(s => s.categoryId === catId && s.active === true);
-  const currentService = () => subcategories.find(s => s.id === serviceId && s.active === true) || null;
-  const serviceLabel = (s) => `${s.name} - ${formatBoostPrice(s.price)}${s.unit ? ` per ${s.unit}` : ''}`;
+  const servicesOf = (catId) => subcategories.filter(s =>
+    s.categoryId === catId && s.active === true && hasCurrentRateBasis(s));
+  const currentService = () => subcategories.find(s =>
+    s.id === serviceId && s.active === true && hasCurrentRateBasis(s)) || null;
+  const serviceLabel = (s) => `${s.name} — ${formatBoostPrice(s.price)} per 1,000 ${s.unit || 'units'}`;
 
   function showCatalogueError() {
     const failures = Object.entries(catalogueErrors).map(([key, message]) => `${catalogueLabels[key] || key}: ${message}`);
@@ -192,12 +197,8 @@
     qtyInput.disabled = false;
     const { min, max } = boostServiceLimits(service);
     limitsEl.textContent = formatBoostLimits(service);
-    // A plan can price a unit at a fraction of ₦1 (e.g. ₦0.10); the wallet only
-    // holds whole naira, so say so where the buyer picks the quantity.
-    const fractional = boostPriceKobo(service.price) % 100 !== 0;
-    priceNote.textContent = fractional
-      ? `${formatBoostPrice(service.price)} per ${String(service.unit || 'unit').trim() || 'unit'} · your wallet is whole naira, so the amount is rounded to the nearest ₦ (never below ₦1).`
-      : '';
+    const unit = String(service.unit || 'units').trim() || 'units';
+    priceNote.textContent = `${formatBoostPrice(service.price)} per 1,000 ${unit} · amount = rate × quantity ÷ 1,000, rounded to the nearest ₦ (never below ₦1).`;
     const avg = String(service.averageTime || '').trim();
     const desc = String(service.description || '').trim();
     infoEl.innerHTML = `<div>Average time: <b>${esc(avg || 'Varies')}</b></div>${desc ? `<div>${esc(desc)}</div>` : ''}`;

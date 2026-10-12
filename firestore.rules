@@ -12,10 +12,9 @@ rules_version = '2';
 //  - A customer's wallet can never go UP. Funding is credited by the admin only.
 //  - Stock can go DOWN only in a batch that creates the order that includes that product.
 //  - Orders are created once (create-only), so a retried checkout can't double-charge.
-//  - Boost orders are paid the same way: the total must be the plan's price per unit ×
-//    quantity. A plan may price a unit at a fraction of ₦1 (₦0.10 minimum), so the money
-//    is worked out in kobo and rounded to whole naira (never below ₦1) — the wallet holds
-//    no kobo.
+//  - Boost orders are paid the same way: the plan's rate per 1,000 × quantity / 1,000.
+//    The rate must be ₦500–₦50,000 per 1,000 units; totals are rounded to whole naira
+//    (never below ₦1) because the wallet holds no kobo.
 //  - Checkout fees are fixed by the fee schedule in /settings/fees (admin-edited), with
 //    built-in defaults: ₦2,000 platform service fee, ₦2,500 delivery inside the store's
 //    local state, ₦6,000 delivery anywhere else.
@@ -72,12 +71,11 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/pickupStations/$(id)).data;
     }
 
-    // What a boost order costs: the plan's price per unit × quantity, worked out in
-    // kobo (a plan may price a unit at a fraction of ₦1, e.g. ₦0.10) and rounded to
-    // whole naira because the wallet only ever holds whole naira — never below ₦1.
-    // Mirrors boostOrderTotal() in store.js.
-    function boostOrderTotal(unitPrice, quantity) {
-      let total = math.round(math.round(unitPrice * 100.0) * quantity / 100.0);
+    // What a boost order costs: the plan's rate per 1,000 × quantity / 1,000.
+    // Work in kobo, round to whole naira because the wallet holds no kobo, and
+    // never charge less than ₦1. Mirrors boostOrderTotal() in store.js.
+    function boostOrderTotal(ratePerThousand, quantity) {
+      let total = math.round(math.round(ratePerThousand * 100.0) * quantity / 100000.0);
       return total < 1 ? 1 : total;
     }
 
@@ -432,13 +430,10 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    // Subcategories — the plans shoppers order, each with its own price per unit,
-    // optional order limits (minQuantity, maxQuantity where 0/blank means no
-    // maximum) and an average delivery time. The price may be a fraction of ₦1
-    // (as low as ₦0.10, in kobo steps) — the order total is rounded to whole
-    // naira there. The limits are enforced in the app's order transaction, which
-    // re-reads the plan; the rules below still pin the price, names and wallet
-    // debit, so bypassing a limit cannot change what is charged.
+    // Subcategories — the plans shoppers order, each with a rate per 1,000 units,
+    // source order limits (maxQuantity 0/blank means no maximum) and average time.
+    // The rate is ₦500–₦50,000. Order limits are re-read and enforced by both the
+    // app transaction and the boost-order rule; totals are rounded to whole naira.
     match /boostSubcategories/{subcategoryId} {
       allow read: if resource.data.active == true || isAdmin();
       allow create: if isAdmin()
@@ -449,19 +444,26 @@ service cloud.firestore {
         && request.resource.data.description.size() <= 500
         && isText(request.resource.data.unit, 60)
         && request.resource.data.price is number
-        && request.resource.data.price >= 0.1
+        && request.resource.data.price >= 500
+        && request.resource.data.price <= 50000
+        && request.resource.data.priceBasis == 1000
         && (!('minQuantity' in request.resource.data) || (request.resource.data.minQuantity is int && request.resource.data.minQuantity >= 1))
         && (!('maxQuantity' in request.resource.data) || (request.resource.data.maxQuantity is int && request.resource.data.maxQuantity >= 0))
         && (!('averageTime' in request.resource.data) || (request.resource.data.averageTime is string && request.resource.data.averageTime.size() <= 120))
         && request.resource.data.active is bool;
-      allow update: if isAdmin();
+      allow update: if isAdmin()
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['price'])
+          || (request.resource.data.price is number
+            && request.resource.data.price >= 500
+            && request.resource.data.price <= 50000))
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['priceBasis'])
+          || request.resource.data.priceBasis == 1000);
       allow delete: if isAdmin();
     }
 
     // Boost orders: /boostOrders/{uid}_{requestId} — one service, paid from the wallet.
-    // No delivery and no checkout fees: the total is the catalogue's unit price × the
-    // quantity, rounded to whole naira (the plan price may be a fraction of ₦1). The
-    // id is "<uid>_<requestId>" so retries reuse the same id.
+    // No delivery or checkout fees: total = per-1,000 rate × quantity / 1,000, rounded
+    // to whole naira. The id is "<uid>_<requestId>" so retries reuse the same id.
     match /boostOrders/{orderId} {
       allow read: if (signedIn() && resource.data.uid == request.auth.uid) || isAdmin();
 
@@ -469,7 +471,7 @@ service cloud.firestore {
         && orderId == request.auth.uid + '_' + request.resource.data.requestId
         && request.resource.data.keys().hasOnly([
           'uid', 'requestId', 'platformId', 'platformName', 'categoryId', 'categoryName',
-          'subcategoryId', 'subcategoryName', 'unit', 'unitPrice', 'quantity', 'total',
+          'subcategoryId', 'subcategoryName', 'unit', 'unitPrice', 'priceBasis', 'quantity', 'total',
           'link', 'status', 'createdAt', 'updatedAt'
         ])
         && request.resource.data.uid == request.auth.uid
@@ -488,13 +490,20 @@ service cloud.firestore {
         && request.resource.data.link.size() <= 300
         && request.resource.data.quantity is int
         && request.resource.data.quantity >= 1
+        && request.resource.data.quantity <= 10000000
         && request.resource.data.unitPrice is number
-        && request.resource.data.unitPrice >= 0.1
+        && request.resource.data.unitPrice >= 500
+        && request.resource.data.unitPrice <= 50000
+        && request.resource.data.priceBasis == 1000
         && request.resource.data.total is int
         && request.resource.data.total
              == boostOrderTotal(request.resource.data.unitPrice, request.resource.data.quantity)
+        && request.resource.data.quantity >= get(/databases/$(database)/documents/boostSubcategories/$(request.resource.data.subcategoryId)).data.get('minQuantity', 1)
+        && (get(/databases/$(database)/documents/boostSubcategories/$(request.resource.data.subcategoryId)).data.get('maxQuantity', 0) == 0
+          || request.resource.data.quantity <= get(/databases/$(database)/documents/boostSubcategories/$(request.resource.data.subcategoryId)).data.maxQuantity)
         // The catalogue as it is now decides the price and the names on the order.
         && get(/databases/$(database)/documents/boostSubcategories/$(request.resource.data.subcategoryId)).data.price == request.resource.data.unitPrice
+        && get(/databases/$(database)/documents/boostSubcategories/$(request.resource.data.subcategoryId)).data.get('priceBasis', 0) == request.resource.data.priceBasis
         && get(/databases/$(database)/documents/boostSubcategories/$(request.resource.data.subcategoryId)).data.name == request.resource.data.subcategoryName
         && get(/databases/$(database)/documents/boostSubcategories/$(request.resource.data.subcategoryId)).data.unit == request.resource.data.unit
         && get(/databases/$(database)/documents/boostSubcategories/$(request.resource.data.subcategoryId)).data.categoryId == request.resource.data.categoryId

@@ -1291,39 +1291,33 @@ export const NEXT_ORDER_ACTIONS = {
 
 // ---------- Social media boosting ----------
 // The admin runs a boosting catalogue: platforms (Facebook, TikTok, YouTube, …),
-// categories inside them (Followers, Likes, Views, …), and plans — the actual
-// service listings, each with its own price per unit, optional min/max quantity
-// and an average delivery time. Shoppers see one order form (Category → Plan →
-// link → quantity → pay from wallet); there is no delivery and no checkout fee on
-// boost orders.
+// categories inside them (Followers, Likes, Views, …), and plans — each GSUBZ price
+// is a rate per 1,000 units, with the source plan's min/max quantity and average
+// delivery time. Shoppers order a quantity and pay the proportional rate from their
+// wallet; there is no delivery and no checkout fee on boost orders.
 export const BOOST_ID_PATTERN = /^[A-Za-z0-9_-]{2,40}$/;
 // Hard ceiling for any boost quantity. A plan can narrow it with minQuantity /
-// maxQuantity (maxQuantity 0 or missing means "no maximum"). GSUBZ's own maximums
-// go far higher — its "unlimited" marker is 2,147,483,647, which the import stores
-// as 0 (= no maximum) instead of a number the money maths cannot hold.
+// maxQuantity (maxQuantity 0 or missing means "no maximum"). GSUBZ's unlimited
+// marker is 2,147,483,647, so the site cap keeps the money maths safe.
 export const BOOST_MAX_QUANTITY = 10000000;
-// Smallest price per unit the admin can set: ₦0.10 (cheap units such as views).
-// The wallet only ever holds whole naira, so all boost money is worked out in
-// kobo (exact integers) and an order total is rounded to the nearest naira.
-export const BOOST_MIN_UNIT_PRICE = 0.1;
-// A unit price under ₦1 is only sold in packs of 50 or more, so a whole-naira
-// order total is always worth processing.
-export const BOOST_CHEAP_MIN_QUANTITY = 50;
+// Rate bounds for the imported/admin-editable catalogue, in naira per 1,000 units.
+export const BOOST_MIN_RATE_PER_THOUSAND = 500;
+export const BOOST_MAX_RATE_PER_THOUSAND = 50000;
 // No average time promised on the site is shorter than an hour, whatever the
 // source catalogue claims.
 export const BOOST_MIN_AVERAGE_TIME_MINUTES = 60;
 
-// Effective order limits for a plan. The minimum follows the catalogue (imported
-// from GSUBZ), with one exception: a unit price under ₦1 needs at least 50 units.
-// The check reads the plan's CURRENT price, so an admin price edit below ₦1
-// raises the minimum automatically, and lifting the price puts it back down.
+// Effective order limits for a plan. These stay aligned with GSUBZ's source
+// minimum and maximum (maxQuantity 0 or missing means no maximum).
 export function boostServiceLimits(service = {}) {
   const minRaw = Number(service.minQuantity);
-  let min = Number.isInteger(minRaw) && minRaw >= 1 ? Math.min(minRaw, BOOST_MAX_QUANTITY) : 1;
-  const kobo = boostPriceKobo(service.price);
-  if (kobo > 0 && kobo < 100) min = Math.max(min, BOOST_CHEAP_MIN_QUANTITY);
+  const min = Number.isInteger(minRaw) && minRaw >= 1
+    ? Math.min(minRaw, BOOST_MAX_QUANTITY)
+    : 1;
   const maxRaw = Number(service.maxQuantity);
-  const max = Number.isInteger(maxRaw) && maxRaw >= min ? Math.min(maxRaw, BOOST_MAX_QUANTITY) : BOOST_MAX_QUANTITY;
+  const max = Number.isInteger(maxRaw) && maxRaw >= min
+    ? Math.min(maxRaw, BOOST_MAX_QUANTITY)
+    : BOOST_MAX_QUANTITY;
   return { min, max };
 }
 
@@ -1334,9 +1328,8 @@ export function formatBoostLimits(service = {}) {
   return max >= BOOST_MAX_QUANTITY ? low : `${low} | Max: ${max.toLocaleString('en-NG')}`;
 }
 
-// A plan's price per unit, as whole kobo (₦1 = 100). Working in kobo keeps the
-// maths exact for the cheap fractional prices (₦0.1, ₦0.15, …) the admin can set.
-// Returns 0 when the price is unusable.
+// A plan's rate per 1,000 units, as whole kobo (₦1 = 100). Working in kobo
+// keeps fractional rates exact. Returns 0 when the price is unusable.
 export function boostPriceKobo(price) {
   const amount = Number(price);
   if (!Number.isFinite(amount)) return 0;
@@ -1344,30 +1337,34 @@ export function boostPriceKobo(price) {
   return Number.isSafeInteger(kobo) && kobo >= 1 ? kobo : 0;
 }
 
-// Reads an admin-typed price ("17", "0.5", "12.30") as a number, or null when it
-// is not a valid boost price (at least ₦0.10, at most two decimals).
+// Reads an admin-typed rate per 1,000 units, or null when it is outside the
+// catalogue's ₦500–₦50,000 range or has more than two decimal places.
 export function parseBoostPrice(value) {
   const text = String(value ?? '').trim();
   if (!/^(?:\d+(?:\.\d{1,2})?|\.\d{1,2})$/.test(text)) return null;
   const kobo = boostPriceKobo(text);
-  if (!kobo || kobo < boostPriceKobo(BOOST_MIN_UNIT_PRICE)) return null;
+  if (!kobo || kobo < boostPriceKobo(BOOST_MIN_RATE_PER_THOUSAND)
+      || kobo > boostPriceKobo(BOOST_MAX_RATE_PER_THOUSAND)) return null;
   return kobo / 100;
 }
 
-// What a boost order costs: price per unit × quantity, in kobo, rounded to the
-// nearest naira because the wallet is whole naira — never below ₦1. Returns 0
-// when the price or the quantity is unusable (so callers can reject the order).
-export function boostOrderTotal(price, quantity) {
-  const kobo = boostPriceKobo(price);
+// What a boost order costs: rate per 1,000 × quantity / 1,000, calculated in
+// kobo and rounded to the nearest whole naira because the wallet holds no kobo.
+// Never charge less than ₦1. Returns 0 when the price or quantity is unusable.
+export function boostOrderTotal(pricePerThousand, quantity) {
+  const rateKobo = boostPriceKobo(pricePerThousand);
   const units = Number(quantity);
-  if (!kobo || kobo < boostPriceKobo(BOOST_MIN_UNIT_PRICE)) return 0;
+  if (!rateKobo
+      || rateKobo < boostPriceKobo(BOOST_MIN_RATE_PER_THOUSAND)
+      || rateKobo > boostPriceKobo(BOOST_MAX_RATE_PER_THOUSAND)) return 0;
   if (!Number.isSafeInteger(units) || units < 1 || units > BOOST_MAX_QUANTITY) return 0;
-  if (!Number.isSafeInteger(kobo * units)) return 0; // too large to price exactly
-  const total = Math.round((kobo * units) / 100);
+  const koboTimesUnits = rateKobo * units;
+  if (!Number.isSafeInteger(koboTimesUnits)) return 0; // too large to price exactly
+  const total = Math.round(koboTimesUnits / 100000); // kobo / 1,000 / 100 kobo per naira
   return total < 1 ? 1 : total;
 }
 
-// "₦0.10" for a sub-₦1 price, "₦17" when the price is a whole naira amount.
+// Whole-naira rates display without decimals; fractional rates show two decimals.
 export function formatBoostPrice(price) {
   const kobo = boostPriceKobo(price);
   if (!kobo) return naira(0);
@@ -1378,9 +1375,10 @@ export function formatBoostPrice(price) {
 
 // ---------- GSUBZ catalogue import (Admin → Boosting) ----------
 // The boosting catalogue is a snapshot of GSUBZ's "Socials Media Market"
-// (data/gsubz-socials-services.json): every category, and — per category — only
-// its most expensive service(s), priced at 4× GSUBZ. The admin edits just the
-// price and the average time afterwards; everything else is synced.
+// (data/gsubz-socials-services.json). It keeps the cheapest qualifying plan(s) in
+// each category whose KORASTORE rate is ₦500–₦50,000 per 1,000 units (the site rate
+// remains 4× GSUBZ). The admin edits just that rate and average time; names, units
+// and source quantity limits are synced from GSUBZ.
 
 // Parses "3 hours 42 minutes", "45 minutes", "1h 30m" … into total minutes, or
 // null when the text does not describe a duration.
@@ -1532,14 +1530,15 @@ function boostHash(text) {
 // GSUBZ marks "no maximum" as 2,147,483,647; the site stores 0 = no maximum.
 function boostSourceMax(value) {
   const max = Math.floor(Number(value) || 0);
-  return (max < 1 || max >= BOOST_MAX_QUANTITY) ? 0 : max;
+  if (max < 1 || max >= 2147483647) return 0;
+  return Math.min(max, BOOST_MAX_QUANTITY);
 }
 
 // Turns the GSUBZ snapshot into the three collections the store sells from.
-// Pure: ids are deterministic (a re-publish upserts the same documents), each
-// category keeps only its most expensive service(s) — ties share the top price —
-// and the site price is 4× the GSUBZ per-unit price. Free-service categories are
-// not sold here.
+// Pure: ids are deterministic (a re-publish upserts the same documents), and for
+// each category it keeps the cheapest plan(s) whose KORASTORE rate (4× the GSUBZ
+// per-1,000 rate) falls within ₦500–₦50,000. Ties all come across. Free-service
+// categories are not sold here; source min/max quantities remain unchanged.
 export function buildBoostCatalogFromGsubz(raw) {
   const services = Array.isArray(raw?.services) ? raw.services : [];
   const byCategory = new Map();
@@ -1555,11 +1554,20 @@ export function buildBoostCatalogFromGsubz(raw) {
   const categories = [];
   const plans = [];
   for (const [categoryName, rows] of [...byCategory.entries()].sort(([a], [b]) => a.localeCompare(b))) {
-    const topPrice = Math.max(...rows.map((row) => Number(row.price) || 0));
-    const winners = rows
-      .filter((row) => Number(row.price) === topPrice && boostPriceKobo(row.price) > 0)
+    const eligible = rows.map((row) => ({
+      row,
+      sourcePrice: Number(row.price) || 0,
+      price: Math.round((Number(row.price) || 0) * 4 * 100) / 100
+    })).filter(({ sourcePrice, price }) =>
+      boostPriceKobo(sourcePrice) > 0
+      && price >= BOOST_MIN_RATE_PER_THOUSAND
+      && price <= BOOST_MAX_RATE_PER_THOUSAND);
+    if (!eligible.length) continue;
+    const lowestPrice = Math.min(...eligible.map(({ price }) => price));
+    const winners = eligible
+      .filter(({ price }) => price === lowestPrice)
+      .map(({ row }) => row)
       .sort((a, b) => Number(a.id) - Number(b.id));
-    if (!winners.length) continue;
     const family = boostPlatformFromName(categoryName);
     const platformId = boostSlug(family, 40) || "other";
     if (!platforms.has(platformId)) {
@@ -1587,10 +1595,11 @@ export function buildBoostCatalogFromGsubz(raw) {
         description: truncateUtf8(detail, 500, ""),
         unit: boostUnitFromName(`${row.name || ""} ${categoryName}`),
         price,
-        // The defaults are remembered so a re-publish only overwrites a price or
+        priceBasis: 1000,
+        // The defaults are remembered so a re-publish only overwrites a rate or
         // average time the admin has NOT edited.
         defaultPrice: price,
-        minQuantity: Math.max(1, Math.floor(Number(row.min) || 1), sourcePrice < 1 ? BOOST_CHEAP_MIN_QUANTITY : 0),
+        minQuantity: Math.max(1, Math.floor(Number(row.min) || 1)),
         maxQuantity: boostSourceMax(row.max),
         averageTime,
         defaultAverageTime: averageTime,
@@ -1637,9 +1646,9 @@ export function saveBoostItem(kind, id, data, { isNew = false } = {}) {
 // Publishes an imported GSUBZ catalogue (buildBoostCatalogFromGsubz output):
 // upserts platforms, categories and plans in batches, then hides anything else
 // that is still live (the old manual catalogue). Price and averageTime belong to
-// the store, not to GSUBZ — a re-publish keeps the admin's values for those two
-// fields (tracked against the defaultPrice / defaultAverageTime it first wrote)
-// and refreshes everything else.
+// the store, not to GSUBZ — re-publishing keeps the admin's edits. A price edit is
+// carried over only when its priceBasis matches, so old per-unit rates are not
+// mistakenly reused as per-1,000 rates during this migration.
 export async function publishBoostCatalog({ platforms = [], categories = [], plans = [], existing = {}, hideOthers = true } = {}) {
   const before = new Map((existing.plans || []).map((row) => [row.id, row]));
   const upserts = [
@@ -1649,7 +1658,9 @@ export async function publishBoostCatalog({ platforms = [], categories = [], pla
       const data = { ...plan };
       const old = before.get(plan.id);
       if (old) {
-        if (old.price != null && old.price !== old.defaultPrice) data.price = old.price;
+        if (old.priceBasis === plan.priceBasis && old.price != null && old.price !== old.defaultPrice) {
+          data.price = old.price;
+        }
         if (old.averageTime && old.averageTime !== old.defaultAverageTime) data.averageTime = old.averageTime;
       }
       return { id: plan.id, collection: "boostSubcategories", data };
@@ -1680,9 +1691,9 @@ export async function publishBoostCatalog({ platforms = [], categories = [], pla
   return { written: upserts.length, hidden: hides.length };
 }
 
-// Buys one boosting service: the catalogue's price × quantity, paid from the wallet.
-// The order id is "<uid>_<requestId>", so a retried checkout returns the original
-// order instead of charging twice.
+// Buys one boosting service: the catalogue's rate per 1,000 × quantity / 1,000,
+// paid from the wallet. The order id is "<uid>_<requestId>", so a retried checkout
+// returns the original order instead of charging twice.
 export async function placeBoostOrder(requestId, { subcategoryId, quantity, link }) {
   const user = auth.currentUser;
   if (!user) throw new Error("Sign in to continue.");
@@ -1721,14 +1732,21 @@ export async function placeBoostOrder(requestId, { subcategoryId, quantity, link
     const platform = platformSnap.exists() ? platformSnap.data() : null;
     if (!platform || platform.active !== true) throw new Error("This service is not available right now.");
 
-    const unitPrice = Number(service.price);
-    if (!boostPriceKobo(unitPrice) || unitPrice < BOOST_MIN_UNIT_PRICE) throw new Error("This service has no valid price.");
+    if (Number(service.priceBasis) !== 1000) {
+      throw new Error("The boost catalogue needs republishing before this plan can be ordered.");
+    }
+    const ratePerThousand = Number(service.price);
+    if (!boostPriceKobo(ratePerThousand)
+        || ratePerThousand < BOOST_MIN_RATE_PER_THOUSAND
+        || ratePerThousand > BOOST_MAX_RATE_PER_THOUSAND) {
+      throw new Error("This service's per-1,000 rate is outside the allowed ₦500–₦50,000 range.");
+    }
     // The plan's own limits, read inside the transaction so they cannot be stale.
     const { min, max } = boostServiceLimits(service);
     if (amount < min) throw new Error(`This plan needs a quantity of at least ${min.toLocaleString('en-NG')}.`);
     if (amount > max) throw new Error(`This plan allows a quantity of at most ${max.toLocaleString('en-NG')}.`);
-    // Price × quantity in kobo, rounded to whole naira (the wallet holds no kobo).
-    const total = boostOrderTotal(unitPrice, amount);
+    // Rate per 1,000 × quantity / 1,000, rounded to whole naira (the wallet holds no kobo).
+    const total = boostOrderTotal(ratePerThousand, amount);
     if (!total) throw new Error("That quantity is too large.");
 
     const profileSnap = await tx.get(userRef);
@@ -1746,7 +1764,7 @@ export async function placeBoostOrder(requestId, { subcategoryId, quantity, link
       categoryId: categorySnap.id, categoryName: String(category.name || "Category").slice(0, 80),
       subcategoryId: serviceSnap.id, subcategoryName: String(service.name || "Service").slice(0, 120),
       unit: String(service.unit || "").slice(0, 60),
-      unitPrice, quantity: amount, total,
+      unitPrice: ratePerThousand, priceBasis: 1000, quantity: amount, total,
       link: target, status: "paid",
       createdAt: serverTimestamp(), updatedAt: serverTimestamp()
     });
@@ -1759,7 +1777,7 @@ export async function placeBoostOrder(requestId, { subcategoryId, quantity, link
       reference: orderId, actor: uid, createdAt: serverTimestamp()
     });
     return {
-      orderId, status: "paid", unitPrice, quantity: amount,
+      orderId, status: "paid", unitPrice: ratePerThousand, priceBasis: 1000, quantity: amount,
       total, balance: newBalance, duplicate: false
     };
   });
