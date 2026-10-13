@@ -93,7 +93,7 @@ The admin can change the amounts and which state counts as "local" under **Admin
 - **Product photos are compressed client-side** (JPEG, max 5) and stored as base64 inside the product document — Firestore's 1 MB per-document limit is why the uploader compresses them. Very photo-heavy products (5 large photos) push that limit; the uploader blocks oversized sets.
 - **Analytics are approximate.** Visits are page views, not unique people. Counters are open to anyone who can reach the site, so a script could inflate them (Firebase App Check would reduce that, but it is not set up here). Clicks are measured by the page, so a click on a link that opens another site can be missed if the page closes before the count is saved.
 - **Funding alerts need a browser.** They run only while an admin's browser has the site open. A closed browser learns about a request on its next visit.
-- **Browser notifications** are best-effort: they fire live while the site is open and as a catch-up on the next visit. There is no push server, so a closed browser is notified only when the shopper returns.
+- **Browser notifications** are best-effort: they fire live while the site is open and as a catch-up on the next visit. Closed-browser push works only for recommended products, and only when you send it from the OneSignal dashboard (see *Closed-browser push* below).
 - **No tax, coupons, email notifications or payment-gateway integration.**
 
 ## Pages
@@ -144,6 +144,20 @@ Money is stored as whole naira (integers) — the wallet never holds kobo. A boo
 - **Sales and funding** come from the existing orders, boost orders and funding requests (cancelled orders are excluded from revenue).
 
 Firestore rules only let these counters go up by exactly 1 per write, and only admins can read them. A WhatsApp **join** cannot be measured; the page counts clicks on the button.
+
+## Closed-browser push (OneSignal, no server)
+
+Shoppers who press **Turn on alerts** on the shop page are subscribed through **OneSignal's free web-push plan**. Their browser then gets a notification even when the site is closed (desktop and Android Chrome, Edge and Firefox; iPhone only after the site is added to the home screen). The site itself stays static: the OneSignal web SDK runs in the browser and uses `sw.js`. Nothing secret is stored in this repo.
+
+**Setup (one time):**
+
+1. Create a free account at onesignal.com and make a **Web** app. Use your store's address as the site URL.
+2. Copy the **OneSignal App ID** into `ONESIGNAL_APP_ID` in `push-config.js`, then deploy the site. Until this is set, closed-browser push is off.
+3. Keep the **REST API key** from OneSignal (Settings → Keys & IDs) private. Do not put it in the repo or the site.
+
+**Sending a recommended product:** when you mark a product as recommended, the in-browser alert goes out automatically to shoppers with the site open. For closed browsers, open the OneSignal dashboard → **Messages → New Push**, use the product name as the message, and link it to `product.html?id=<productId>`. The admin Products page reminds you of this after each new recommendation.
+
+Sending from the admin page automatically would need a small server-side function that keeps the REST key secret. That isn't part of this setup.
 
 ## Setup and deployment
 

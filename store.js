@@ -9,6 +9,7 @@ import {
   orderBy, limit, onSnapshot, serverTimestamp, runTransaction, writeBatch, increment
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { firebaseConfig, ADMIN_EMAILS } from "./firebase-config.js";
+import { ONESIGNAL_APP_ID } from "./push-config.js";
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
@@ -190,7 +191,8 @@ export function checkoutFees(subtotal, delivery, fees = DEFAULT_FEES) {
 }
 
 // ---------- Recommended-product alerts ----------
-// Written when the admin lists (or flags) a product as "recommended".
+// Written when the admin lists (or flags) a product as "recommended". This feed drives the
+// in-browser alerts. Closed-browser push is sent from the OneSignal dashboard (see README).
 export function announceRecommended(productId, name) {
   return addDoc(collection(db, "notifications"), {
     type: "recommended",
@@ -198,6 +200,45 @@ export function announceRecommended(productId, name) {
     name: String(name || "New product").slice(0, 120),
     createdAt: serverTimestamp()
   });
+}
+
+// ---------- OneSignal (closed-browser push for shoppers) ----------
+// Loads the OneSignal web SDK once. It uses sw.js (which imports OneSignal's worker) so
+// there is still a single service worker for the site. Nothing loads when the App ID is empty.
+let oneSignalStarted = false;
+export function startOneSignal() {
+  if (!ONESIGNAL_APP_ID || oneSignalStarted || location.protocol === "file:") return;
+  oneSignalStarted = true;
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  window.OneSignalDeferred.push(async (OneSignal) => {
+    await OneSignal.init({
+      appId: ONESIGNAL_APP_ID,
+      serviceWorkerPath: new URL("sw.js", document.baseURI).pathname,
+      serviceWorkerParam: { scope: new URL("./", document.baseURI).pathname },
+      allowLocalhostAsSecureOrigin: true
+    });
+  });
+  const script = document.createElement("script");
+  script.src = "https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js";
+  script.defer = true;
+  document.head.appendChild(script);
+}
+
+// The shopper's "Turn on alerts" button. With OneSignal on, the prompt also subscribes the
+// browser for closed-browser push. Without it, this is the plain browser prompt.
+export async function requestShopperAlerts() {
+  if (!ONESIGNAL_APP_ID) return requestNotificationPermission();
+  startOneSignal();
+  const asked = new Promise((resolve) => {
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    window.OneSignalDeferred.push(async (OneSignal) => {
+      try { await OneSignal.Notifications.requestPermission(); } catch { /* the state below still tells the truth */ }
+      resolve();
+    });
+  });
+  // If the OneSignal script is blocked, do not leave the button stuck on "Asking…".
+  await Promise.race([asked, new Promise((resolve) => setTimeout(resolve, 15000))]);
+  return notificationState();
 }
 
 export function watchNotifications(callback, onError = noop, max = 10) {
@@ -858,6 +899,7 @@ export function mountHeader(active) {
   // Every storefront page listens for new recommended products and notifies the user.
   if (!alertsStarted) { alertsStarted = true; watchRecommendedAlerts(); }
   mountWhatsAppChannel();
+  startOneSignal();
   countVisit();
 }
 
@@ -1205,7 +1247,7 @@ export function watchRecommendedAlerts() {
         showBrowserNotification({
           title: "KORASTORE · Recommended for you",
           body: `${item.name} just landed in the shop`,
-          tag: item.productId || item.id,
+          tag: `recommended-${item.productId || item.id}`,
           link
         });
       }
