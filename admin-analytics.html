@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Analytics — KORASTORE Admin</title>
+  <link rel="stylesheet" href="store.css">
+  <link rel="icon" href="assets/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png"><meta name="theme-color" content="#0b2545">
+</head>
+<body>
+<div id="gate" class="gate"><div class="gate-card"><span class="gate-mark">K</span><h2>Checking admin access…</h2><p>Verifying your account before any store data loads.</p></div></div>
+<div class="admin-shell" id="admin-content" hidden>
+  <aside class="admin-side" id="admin-sidebar"></aside>
+  <main class="admin-main">
+    <div class="page-head"><div><span class="eyebrow">Insight</span><h1>Analytics</h1><p>Visits, clicks, leads and sales. Visits are storefront page views and clicks come from tracked links; days run on Lagos time. Nothing here identifies visitors who are not signed up.</p></div></div>
+
+    <section class="stats" aria-label="Customers">
+      <div class="stat"><small>Total users</small><strong id="s-users">0</strong><em id="s-users-new">0 joined in the last 7 days</em></div>
+      <div class="stat"><small>Leads</small><strong id="s-leads">0</strong><em>Signed up, no order yet</em></div>
+      <div class="stat"><small>Customers who ordered</small><strong id="s-buyers">0</strong><em id="s-buyers-rate">0% of users</em></div>
+      <div class="stat"><small>Pending funding</small><strong id="s-pending">0</strong><em id="s-pending-sum">₦0 waiting</em></div>
+    </section>
+
+    <section class="stats" aria-label="Traffic" style="margin-top:16px">
+      <div class="stat"><small>Visits today</small><strong id="s-visits-today">0</strong><em id="s-visits-week">0 in the last 7 days</em></div>
+      <div class="stat"><small>Visits, last 30 days</small><strong id="s-visits-month">0</strong><em id="s-visits-all">0 all time</em></div>
+      <div class="stat"><small>WhatsApp channel clicks</small><strong id="s-wa-today">0</strong><em id="s-wa-all">0 all time</em></div>
+      <div class="stat"><small>Site link clicks</small><strong id="s-links-today">0</strong><em id="s-links-all">0 all time</em></div>
+    </section>
+
+    <section class="stats" aria-label="Sales" style="margin-top:16px">
+      <div class="stat"><small>Orders (not cancelled)</small><strong id="s-orders">0</strong><em id="s-boosts">0 boost orders included</em></div>
+      <div class="stat"><small>Revenue (not cancelled)</small><strong id="s-revenue">₦0</strong><em id="s-revenue-boost">₦0 from boosting</em></div>
+      <div class="stat"><small>Approved funding</small><strong id="s-approved">₦0</strong><em id="s-approved-count">0 requests</em></div>
+      <div class="stat"><small>Wallet balances</small><strong id="s-balances">₦0</strong><em>Total held by customers</em></div>
+    </section>
+
+    <div class="admin-grid" style="margin-top:20px">
+      <section class="card">
+        <div class="card-head"><div><h2>Last 14 days</h2><small>Visits and clicks per day (Lagos time).</small></div></div>
+        <div class="table-wrap"><table class="table"><thead><tr><th>Day</th><th>Visits</th><th>WhatsApp</th><th>Link clicks</th></tr></thead><tbody id="days"><tr><td colspan="4">Loading…</td></tr></tbody></table></div>
+      </section>
+      <section class="card">
+        <div class="card-head"><div><h2>Top links</h2><small>Every tracked click, all time.</small></div></div>
+        <div class="table-wrap"><table class="table"><thead><tr><th>Link</th><th>Clicks</th></tr></thead><tbody id="links"><tr><td colspan="2">Loading…</td></tr></tbody></table></div>
+      </section>
+    </div>
+
+    <section class="card" style="margin-top:20px">
+      <div class="spread" style="margin-bottom:16px">
+        <div><h2>Leads</h2><small class="muted">Registered customers who have not placed a product or boost order yet. Newest first.</small></div>
+        <div class="row"><input id="lead-search" class="input" type="search" placeholder="Search name or email" style="max-width:260px" aria-label="Search leads"><small id="lead-count" class="muted"></small></div>
+      </div>
+      <div class="table-wrap"><table class="table"><thead><tr><th>Name</th><th>Email</th><th>Joined</th><th>Wallet</th></tr></thead><tbody id="leads"><tr><td colspan="4">Loading…</td></tr></tbody></table></div>
+    </section>
+  </main>
+</div>
+<script type="module">
+  import { mountAdminSidebar, requireAdmin, watchAllUsers, watchAllOrders, watchAllBoostOrders, watchAllFunding, watchAnalyticsDays, watchAnalyticsLinks, isAdminEmail, dayKey, naira, esc, formatDate, toDate } from './store.js';
+  mountAdminSidebar('admin-analytics.html');
+
+  const DAY = 86400000;
+  let users = [], orders = [], boosts = [], funding = [], days = [], links = [];
+  const $ = (id) => document.querySelector(id);
+  const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
+  // Keys for the last n days, newest first, e.g. ['2026-10-13', '2026-10-12', …].
+  const lastDays = (n) => Array.from({ length: n }, (_, i) => dayKey(new Date(Date.now() - i * DAY)));
+  const sumOf = (list, field, keys) => list.filter(d => keys.includes(d.id)).reduce((s, d) => s + Number(d[field] || 0), 0);
+  const sumAll = (field) => days.reduce((s, d) => s + Number(d[field] || 0), 0);
+
+  function render() {
+    const customers = users.filter(u => !isAdminEmail(u));
+    const buyers = new Set([...orders, ...boosts].map(o => o.uid));
+    const leads = customers.filter(u => !buyers.has(u.id));
+    const joinedSince = Date.now() - 7 * DAY;
+    const joinedWeek = customers.filter(u => (toDate(u.createdAt)?.getTime() || 0) >= joinedSince).length;
+    const rate = customers.length ? Math.round((customers.filter(u => buyers.has(u.id)).length / customers.length) * 100) : 0;
+
+    const today = dayKey();
+    const week = lastDays(7);
+    const month = lastDays(30);
+    const live = [...orders, ...boosts].filter(o => o.status !== 'cancelled');
+    const liveBoost = boosts.filter(o => o.status !== 'cancelled');
+    const pending = funding.filter(r => r.status === 'pending');
+    const approved = funding.filter(r => r.status === 'approved');
+
+    $('#s-users').textContent = customers.length;
+    $('#s-users-new').textContent = `${joinedWeek} joined in the last 7 days`;
+    $('#s-leads').textContent = leads.length;
+    $('#s-buyers').textContent = customers.length - leads.length;
+    $('#s-buyers-rate').textContent = `${rate}% of users`;
+    $('#s-pending').textContent = pending.length;
+    $('#s-pending-sum').textContent = `${naira(pending.reduce((s, r) => s + Number(r.amount || 0), 0))} waiting`;
+
+    $('#s-visits-today').textContent = sumOf(days, 'visits', [today]);
+    $('#s-visits-week').textContent = `${sumOf(days, 'visits', week)} in the last 7 days`;
+    $('#s-visits-month').textContent = sumOf(days, 'visits', month);
+    $('#s-visits-all').textContent = `${sumAll('visits')} all time`;
+    $('#s-wa-today').textContent = sumOf(days, 'whatsappClicks', [today]);
+    $('#s-wa-all').textContent = `${sumAll('whatsappClicks')} all time`;
+    $('#s-links-today').textContent = sumOf(days, 'linkClicks', [today]);
+    $('#s-links-all').textContent = `${sumAll('linkClicks')} all time`;
+
+    $('#s-orders').textContent = live.length;
+    $('#s-boosts').textContent = `${liveBoost.length} boost order${liveBoost.length === 1 ? '' : 's'} included`;
+    $('#s-revenue').textContent = naira(live.reduce((s, o) => s + Number(o.total || 0), 0));
+    $('#s-revenue-boost').textContent = `${naira(liveBoost.reduce((s, o) => s + Number(o.total || 0), 0))} from boosting`;
+    $('#s-approved').textContent = naira(approved.reduce((s, r) => s + Number(r.amount || 0), 0));
+    $('#s-approved-count').textContent = plural(approved.length, 'request');
+    $('#s-balances').textContent = naira(customers.reduce((s, u) => s + Number(u.balance || 0), 0));
+
+    const byDay = new Map(days.map(d => [d.id, d]));
+    $('#days').innerHTML = lastDays(14).map(key => {
+      const d = byDay.get(key) || {};
+      return `<tr><td>${esc(key === today ? `${key} (today)` : key)}</td><td class="mono">${Number(d.visits || 0)}</td><td class="mono">${Number(d.whatsappClicks || 0)}</td><td class="mono">${Number(d.linkClicks || 0)}</td></tr>`;
+    }).join('');
+
+    const top = [...links].sort((a, b) => Number(b.count || 0) - Number(a.count || 0)).slice(0, 20);
+    $('#links').innerHTML = top.length
+      ? top.map(l => `<tr><td class="mono">${esc(l.label || l.id)}</td><td class="mono"><b>${Number(l.count || 0)}</b></td></tr>`).join('')
+      : '<tr><td colspan="2">No clicks recorded yet.</td></tr>';
+
+    renderLeads(leads);
+  }
+
+  function renderLeads(leads) {
+    const q = $('#lead-search').value.trim().toLowerCase();
+    const sorted = [...leads].sort((a, b) => (toDate(b.createdAt)?.getTime() || 0) - (toDate(a.createdAt)?.getTime() || 0));
+    const list = q ? sorted.filter(u => `${u.name || ''} ${u.email || ''}`.toLowerCase().includes(q)) : sorted;
+    $('#lead-count').textContent = plural(list.length, 'lead');
+    $('#leads').innerHTML = list.length
+      ? list.slice(0, 200).map(u => `<tr><td><b>${esc(u.name || 'No name')}</b></td><td>${esc(u.email || '—')}</td><td>${esc(formatDate(u.createdAt))}</td><td class="mono">${naira(u.balance)}</td></tr>`).join('')
+        + (list.length > 200 ? `<tr><td colspan="4"><small class="muted">Showing the newest 200. Use search to find anyone else.</small></td></tr>` : '')
+      : '<tr><td colspan="4">No leads match this search.</td></tr>';
+  }
+
+  $('#lead-search').addEventListener('input', () => render());
+
+  if (await requireAdmin('admin-analytics.html')) {
+    watchAllUsers(rows => { users = rows; render(); });
+    watchAllOrders(rows => { orders = rows; render(); });
+    watchAllBoostOrders(rows => { boosts = rows; render(); });
+    watchAllFunding(rows => { funding = rows; render(); });
+    watchAnalyticsDays(rows => { days = rows; render(); });
+    watchAnalyticsLinks(rows => { links = rows; render(); });
+  }
+</script>
+</body>
+</html>
