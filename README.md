@@ -91,7 +91,9 @@ The admin can change the amounts and which state counts as "local" under **Admin
 - **Pickup stations are a snapshot.** The list comes from Jumia's own station data through a third-party mirror (451 stations in the current file), so stations open, move and close between snapshots. The admin page shows what changed, hides stations that vanished and re-publishes the file — but confirm important stations before promising one. The GPS position used for "closest station" is only used in the browser and never saved.
 - **The old doorstep address is record-only.** `users/{uid}` still keeps `country`, `state`, `lga` and `address` (nothing is delivered there any more); `data/ng-locations.json` remains the official state/LGA list used by the admin fee form. The rules only check that they're strings. The delivery location itself is stored in Firestore (`users/{uid}`), not in browser storage.
 - **Product photos are compressed client-side** (JPEG, max 5) and stored as base64 inside the product document — Firestore's 1 MB per-document limit is why the uploader compresses them. Very photo-heavy products (5 large photos) push that limit; the uploader blocks oversized sets.
-- **Browser notifications** are best-effort: they fire live while the site is open and as a catch-up on the next visit. There is no push server, so a closed browser is notified only when the shopper returns.
+- **Analytics are approximate.** Visits are page views, not unique people. Counters are open to anyone who can reach the site, so a script could inflate them (Firebase App Check would reduce that, but it is not set up here). Clicks are measured by the page, so a click on a link that opens another site can be missed if the page closes before the count is saved.
+- **Funding alerts need a browser.** They run only while an admin's browser has the site open. A closed browser learns about a request on its next visit.
+- **Browser notifications** are best-effort: they fire live while the site is open and as a catch-up on the next visit. Closed-browser push works only for recommended products, and only when you send it from the OneSignal dashboard (see *Closed-browser push* below).
 - **No tax, coupons, email notifications or payment-gateway integration.**
 
 ## Pages
@@ -99,7 +101,7 @@ The admin can change the amounts and which state counts as "local" under **Admin
 - Storefront: `index.html` (home), `shop.html` (catalogue with search, categories and sorting), `product.html`, `boost.html` (boost order form: category → plan → link → quantity → pay), `boost-platform.html` (forwards old platform links to the order form), `cart.html`
 - Accounts: `login.html`, `register.html`
 - Customer: `dashboard.html` (overview), `wallet.html` (fund), `orders.html`, `profile.html` (pickup station)
-- Admin: `admin.html` (overview), `admin-products.html` (searchable by Product ID), `admin-boost.html` (boosting categories, plans with min/max and average times, orders), `admin-pickup.html` (publish and hide pickup stations), `admin-funding.html`, `admin-orders.html`, `admin-fees.html` (checkout fees), `admin-settings.html` (deposit bank details)
+- Admin: `admin.html` (overview), `admin-analytics.html` (visits, clicks, leads, sales), `admin-products.html` (searchable by Product ID), `admin-boost.html` (boosting categories, plans with min/max and average times, orders), `admin-pickup.html` (publish and hide pickup stations), `admin-funding.html`, `admin-orders.html`, `admin-fees.html` (checkout fees), `admin-settings.html` (deposit bank details)
 
 Shared client code is in `store.js`, styles in `store.css`. Nigerian states and LGAs are in `data/ng-locations.json` (from the MIT-licensed `nigeria-state-lga-data` package, 37 entries, 777 LGAs). Non-Nigerian addresses use free text for state and area.
 
@@ -122,8 +124,40 @@ Shared client code is in `store.js`, styles in `store.css`. Nigerian states and 
 | `orders/{uid}_{requestId}` | customer (create once); admin (status) | owner, admin |
 | `notifications/{id}` | admin (recommended-product announcements) | everyone |
 | `ledger/{id}` | customer (purchase entries only); admin (all) | admin |
+| `analyticsDaily/{YYYY-MM-DD}` | anyone on the storefront (`visits`, `whatsappClicks`, `linkClicks`, +1 each write) | admin |
+| `analyticsLinks/{label}` | anyone clicking a tracked link (`count` +1, label slug) | admin |
 
 Money is stored as whole naira (integers) — the wallet never holds kobo. A boost plan's `price` is a naira rate per 1,000 units and carries `priceBasis: 1000`; its order `total` is `unitPrice × quantity ÷ 1,000`, rounded to whole naira. Product documents hold the admin-chosen `productId` as their id plus `name`, `category`, `price` (selling), `compareAtPrice` (slashed original, optional), `stock`, `minOrderQuantity`, `sold`, `description`, `keywords[]`, `images[]` (base64), `variations[]` (each `{name, price}` — clothing options with their own prices), `recommended`, `active`. Orders hold `items[]` (with quantity and optional `variant` name and `variantIndex` per line), `subtotal`, `serviceFee`, `deliveryFee`, `total` and the `delivery` snapshot. Boosting: `boostPlatforms` (`name`, `description`, `active` — created automatically from the category form), `boostCategories` (`platformId`, `name`, `description`, `active`), `boostSubcategories` (`categoryId`, `name`, `description`, `unit`, `price` per 1,000, `priceBasis: 1000`, `minQuantity`, `maxQuantity` where 0 means no maximum, `averageTime`, `active`) and `boostOrders` (`uid`, `requestId`, platform/category/service names and ids, `unit`, `unitPrice` per 1,000, `priceBasis: 1000`, `quantity`, `total`, `link`, `status`).
+
+## WhatsApp channel, funding alerts and analytics
+
+**WhatsApp channel.** Every storefront page shows a green **Join our channel** button (bottom right) that opens KORASTORE's WhatsApp channel. The footer has the same link. The URL lives in `WHATSAPP_CHANNEL_URL` in `store.js`.
+
+**Funding alerts for admins.** While an approved admin is signed in on any page, each new `pending` funding request raises a browser notification (and an in-page toast) with the customer's name, the amount and the reference. Admins turn this on with **🔔 Turn on funding alerts** in the admin sidebar, because browsers only show the permission prompt after a click. Alerts are best-effort, like recommended-product alerts: they fire while an admin page or the storefront is open, and anything that arrived while the browser was closed is caught up on the next visit. Closed-browser push would need Firebase Cloud Messaging plus a Cloud Function, which this no-server design does not have.
+
+**Analytics** (`admin-analytics.html`). Anonymous counters, with no IP addresses, no device IDs and no personal data in the counters:
+
+- **Visits** are storefront page views, counted once per page load in `analyticsDaily/{YYYY-MM-DD}` (Lagos time). Admin accounts are not counted. A page view is not a unique visitor.
+- **Clicks** come from elements marked `data-track="<label>"`. The header nav, footer, the home-page buttons and the WhatsApp button are tagged. WhatsApp clicks are counted separately as `whatsappClicks`, and all other tracked links as `linkClicks`. Per-link totals live in `analyticsLinks/{label}`.
+- **Total users** counts registered customer accounts, not counting the admin accounts.
+- **Leads** are registered customers who have not placed a product or boost order yet. The page lists them newest first, with a search box.
+- **Sales and funding** come from the existing orders, boost orders and funding requests (cancelled orders are excluded from revenue).
+
+Firestore rules only let these counters go up by exactly 1 per write, and only admins can read them. A WhatsApp **join** cannot be measured; the page counts clicks on the button.
+
+## Closed-browser push (OneSignal, no server)
+
+Shoppers who press **Turn on alerts** on the shop page are subscribed through **OneSignal's free web-push plan**. Their browser then gets a notification even when the site is closed (desktop and Android Chrome, Edge and Firefox; iPhone only after the site is added to the home screen). The site itself stays static: the OneSignal web SDK runs in the browser and uses `sw.js`. Nothing secret is stored in this repo.
+
+**Setup (one time):**
+
+1. Create a free account at onesignal.com and make a **Web** app. Use your store's address as the site URL.
+2. Copy the **OneSignal App ID** into `ONESIGNAL_APP_ID` in `push-config.js`, then deploy the site. Until this is set, closed-browser push is off.
+3. Keep the **REST API key** from OneSignal (Settings → Keys & IDs) private. Do not put it in the repo or the site.
+
+**Sending a recommended product:** when you mark a product as recommended, the in-browser alert goes out automatically to shoppers with the site open. For closed browsers, open the OneSignal dashboard → **Messages → New Push**, use the product name as the message, and link it to `product.html?id=<productId>`. The admin Products page reminds you of this after each new recommendation.
+
+Sending from the admin page automatically would need a small server-side function that keeps the REST key secret. That isn't part of this setup.
 
 ## Setup and deployment
 
@@ -139,7 +173,7 @@ Money is stored as whole naira (integers) — the wallet never holds kobo. A boo
    - a customer cannot order to a station that does not exist, is hidden, or whose state does not match the station document (the delivery fee must follow the station's own state);
    - only approved admins can approve funding, change order status, list products, or post notifications.
    Then run through a full purchase and refund on a test account.
-4. **Deploy the rules.** Sign in with the Firebase CLI, then:
+4. **Deploy the rules.** Required for the analytics counters, the admin analytics page and the funding alerts to work. Sign in with the Firebase CLI, then:
    ```sh
    npx firebase-tools login
    npm run deploy:rules

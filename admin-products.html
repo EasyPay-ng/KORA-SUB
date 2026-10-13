@@ -72,7 +72,8 @@
   </main>
 </div>
 <script type="module">
-  import { mountAdminSidebar, requireAdmin, watchProducts, saveProduct, announceRecommended, PRODUCT_ID_PATTERN, esc, priceHTML } from './store.js';
+  import { mountAdminSidebar, requireAdmin, watchProducts, saveProduct, announceRecommended, showToast, PRODUCT_ID_PATTERN, esc, priceHTML } from './store.js';
+  import { ONESIGNAL_APP_ID } from './push-config.js';
   mountAdminSidebar('admin-products.html');
   const $ = (id) => document.querySelector(id);
   let products = [];
@@ -379,6 +380,7 @@
       await saveProduct(productId, data, { isNew });
       if (recommended && (isNew || editing?.recommended !== true)) {
         await announceRecommended(productId, name).catch(() => {});
+        if (ONESIGNAL_APP_ID) showToast('Recommended', 'Shoppers with the site open were alerted. To reach closed browsers, send a push from the OneSignal dashboard.');
       }
       fill(null);
     } catch (problem) {

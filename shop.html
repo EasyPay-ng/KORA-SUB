@@ -35,7 +35,7 @@
 </main>
 <div id="site-footer"></div>
 <script type="module">
-  import { mountHeader, mountFooter, watchProducts, productCard, bindAddToCart, esc, requestNotificationPermission, notificationState, showToast } from './store.js';
+  import { mountHeader, mountFooter, watchProducts, productCard, bindAddToCart, esc, requestShopperAlerts, notificationState, showToast } from './store.js';
   mountHeader('shop.html');
   mountFooter();
   const grid = document.querySelector('#grid');
@@ -63,7 +63,7 @@
   alertsBtn.addEventListener('click', async () => {
     alertsBtn.disabled = true;
     alertsBtn.textContent = 'Asking…';
-    const result = await requestNotificationPermission();
+    const result = await requestShopperAlerts();
     if (result === 'granted') showToast('Alerts on', 'We will notify you when a recommended product is added.');
     paintAlertsButton();
     if (result === 'default') alertsBtn.disabled = false;

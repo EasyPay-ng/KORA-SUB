@@ -6,9 +6,10 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import {
   getFirestore, doc, getDoc, getDocs, setDoc, updateDoc, addDoc, collection, query, where,
-  orderBy, limit, onSnapshot, serverTimestamp, runTransaction, writeBatch
+  orderBy, limit, onSnapshot, serverTimestamp, runTransaction, writeBatch, increment
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { firebaseConfig, ADMIN_EMAILS } from "./firebase-config.js";
+import { ONESIGNAL_APP_ID } from "./push-config.js";
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
@@ -190,7 +191,8 @@ export function checkoutFees(subtotal, delivery, fees = DEFAULT_FEES) {
 }
 
 // ---------- Recommended-product alerts ----------
-// Written when the admin lists (or flags) a product as "recommended".
+// Written when the admin lists (or flags) a product as "recommended". This feed drives the
+// in-browser alerts. Closed-browser push is sent from the OneSignal dashboard (see README).
 export function announceRecommended(productId, name) {
   return addDoc(collection(db, "notifications"), {
     type: "recommended",
@@ -198,6 +200,45 @@ export function announceRecommended(productId, name) {
     name: String(name || "New product").slice(0, 120),
     createdAt: serverTimestamp()
   });
+}
+
+// ---------- OneSignal (closed-browser push for shoppers) ----------
+// Loads the OneSignal web SDK once. It uses sw.js (which imports OneSignal's worker) so
+// there is still a single service worker for the site. Nothing loads when the App ID is empty.
+let oneSignalStarted = false;
+export function startOneSignal() {
+  if (!ONESIGNAL_APP_ID || oneSignalStarted || location.protocol === "file:") return;
+  oneSignalStarted = true;
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  window.OneSignalDeferred.push(async (OneSignal) => {
+    await OneSignal.init({
+      appId: ONESIGNAL_APP_ID,
+      serviceWorkerPath: new URL("sw.js", document.baseURI).pathname,
+      serviceWorkerParam: { scope: new URL("./", document.baseURI).pathname },
+      allowLocalhostAsSecureOrigin: true
+    });
+  });
+  const script = document.createElement("script");
+  script.src = "https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js";
+  script.defer = true;
+  document.head.appendChild(script);
+}
+
+// The shopper's "Turn on alerts" button. With OneSignal on, the prompt also subscribes the
+// browser for closed-browser push. Without it, this is the plain browser prompt.
+export async function requestShopperAlerts() {
+  if (!ONESIGNAL_APP_ID) return requestNotificationPermission();
+  startOneSignal();
+  const asked = new Promise((resolve) => {
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    window.OneSignalDeferred.push(async (OneSignal) => {
+      try { await OneSignal.Notifications.requestPermission(); } catch { /* the state below still tells the truth */ }
+      resolve();
+    });
+  });
+  // If the OneSignal script is blocked, do not leave the button stuck on "Asking…".
+  await Promise.race([asked, new Promise((resolve) => setTimeout(resolve, 15000))]);
+  return notificationState();
 }
 
 export function watchNotifications(callback, onError = noop, max = 10) {
@@ -813,6 +854,25 @@ const NAV = [
   ["dashboard.html", "Account"]
 ];
 
+// KORASTORE's WhatsApp channel. The floating button and the footer link both use it.
+export const WHATSAPP_CHANNEL_URL = "https://whatsapp.com/channel/0029Vb91iDh8KMqn1ZD69W2m";
+const WHATSAPP_ICON = `<svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true" focusable="false"><path fill="currentColor" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>`;
+
+// Floating WhatsApp button, shown on every storefront page.
+export function mountWhatsAppChannel() {
+  if (document.querySelector(".wa-float")) return;
+  const link = document.createElement("a");
+  link.className = "wa-float";
+  link.href = WHATSAPP_CHANNEL_URL;
+  link.target = "_blank";
+  link.rel = "noopener noreferrer";
+  link.dataset.track = "whatsapp-channel";
+  link.setAttribute("aria-label", "Join the KORASTORE WhatsApp channel");
+  link.title = "Join our WhatsApp channel";
+  link.innerHTML = `${WHATSAPP_ICON}<span class="wa-float-text">Join our channel</span>`;
+  document.body.appendChild(link);
+}
+
 export function mountHeader(active) {
   const host = document.querySelector("#site-header");
   if (!host) return;
@@ -824,7 +884,7 @@ export function mountHeader(active) {
           <span class="brand-text"><b>KORASTORE</b><small>Find it. Fund it. Own it.</small></span>
         </a>
         <nav class="nav" aria-label="Main">
-          ${NAV.map(([href, label]) => `<a href="${href}" class="${active === href ? "on" : ""}">${label}${href === "cart.html" ? ` <span class="cart-count" id="cart-count">0</span>` : ""}</a>`).join("")}
+          ${NAV.map(([href, label]) => `<a href="${href}" data-track="nav-${href.replace(".html", "")}" class="${active === href ? "on" : ""}">${label}${href === "cart.html" ? ` <span class="cart-count" id="cart-count">0</span>` : ""}</a>`).join("")}
         </nav>
       </div>
     </header>`;
@@ -838,6 +898,9 @@ export function mountHeader(active) {
   window.addEventListener("storage", paint);
   // Every storefront page listens for new recommended products and notifies the user.
   if (!alertsStarted) { alertsStarted = true; watchRecommendedAlerts(); }
+  mountWhatsAppChannel();
+  startOneSignal();
+  countVisit();
 }
 
 export function mountFooter() {
@@ -847,7 +910,7 @@ export function mountFooter() {
     <footer class="footer">
       <div class="wrap footer-inner">
         <div><b>KORASTORE</b><p>Find it. Fund it. Own it.</p></div>
-        <div class="footer-links"><a href="shop.html">Shop</a><a href="boost.html">Boost</a><a href="wallet.html">Fund wallet</a><a href="orders.html">Orders</a><a href="mailto:beniwealth70@gmail.com">Contact</a></div>
+        <div class="footer-links"><a href="shop.html" data-track="footer-shop">Shop</a><a href="boost.html" data-track="footer-boost">Boost</a><a href="wallet.html" data-track="footer-wallet">Fund wallet</a><a href="orders.html" data-track="footer-orders">Orders</a><a href="${WHATSAPP_CHANNEL_URL}" target="_blank" rel="noopener noreferrer" data-track="footer-whatsapp-channel">WhatsApp channel</a><a href="mailto:beniwealth70@gmail.com" data-track="footer-contact">Contact</a></div>
         <small>© ${new Date().getFullYear()} KORASTORE</small>
       </div>
     </footer>`;
@@ -975,6 +1038,7 @@ export function requireAdmin(activePage, gateSelector = "#gate", contentSelector
 
 const ADMIN_LINKS = [
   ["admin.html", "Overview", "◎"],
+  ["admin-analytics.html", "Analytics", "◔"],
   ["admin-products.html", "Products", "▣"],
   ["admin-boost.html", "Boosting", "↗"],
   ["admin-pickup.html", "Pickup stations", "⌖"],
@@ -992,7 +1056,20 @@ export function mountAdminSidebar(active) {
     <nav class="admin-nav" aria-label="Admin">
       ${ADMIN_LINKS.map(([href, label, icon]) => `<a href="${href}" class="${href === active ? "on" : ""}"><span aria-hidden="true">${icon}</span>${label}</a>`).join("")}
     </nav>
-    <div class="admin-foot"><a href="index.html">View storefront ↗</a><button type="button" data-signout>Sign out</button></div>`;
+    <div class="admin-foot"><button type="button" class="admin-alerts" data-admin-alerts hidden>🔔 Turn on funding alerts</button><a href="index.html">View storefront ↗</a><button type="button" data-signout>Sign out</button></div>`;
+  // Browsers only show the permission prompt after a click, so the admin turns alerts on here.
+  const alertsButton = host.querySelector("[data-admin-alerts]");
+  if (alertsButton) {
+    const syncAlerts = () => {
+      const state = notificationState();
+      alertsButton.hidden = state !== "default";
+    };
+    alertsButton.addEventListener("click", async () => {
+      await requestNotificationPermission();
+      syncAlerts();
+    });
+    syncAlerts();
+  }
 }
 
 // ---------- Product presentation ----------
@@ -1170,7 +1247,7 @@ export function watchRecommendedAlerts() {
         showBrowserNotification({
           title: "KORASTORE · Recommended for you",
           body: `${item.name} just landed in the shop`,
-          tag: item.productId || item.id,
+          tag: `recommended-${item.productId || item.id}`,
           link
         });
       }
@@ -1851,3 +1928,121 @@ export function watchAllBoostOrders(callback, onError = noop) {
     callback(rows(snap).sort((a, b) => (toDate(b.createdAt)?.getTime() || 0) - (toDate(a.createdAt)?.getTime() || 0)));
   }, onError);
 }
+
+// ---------- Analytics ----------
+// Anonymous daily counters, with no personal data: a visit is a storefront page view, and
+// a click is any element marked data-track. Admin accounts are not counted. Each counter
+// only moves up by +1 and is checked by firestore.rules (analyticsDaily, analyticsLinks).
+// Days are bucketed in Africa/Lagos so the admin "today" matches the store's clock.
+const ANALYTICS_DAYS = "analyticsDaily";
+const ANALYTICS_LINKS = "analyticsLinks";
+const TRACK_LABEL = /^[a-z0-9-]{1,40}$/;
+const WHATSAPP_LABEL = "whatsapp-channel";
+
+export function dayKey(date = new Date()) {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Lagos", year: "numeric", month: "2-digit", day: "2-digit" }).format(date);
+}
+
+export function isAdminEmail(user) {
+  return !!user && ADMIN_EMAILS.includes((user.email || "").trim().toLowerCase());
+}
+
+let visitCounted = false;
+function countVisit() {
+  if (visitCounted) return;
+  visitCounted = true;
+  auth.authStateReady().then(() => {
+    if (isAdminEmail(auth.currentUser)) return null;
+    return setDoc(doc(db, ANALYTICS_DAYS, dayKey()), { visits: increment(1) }, { merge: true });
+  }).catch(noop);
+}
+
+export function recordLinkClick(label) {
+  const key = String(label || "").toLowerCase();
+  if (!TRACK_LABEL.test(key)) return Promise.resolve();
+  const batch = writeBatch(db);
+  const dailyField = key === WHATSAPP_LABEL ? "whatsappClicks" : "linkClicks";
+  batch.set(doc(db, ANALYTICS_DAYS, dayKey()), { [dailyField]: increment(1) }, { merge: true });
+  batch.set(doc(db, ANALYTICS_LINKS, key), { count: increment(1), label: key }, { merge: true });
+  return batch.commit().catch(noop);
+}
+
+// One delegated listener for the whole site. Same-tab links wait briefly for the count to
+// be saved, so a fast navigation does not lose the click.
+document.addEventListener("click", (event) => {
+  const link = event.target instanceof Element ? event.target.closest("a[data-track]") : null;
+  if (!link) return;
+  const pending = recordLinkClick(link.dataset.track);
+  const plainClick = event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
+  const sameTab = !link.target || link.target === "_self";
+  if (plainClick && sameTab && link.href && new URL(link.href).origin === location.origin) {
+    event.preventDefault();
+    const href = link.href;
+    Promise.race([pending, new Promise((resolve) => setTimeout(resolve, 700))])
+      .finally(() => { location.href = href; });
+  }
+});
+
+// Admin reads.
+export function watchAnalyticsDays(callback, onError = noop) {
+  return onSnapshot(collection(db, ANALYTICS_DAYS), (snap) => callback(rows(snap)), onError);
+}
+export function watchAnalyticsLinks(callback, onError = noop) {
+  return onSnapshot(collection(db, ANALYTICS_LINKS), (snap) => callback(rows(snap)), onError);
+}
+
+// ---------- Admin funding alerts ----------
+// While an approved admin is signed in on any page, each new pending funding request raises
+// a browser notification and an in-page toast. Like recommended-product alerts, a closed
+// browser is only told on the next visit (there is no push server). The first run only
+// records the current time, so older requests are not replayed.
+const FUNDING_SEEN_KEY = "korastore-admin-funding-seen";
+let stopFundingAlerts = null;
+
+async function announceFunding(request) {
+  let who = "A customer";
+  try {
+    const profile = await getDoc(doc(db, "users", request.uid));
+    if (profile.exists()) who = profile.data().name || profile.data().email || who;
+  } catch { /* the alert still fires without the name */ }
+  const title = `Funding request · ${naira(request.amount)}`;
+  const body = `${who} · Ref ${request.reference || "—"}. Confirm once the transfer lands.`;
+  showToast(title, body);
+  showBrowserNotification({
+    title: `KORASTORE · ${title}`,
+    body,
+    tag: `funding-${request.id}`,
+    link: new URL("admin-funding.html", location.href).href
+  });
+}
+
+function startFundingAlerts() {
+  let lastSeen = Number(localStorage.getItem(FUNDING_SEEN_KEY) || 0);
+  if (!lastSeen) {
+    lastSeen = Date.now();
+    localStorage.setItem(FUNDING_SEEN_KEY, String(lastSeen));
+  }
+  const pending = query(collection(db, "fundingRequests"), where("status", "==", "pending"));
+  return onSnapshot(pending, (snap) => {
+    const now = Date.now();
+    const fresh = rows(snap)
+      .map((request) => ({ ...request, time: toDate(request.createdAt)?.getTime() || now }))
+      .filter((request) => request.time > lastSeen)
+      .sort((a, b) => a.time - b.time);
+    if (!fresh.length) return;
+    lastSeen = fresh.reduce((max, request) => Math.max(max, request.time), lastSeen);
+    localStorage.setItem(FUNDING_SEEN_KEY, String(lastSeen));
+    for (const request of fresh.slice(0, 5)) announceFunding(request);
+  }, noop);
+}
+
+// Starts or stops the watcher as admins sign in and out. Firestore rules still decide what
+// the listener may read; a signed-in admin with an unverified email just gets nothing.
+onAuthStateChanged(auth, (user) => {
+  if (isAdminEmail(user)) {
+    if (!stopFundingAlerts) stopFundingAlerts = startFundingAlerts();
+  } else if (stopFundingAlerts) {
+    stopFundingAlerts();
+    stopFundingAlerts = null;
+  }
+});

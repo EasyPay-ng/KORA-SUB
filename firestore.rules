@@ -19,6 +19,8 @@ rules_version = '2';
 //    built-in defaults: ₦2,000 platform service fee, ₦2,500 delivery inside the store's
 //    local state, ₦6,000 delivery anywhere else.
 //  - Product documents use the admin-chosen product ID as their id (3–40 of A–Z a–z 0–9 _ -).
+//  - Analytics counters (daily visits and clicks, per-link totals) can only go up by 1
+//    per write and hold no personal data. Only approved admins read them.
 //  - Approved admin accounts (email + verified email) approve funding, move order status,
 //    cancel with refunds, list products and announce recommended ones. Admins can set any
 //    balance; that trust is by design.
@@ -586,6 +588,51 @@ service cloud.firestore {
         && getAfter(/databases/$(database)/documents/boostOrders/$(request.resource.data.reference)).data.uid == request.auth.uid
         && request.resource.data.amount == -getAfter(/databases/$(database)/documents/boostOrders/$(request.resource.data.reference)).data.total;
       allow create, update, delete: if isAdmin();
+    }
+
+    // ---------------------------------------------------------------
+    // Analytics (anonymous counters, no personal data). Visitors and shoppers
+    // increment them from the browser, so each write may only add exactly 1 to one
+    // counter. Only approved admins read them.
+    // ---------------------------------------------------------------
+
+    // Daily counters: /analyticsDaily/{YYYY-MM-DD} with visits, whatsappClicks, linkClicks.
+    match /analyticsDaily/{day} {
+      allow read: if isAdmin();
+
+      allow create: if day.matches('^20[0-9]{2}-[0-9]{2}-[0-9]{2}$')
+        && request.resource.data.keys().hasOnly(['visits', 'whatsappClicks', 'linkClicks'])
+        && request.resource.data.get('visits', 0) + request.resource.data.get('whatsappClicks', 0) + request.resource.data.get('linkClicks', 0) == 1;
+
+      allow update: if day.matches('^20[0-9]{2}-[0-9]{2}-[0-9]{2}$')
+        && (
+          (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['visits'])
+            && request.resource.data.visits == resource.data.get('visits', 0) + 1)
+          || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['whatsappClicks'])
+            && request.resource.data.whatsappClicks == resource.data.get('whatsappClicks', 0) + 1)
+          || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['linkClicks'])
+            && request.resource.data.linkClicks == resource.data.get('linkClicks', 0) + 1)
+        );
+
+      allow delete: if false;
+    }
+
+    // Per-link totals: /analyticsLinks/{label}. Labels are short lowercase slugs
+    // (for example nav-shop or whatsapp-channel).
+    match /analyticsLinks/{label} {
+      allow read: if isAdmin();
+
+      allow create: if label.matches('^[a-z0-9-]{1,40}$')
+        && request.resource.data.keys().hasOnly(['count', 'label'])
+        && request.resource.data.count == 1
+        && request.resource.data.label == label;
+
+      allow update: if label.matches('^[a-z0-9-]{1,40}$')
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['count', 'label'])
+        && request.resource.data.count == resource.data.get('count', 0) + 1
+        && request.resource.data.label == label;
+
+      allow delete: if false;
     }
 
     // Anything not matched above is denied by default.

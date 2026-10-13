@@ -336,7 +336,7 @@ h1, h2, h3, h4 { font-family: 'Sora', sans-serif; letter-spacing: -.02em; line-h
 .thumb-main { position: absolute; left: 4px; bottom: 4px; padding: 1px 7px; border-radius: 99px; background: var(--gold); color: var(--navy); font-size: 10px; font-weight: 800; }
 
 /* ---------- Toasts (in-page notification fallback) ---------- */
-#toasts { position: fixed; right: 18px; bottom: 18px; z-index: 90; display: grid; gap: 10px; width: min(340px, calc(100vw - 36px)); }
+#toasts { position: fixed; right: 18px; bottom: 88px; z-index: 90; display: grid; gap: 10px; width: min(340px, calc(100vw - 36px)); }
 .toast { display: flex; align-items: flex-start; gap: 10px; padding: 14px 14px 14px 16px; border-radius: 14px; background: var(--navy); color: #fff; box-shadow: var(--shadow-lg); animation: toast-in .25s ease; }
 .toast-body { flex: 1; min-width: 0; }
 .toast-body b { display: block; font-family: 'Sora', sans-serif; font-size: 14px; }
@@ -426,3 +426,17 @@ h1, h2, h3, h4 { font-family: 'Sora', sans-serif; letter-spacing: -.02em; line-h
 .pickup-body b { color: var(--navy); }
 .pickup-body small { color: var(--muted); font-size: 12.5px; }
 .pickup-body em { color: var(--navy-3); font-style: normal; font-weight: 700; font-size: 12px; }
+
+/* WhatsApp channel button (storefront, every page) */
+.wa-float { position: fixed; right: 18px; bottom: 18px; z-index: 60; display: inline-flex; align-items: center; gap: 10px; height: 56px; padding: 0 20px 0 14px; border-radius: 999px; background: #25d366; color: #fff; font-weight: 700; font-size: 14px; text-decoration: none; box-shadow: 0 10px 24px rgba(37, 211, 102, .35); }
+.wa-float:hover { background: #1ebe5a; }
+.wa-float:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+.wa-float svg { flex: 0 0 auto; }
+@media (max-width: 640px) {
+  .wa-float { width: 56px; height: 56px; padding: 0; justify-content: center; }
+  .wa-float-text { display: none; }
+  #toasts { bottom: 84px; }
+}
+
+/* Admin: browser-alert opt-in in the sidebar footer */
+.admin-foot .admin-alerts { background: var(--gold); border-color: var(--gold); color: var(--navy); }
