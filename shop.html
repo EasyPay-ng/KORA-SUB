@@ -15,7 +15,7 @@
 
   <section class="card rec-section" id="rec-section" hidden>
     <div class="card-head">
-      <div><h2>★ Recommended</h2><small>Hand-picked by the store admin — turn on alerts to hear the moment one lands</small></div>
+      <div><h2>★ Recommended</h2><small>Hand-picked by the store admin — turn on alerts for new products and order shipping updates</small></div>
       <button class="btn btn-sm btn-ghost" id="alerts-btn">🔔 Turn on alerts</button>
     </div>
     <div id="rec-grid" class="products"></div>
@@ -64,7 +64,7 @@
     alertsBtn.disabled = true;
     alertsBtn.textContent = 'Asking…';
     const result = await requestShopperAlerts();
-    if (result === 'granted') showToast('Alerts on', 'We will notify you when a recommended product is added.');
+    if (result === 'granted') showToast('Alerts on', 'We will notify you about recommended products and order shipping updates.');
     paintAlertsButton();
     if (result === 'default') alertsBtn.disabled = false;
   });

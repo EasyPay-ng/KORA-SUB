@@ -34,7 +34,7 @@
   function render() {
     const balances = users.reduce((s, u) => s + Number(u.balance || 0), 0);
     const live = orders.filter(o => o.status !== 'cancelled');
-    const revenue = live.reduce((s, o) => s + Number(o.total || 0), 0);
+    const revenue = live.reduce((s, o) => s + Number(o.amountPaid ?? o.total ?? 0), 0);
     const pending = funding.filter(r => r.status === 'pending');
     document.querySelector('#s-balances').textContent = naira(balances);
     document.querySelector('#s-customers').textContent = `${users.length} customer${users.length === 1 ? '' : 's'}`;
@@ -49,8 +49,8 @@
       <div class="table-actions"><button class="btn btn-sm btn-gold" data-act="approve" data-id="${esc(r.id)}">Approve</button><button class="btn btn-sm btn-danger" data-act="reject" data-id="${esc(r.id)}">Reject</button></div></div>`).join('')
       : '<div class="empty"><b>All caught up</b>No transfers waiting for confirmation.</div>';
     ordersBox.innerHTML = orders.slice(0, 6).map(o => `
-      <div class="feed-row"><div class="txt"><b>${esc((o.items || []).map(i => i.name).join(', '))}</b><small>${who(o.uid)} · ${esc(formatDateTime(o.createdAt))}</small></div>
-      <span class="badge ${statusClass(o.status)}">${esc(STATUS_LABEL[o.status] || o.status)}</span><span class="amt">${naira(o.total)}</span></div>`).join('') || '<div class="empty"><b>No orders yet</b></div>';
+      <div class="feed-row"><div class="txt"><b>${esc((o.items || []).map(i => i.name).join(', '))}</b><small>${who(o.uid)} · ${esc(formatDateTime(o.createdAt))}${Number(o.amountDue || 0) > 0 ? ` · shipping due ${naira(o.amountDue)}` : ''}</small></div>
+      <span class="badge ${statusClass(o.status)}">${esc(STATUS_LABEL[o.status] || o.status)}</span><span class="amt">${naira(o.amountPaid ?? o.total)}</span></div>`).join('') || '<div class="empty"><b>No orders yet</b></div>';
   }
   pendingBox.addEventListener('click', async (event) => {
     const btn = event.target.closest('[data-act]');

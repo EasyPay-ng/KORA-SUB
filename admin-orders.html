@@ -11,44 +11,96 @@
 <div class="admin-shell" id="admin-content" hidden>
   <aside class="admin-side" id="admin-sidebar"></aside>
   <main class="admin-main">
-    <div class="page-head"><div><span class="eyebrow">Fulfilment</span><h1>Orders</h1><p>Move orders forward as you pack and ship. Cancelling refunds the full amount to the customer's wallet and restocks the items.</p></div></div>
+    <div class="page-head"><div><span class="eyebrow">Fulfilment</span><h1>Orders</h1><p>Set each order's shipping fee after reviewing the pickup details. The customer receives a browser notification with the items, service fee, shipping fee and final total, then pays the shipping amount from their wallet.</p></div></div>
     <section class="card">
       <div class="spread" style="margin-bottom:16px">
         <select id="filter" class="select" style="max-width:220px"><option value="open">Open orders</option><option value="all">All orders</option><option value="paid">Paid</option><option value="processing">Processing</option><option value="shipped">Shipped</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select>
         <small id="count" class="muted">Loading…</small>
       </div>
-      <div class="table-wrap"><table class="table"><thead><tr><th>Order</th><th>Customer & delivery</th><th>Items</th><th>Total</th><th>Status</th><th></th></tr></thead><tbody id="rows"><tr><td colspan="6">Loading…</td></tr></tbody></table></div>
+      <div class="table-wrap"><table class="table"><thead><tr><th>Order</th><th>Customer & delivery</th><th>Items</th><th>Total</th><th>Shipping</th><th>Status</th><th></th></tr></thead><tbody id="rows"><tr><td colspan="7">Loading…</td></tr></tbody></table></div>
     </section>
   </main>
 </div>
 <script type="module">
-  import { mountAdminSidebar, requireAdmin, watchAllOrders, watchAllUsers, setOrderStatus, naira, esc, formatDateTime, STATUS_LABEL, statusClass, NEXT_ORDER_ACTIONS, variantLabel, stationShortName } from './store.js';
+  import { mountAdminSidebar, requireAdmin, watchAllOrders, watchAllUsers, setOrderStatus, setOrderShippingFee, naira, esc, formatDateTime, STATUS_LABEL, statusClass, NEXT_ORDER_ACTIONS, variantLabel, stationShortName } from './store.js';
   mountAdminSidebar('admin-orders.html');
   let orders = [], users = [];
   const filter = document.querySelector('#filter');
+
+  function shippingCell(order) {
+    if (order.status === 'cancelled') {
+      return order.shippingFee != null
+        ? `<b>${naira(order.shippingFee)}</b><small class="muted">Cancelled</small>`
+        : '<small class="muted">Not set</small>';
+    }
+    // Orders made before the per-order shipping workflow remain readable, but cannot be
+    // edited here because their delivery fee was already charged at checkout.
+    if (!("shippingStatus" in order)) {
+      return order.deliveryFee != null
+        ? `<b>${naira(order.deliveryFee)}</b><small class="muted">Legacy delivery fee</small>`
+        : '<small class="muted">Legacy order</small>';
+    }
+    const fee = order.shippingFee;
+    const due = Number(order.amountDue || 0);
+    const baseTotal = Number(order.subtotal || 0) + Number(order.serviceFee || 0);
+    const zeroShippingCanBeCorrected = fee === 0 && Number(order.amountPaid || 0) === baseTotal;
+    if (fee == null || order.shippingStatus === 'due' || zeroShippingCanBeCorrected) {
+      return `<form class="shipping-form" data-shipping-form data-order="${esc(order.id)}">
+        <input class="input" type="number" min="0" max="5000000" step="1" inputmode="numeric" aria-label="Shipping fee for order ${esc(order.id.slice(-8).toUpperCase())}" value="${fee == null ? '' : esc(fee)}" placeholder="Fee" required>
+        <button class="btn btn-sm btn-gold" type="submit">${fee == null ? 'Set' : 'Update'}</button>
+        ${due > 0 ? `<small class="muted">Customer owes ${naira(due)}</small>` : ''}
+      </form>`;
+    }
+    return `<b>${naira(fee)}</b><small class="${due > 0 ? 'muted' : 'ok-text'}">${due > 0 ? `Customer owes ${naira(due)}` : 'Paid'}</small>`;
+  }
+
   function render() {
     const list = orders.filter(o => filter.value === 'all' || (filter.value === 'open' ? !['delivered', 'cancelled'].includes(o.status) : o.status === filter.value));
     document.querySelector('#count').textContent = `${list.length} order${list.length === 1 ? '' : 's'}`;
     document.querySelector('#rows').innerHTML = list.length ? list.map(o => {
       const u = users.find(x => x.id === o.uid);
       const d = o.delivery || {};
-      const actions = (NEXT_ORDER_ACTIONS[o.status] || []).map(([status, label]) =>
-        `<button class="btn btn-sm ${status === 'cancelled' ? 'btn-danger' : 'btn-ghost'}" data-order="${esc(o.id)}" data-status="${status}">${label}</button>`).join('');
+      const due = Number(o.amountDue || 0);
+      const paid = Number(o.amountPaid ?? o.total ?? 0);
+      const canFulfil = due <= 0 && (o.shippingStatus === 'paid' || !("shippingStatus" in o));
+      const actions = (NEXT_ORDER_ACTIONS[o.status] || [])
+        .filter(([status]) => status === 'cancelled' || canFulfil)
+        .map(([status, label]) =>
+          `<button class="btn btn-sm ${status === 'cancelled' ? 'btn-danger' : 'btn-ghost'}" data-order="${esc(o.id)}" data-status="${status}">${label}</button>`).join('');
+      const fulfilmentNote = due > 0
+        ? `<small class="muted">Waiting for ${naira(due)} shipping payment</small>`
+        : (o.shippingStatus === 'pending' ? '<small class="muted">Shipping not set</small>' : '');
       return `<tr>
         <td><b class="mono">${esc(o.id.slice(-8).toUpperCase())}</b><small>${esc(formatDateTime(o.createdAt))}</small></td>
         <td><b>${esc(u?.name || 'Customer')}</b><small>${d.stationId ? `Pickup · ${esc(stationShortName(d.stationName, 60))}${d.state ? ` (${esc(d.state)})` : ''}<br>${esc(d.stationAddress || '')}` : esc([d.address, d.lga, d.state, d.country].filter(Boolean).join(', '))}</small></td>
-        <td>${(o.items || []).map(i => `<small style="color:var(--ink)">${esc(i.name)}${variantLabel(i) ? ` · ${esc(variantLabel(i))}` : ''} × ${i.quantity}</small>`).join('')}${o.serviceFee != null ? `<small class="muted">incl. ${naira(o.serviceFee || 0)} fee + ${naira(o.deliveryFee || 0)} delivery</small>` : ''}</td>
-        <td class="mono"><b>${naira(o.total)}</b></td>
-        <td><span class="badge ${statusClass(o.status)}">${esc(STATUS_LABEL[o.status] || o.status)}</span></td>
+        <td>${(o.items || []).map(i => `<small style="color:var(--ink)">${esc(i.name)}${variantLabel(i) ? ` · ${esc(variantLabel(i))}` : ''} × ${i.quantity}</small>`).join('')}${o.serviceFee != null ? `<small class="muted">incl. ${naira(o.serviceFee || 0)} service</small>` : ''}</td>
+        <td class="mono"><b>${naira(o.total)}</b><small>${due > 0 ? `Paid ${naira(paid)} · Due ${naira(due)}` : `Paid ${naira(paid)}`}</small></td>
+        <td>${shippingCell(o)}</td>
+        <td><span class="badge ${statusClass(o.status)}">${esc(STATUS_LABEL[o.status] || o.status)}</span>${fulfilmentNote}</td>
         <td><div class="table-actions">${actions || '<small class="muted">Closed</small>'}</div></td>
       </tr>`;
-    }).join('') : '<tr><td colspan="6">No orders match this filter.</td></tr>';
+    }).join('') : '<tr><td colspan="7">No orders match this filter.</td></tr>';
   }
+
   filter.addEventListener('change', render);
+  document.querySelector('#rows').addEventListener('submit', async (event) => {
+    const form = event.target.closest('[data-shipping-form]');
+    if (!form) return;
+    event.preventDefault();
+    const input = form.querySelector('input');
+    const button = form.querySelector('button');
+    const fee = Number(input.value);
+    if (!Number.isSafeInteger(fee) || fee < 0 || fee > 5000000) {
+      return alert('Enter a whole shipping fee between ₦0 and ₦5,000,000.');
+    }
+    button.disabled = true;
+    try { await setOrderShippingFee(form.dataset.order, fee); }
+    catch (problem) { alert(problem.message); button.disabled = false; }
+  });
   document.querySelector('#rows').addEventListener('click', async (event) => {
-    const btn = event.target.closest('[data-order]');
+    const btn = event.target.closest('[data-order][data-status]');
     if (!btn) return;
-    if (btn.dataset.status === 'cancelled' && !confirm('Cancel this order and refund the full amount to the customer wallet?')) return;
+    if (btn.dataset.status === 'cancelled' && !confirm('Cancel this order and refund the amount already paid to the customer wallet?')) return;
     btn.disabled = true;
     try { await setOrderStatus(btn.dataset.order, btn.dataset.status); }
     catch (problem) { alert(problem.message); btn.disabled = false; }

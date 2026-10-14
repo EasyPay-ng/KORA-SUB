@@ -7,23 +7,23 @@ rules_version = '2';
 // the same batch:
 //
 //  - A customer's wallet can go DOWN only in a batch that creates their own paid order
-//    whose total equals the balance decrease (prices are re-read from /products, and the
-//    total must be items + platform service fee + delivery fee).
-//  - A customer's wallet can never go UP. Funding is credited by the admin only.
+//    whose amountPaid equals the balance decrease (prices are re-read from /products, and
+//    shipping is intentionally blank at checkout).
+//  - A customer's wallet can never go UP. Funding and refunds are credited by the admin
+//    only; a disclosed shipping fee can be paid by the order owner in a separate transaction.
 //  - Stock can go DOWN only in a batch that creates the order that includes that product.
 //  - Orders are created once (create-only), so a retried checkout can't double-charge.
 //  - Boost orders are paid the same way: the plan's rate per 1,000 × quantity / 1,000.
 //    The rate must be ₦500–₦50,000 per 1,000 units; totals are rounded to whole naira
 //    (never below ₦1) because the wallet holds no kobo.
-//  - Checkout fees are fixed by the fee schedule in /settings/fees (admin-edited), with
-//    built-in defaults: ₦2,000 platform service fee, ₦2,500 delivery inside the store's
-//    local state, ₦6,000 delivery anywhere else.
+//  - Checkout uses the admin-edited platform service fee in /settings/fees. Shipping is
+//    set per order after checkout, then the customer receives a private notification.
 //  - Product documents use the admin-chosen product ID as their id (3–40 of A–Z a–z 0–9 _ -).
 //  - Analytics counters (daily visits and clicks, per-link totals) can only go up by 1
 //    per write and hold no personal data. Only approved admins read them.
-//  - Approved admin accounts (email + verified email) approve funding, move order status,
-//    cancel with refunds, list products and announce recommended ones. Admins can set any
-//    balance; that trust is by design.
+//  - Approved admin accounts (email + verified email) approve funding, set per-order
+//    shipping, move order status, cancel with refunds, list products and announce
+//    recommended ones. Admins can set any balance; that trust is by design.
 //
 // Limits: a cart is capped at 5 lines per order (rules have no loops, so each line is
 // checked by index). Each line's quantity is limited by the product's available stock.
@@ -87,19 +87,11 @@ service cloud.firestore {
     function feeData() {
       return exists(/databases/$(database)/documents/settings/fees)
         ? get(/databases/$(database)/documents/settings/fees).data
-        : {'serviceFee': 2000, 'deliveryLocal': 2500, 'deliveryNigeria': 6000, 'localState': 'Lagos'};
+        : {'serviceFee': 2000};
     }
 
     function serviceFeeAmount() {
       return feeData().get('serviceFee', 2000);
-    }
-
-    // Cheaper delivery only inside the store's local state; everywhere else uses the
-    // nationwide rate.
-    function deliveryFeeAmount(delivery) {
-      return (delivery.country == 'Nigeria' && delivery.state == feeData().get('localState', 'Lagos'))
-        ? feeData().get('deliveryLocal', 2500)
-        : feeData().get('deliveryNigeria', 6000);
     }
 
     // One order line: must match the product as it is now in /products, including the
@@ -173,8 +165,25 @@ service cloud.firestore {
         && request.resource.data.balance < resource.data.get('balance', 0)
         && request.resource.data.lastOrderId is string
         && getAfter(/databases/$(database)/documents/orders/$(request.resource.data.lastOrderId)).data.uid == uid
-        && getAfter(/databases/$(database)/documents/orders/$(request.resource.data.lastOrderId)).data.total
+        && getAfter(/databases/$(database)/documents/orders/$(request.resource.data.lastOrderId)).data.amountPaid
              == resource.data.get('balance', 0) - request.resource.data.balance;
+
+      // Shipping debit: the customer can pay only the amount the admin disclosed on
+      // their own order, and only while that order is being updated to fully paid.
+      allow update: if isOwner(uid)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['balance', 'lastShippingOrderId', 'updatedAt'])
+        && request.resource.data.balance is int
+        && request.resource.data.balance >= 0
+        && request.resource.data.balance < resource.data.get('balance', 0)
+        && request.resource.data.lastShippingOrderId is string
+        && getAfter(/databases/$(database)/documents/orders/$(request.resource.data.lastShippingOrderId)).data.uid == uid
+        && get(/databases/$(database)/documents/orders/$(request.resource.data.lastShippingOrderId)).data.amountDue is int
+        && get(/databases/$(database)/documents/orders/$(request.resource.data.lastShippingOrderId)).data.amountDue > 0
+        && getAfter(/databases/$(database)/documents/orders/$(request.resource.data.lastShippingOrderId)).data.amountDue == 0
+        && getAfter(/databases/$(database)/documents/orders/$(request.resource.data.lastShippingOrderId)).data.shippingStatus == 'paid'
+        && getAfter(/databases/$(database)/documents/orders/$(request.resource.data.lastShippingOrderId)).data.amountPaid
+             == get(/databases/$(database)/documents/orders/$(request.resource.data.lastShippingOrderId)).data.amountPaid
+                + (resource.data.get('balance', 0) - request.resource.data.balance);
 
       // Boost purchase debit: the wallet goes down, and only for the boost order
       // created in this batch.
@@ -205,8 +214,40 @@ service cloud.firestore {
           && request.resource.data.type == 'boost'
           && getAfter(/databases/$(database)/documents/boostOrders/$(request.resource.data.orderId)).data.uid == uid
           && request.resource.data.amount == -getAfter(/databases/$(database)/documents/boostOrders/$(request.resource.data.orderId)).data.total;
+        allow create: if isOwner(uid)
+          && request.resource.data.type == 'shipping'
+          && getAfter(/databases/$(database)/documents/orders/$(request.resource.data.orderId)).data.uid == uid
+          && request.resource.data.amount
+               == -(getAfter(/databases/$(database)/documents/orders/$(request.resource.data.orderId)).data.amountPaid
+                    - get(/databases/$(database)/documents/orders/$(request.resource.data.orderId)).data.amountPaid);
         allow create: if isAdmin();
         allow update, delete: if isAdmin();
+      }
+
+      // Private order notifications. A customer can read only their own notifications;
+      // the admin creates or refreshes one when shipping is set.
+      match /notifications/{notificationId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create, update: if isAdmin()
+          && request.resource.data.keys().hasOnly([
+            'type', 'orderId', 'subtotal', 'serviceFee', 'shippingFee', 'total', 'amountDue',
+            'createdAt', 'updatedAt'
+          ])
+          && request.resource.data.type == 'shipping_fee'
+          && isText(request.resource.data.orderId, 160)
+          && request.resource.data.subtotal is int
+          && request.resource.data.serviceFee is int
+          && request.resource.data.shippingFee is int
+          && request.resource.data.shippingFee >= 0
+          && request.resource.data.total is int
+          && request.resource.data.amountDue is int
+          && request.resource.data.amountDue >= 0
+          && request.resource.data.total == request.resource.data.subtotal
+             + request.resource.data.serviceFee + request.resource.data.shippingFee
+          && request.resource.data.amountDue == request.resource.data.shippingFee
+          && request.resource.data.createdAt is timestamp
+          && request.resource.data.updatedAt is timestamp;
+        allow delete: if isAdmin();
       }
     }
 
@@ -303,7 +344,7 @@ service cloud.firestore {
     // collected from. Published by the admin from data/jumia-pickup-stations.json; every
     // visitor can read the active ones. An order (and a profile) may only name a station
     // that exists here, and the name, state and address on it must match this document —
-    // which also pins the order's state (and so its delivery fee) to the real station.
+    // giving the admin a trusted pickup snapshot when choosing shipping.
     // ---------------------------------------------------------------
     match /pickupStations/{stationId} {
       allow read: if resource.data.active == true || isAdmin();
@@ -331,14 +372,14 @@ service cloud.firestore {
       allow read: if (signedIn() && resource.data.uid == request.auth.uid) || isAdmin();
 
       // A customer creates an order once. Every line must match current prices and
-      // variations, the total must be items + platform service fee + delivery fee from
-      // the fee schedule, the wallet must go down by exactly the total, and the id must
-      // be "<uid>_<requestId>" so retries reuse the same id.
+      // variations. Items plus the platform fee are charged now; shipping is explicitly
+      // null and is disclosed by the admin later. The id is "<uid>_<requestId>" so
+      // retries reuse the same id.
       allow create: if signedIn()
         && orderId == request.auth.uid + '_' + request.resource.data.requestId
         && request.resource.data.keys().hasOnly([
-          'uid', 'requestId', 'items', 'subtotal', 'serviceFee', 'deliveryFee', 'total',
-          'status', 'delivery', 'createdAt', 'updatedAt'
+          'uid', 'requestId', 'items', 'subtotal', 'serviceFee', 'shippingFee', 'total',
+          'amountPaid', 'amountDue', 'shippingStatus', 'status', 'delivery', 'createdAt', 'updatedAt'
         ])
         && request.resource.data.uid == request.auth.uid
         && isText(request.resource.data.requestId, 80)
@@ -347,6 +388,9 @@ service cloud.firestore {
         && request.resource.data.items.size() >= 1
         && request.resource.data.items.size() <= 5
         && request.resource.data.status == 'paid'
+        && request.resource.data.shippingFee == null
+        && request.resource.data.shippingStatus == 'pending'
+        && request.resource.data.amountDue == 0
         // The order is collected at a pickup station: the delivery map must carry that
         // station's id, name, state and address exactly as the catalogue has them.
         && request.resource.data.delivery is map
@@ -367,9 +411,11 @@ service cloud.firestore {
         && request.resource.data.updatedAt is timestamp
         && request.resource.data.subtotal is int
         && request.resource.data.serviceFee is int
-        && request.resource.data.deliveryFee is int
+        && request.resource.data.shippingFee == null
         && request.resource.data.total is int
         && request.resource.data.total >= 1
+        && request.resource.data.amountPaid is int
+        && request.resource.data.amountPaid == request.resource.data.total
         && (request.resource.data.items.size() <= 0 || lineMatchesProduct(request.resource.data.items[0]))
         && (request.resource.data.items.size() <= 1 || lineMatchesProduct(request.resource.data.items[1]))
         && (request.resource.data.items.size() <= 2 || lineMatchesProduct(request.resource.data.items[2]))
@@ -381,21 +427,64 @@ service cloud.firestore {
              + numAt(request.resource.data.items, 3, 'lineTotal')
              + numAt(request.resource.data.items, 4, 'lineTotal')
         && request.resource.data.serviceFee == serviceFeeAmount()
-        && request.resource.data.deliveryFee == deliveryFeeAmount(request.resource.data.delivery)
-        && request.resource.data.total == request.resource.data.subtotal
-             + request.resource.data.serviceFee
-             + request.resource.data.deliveryFee
+        && request.resource.data.total == request.resource.data.subtotal + request.resource.data.serviceFee
         && getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.balance
-             == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('balance', 0) - request.resource.data.total
+             == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('balance', 0) - request.resource.data.amountPaid
         && getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.balance >= 0;
 
-      // Admin moves an order forward, or cancels it. The client does the refund and restock
-      // in the same batch.
+      // The admin sets or edits shipping while it is still unpaid. The final total is
+      // pinned to the order's items, service fee and disclosed shipping amount.
       allow update: if isAdmin()
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt', 'cancelledAt'])
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'shippingFee', 'total', 'amountDue', 'shippingStatus', 'shippingFeeSetAt', 'shippingFeeSetBy', 'updatedAt'
+        ])
+        && resource.data.status != 'cancelled'
+        && (resource.data.get('shippingStatus', 'pending') in ['pending', 'due']
+          || (resource.data.get('shippingStatus', '') == 'paid'
+            && resource.data.get('shippingFee', -1) == 0
+            && resource.data.get('amountPaid', 0) == resource.data.subtotal + resource.data.serviceFee))
+        && request.resource.data.shippingFee is int
+        && request.resource.data.shippingFee >= 0
+        && request.resource.data.shippingFee <= 5000000
+        && request.resource.data.amountPaid == resource.data.get('amountPaid', resource.data.total)
+        && request.resource.data.total == request.resource.data.subtotal
+             + request.resource.data.serviceFee + request.resource.data.shippingFee
+        && request.resource.data.amountDue == request.resource.data.shippingFee
+        && ((request.resource.data.shippingFee > 0 && request.resource.data.shippingStatus == 'due')
+          || (request.resource.data.shippingFee == 0 && request.resource.data.shippingStatus == 'paid'))
+        && request.resource.data.shippingFeeSetAt is timestamp
+        && isText(request.resource.data.shippingFeeSetBy, 160)
+        && request.resource.data.updatedAt is timestamp;
+
+      // The customer pays the disclosed shipping amount from their wallet. The wallet
+      // and this order must change together; the original item charge is immutable.
+      allow update: if signedIn()
+        && resource.data.uid == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'amountPaid', 'amountDue', 'shippingStatus', 'shippingPaidAt', 'updatedAt'
+        ])
+        && resource.data.shippingStatus == 'due'
+        && resource.data.amountDue is int && resource.data.amountDue > 0
+        && request.resource.data.amountDue == 0
+        && request.resource.data.shippingStatus == 'paid'
+        && request.resource.data.amountPaid == resource.data.amountPaid + resource.data.amountDue
+        && request.resource.data.shippingPaidAt is timestamp
+        && request.resource.data.updatedAt is timestamp;
+
+      // Admin moves an order forward, or cancels it. Fulfilment cannot start until
+      // shipping is paid. Cancellation may also clear an unpaid amount due.
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'status', 'updatedAt', 'cancelledAt', 'amountDue', 'shippingStatus'
+        ])
         && ((resource.data.status == 'paid' && request.resource.data.status in ['processing', 'cancelled'])
           || (resource.data.status == 'processing' && request.resource.data.status in ['shipped', 'cancelled'])
-          || (resource.data.status == 'shipped' && request.resource.data.status == 'delivered'));
+          || (resource.data.status == 'shipped' && request.resource.data.status == 'delivered'))
+        && ((request.resource.data.status == 'cancelled'
+          && request.resource.data.get('amountDue', 0) == 0)
+          || (request.resource.data.status != 'cancelled'
+          && resource.data.get('amountDue', 0) == 0
+          && resource.data.get('shippingStatus', 'paid') == 'paid'));
 
       allow delete: if false;
     }
@@ -587,6 +676,13 @@ service cloud.firestore {
         && request.resource.data.uid == request.auth.uid
         && getAfter(/databases/$(database)/documents/boostOrders/$(request.resource.data.reference)).data.uid == request.auth.uid
         && request.resource.data.amount == -getAfter(/databases/$(database)/documents/boostOrders/$(request.resource.data.reference)).data.total;
+      allow create: if signedIn()
+        && request.resource.data.type == 'shipping'
+        && request.resource.data.uid == request.auth.uid
+        && getAfter(/databases/$(database)/documents/orders/$(request.resource.data.reference)).data.uid == request.auth.uid
+        && request.resource.data.amount
+             == -(getAfter(/databases/$(database)/documents/orders/$(request.resource.data.reference)).data.amountPaid
+                  - get(/databases/$(database)/documents/orders/$(request.resource.data.reference)).data.amountPaid);
       allow create, update, delete: if isAdmin();
     }
 

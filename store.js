@@ -85,7 +85,7 @@ export async function saveLocation(uid, location) {
 }
 
 // Saves (or clears, with null) the pickup station this customer orders to. Stored on the
-// profile so checkout always shows — and charges for — the station they last chose.
+// profile so checkout and fulfilment always show the station they last chose.
 export async function savePickupStation(uid, station) {
   await updateDoc(doc(db, "users", uid), {
     pickup: station
@@ -135,9 +135,10 @@ export function savePaymentSettings(data) {
 }
 
 // ---------- Checkout fees ----------
-// Platform service fee and delivery fees added to every order. Defaults match the store
-// policy; the admin can adjust them (and which state counts as "local") in admin-settings.
-export const DEFAULT_FEES = { serviceFee: 2000, deliveryLocal: 2500, deliveryNigeria: 6000, localState: "Lagos" };
+// The platform service fee is known at checkout. Shipping is deliberately not part of
+// this schedule: the admin chooses it per order after seeing the customer's pickup
+// station and fulfilment details.
+export const DEFAULT_FEES = { serviceFee: 2000 };
 
 export function watchFeeSettings(callback, onError = noop) {
   return onSnapshot(doc(db, "settings", "fees"),
@@ -147,9 +148,6 @@ export function watchFeeSettings(callback, onError = noop) {
 export function saveFeeSettings(data) {
   return setDoc(doc(db, "settings", "fees"), {
     serviceFee: Math.round(Number(data.serviceFee ?? DEFAULT_FEES.serviceFee)),
-    deliveryLocal: Math.round(Number(data.deliveryLocal ?? DEFAULT_FEES.deliveryLocal)),
-    deliveryNigeria: Math.round(Number(data.deliveryNigeria ?? DEFAULT_FEES.deliveryNigeria)),
-    localState: String(data.localState || DEFAULT_FEES.localState).slice(0, 60),
     updatedAt: serverTimestamp()
   }, { merge: true });
 }
@@ -163,30 +161,19 @@ export async function getFeeSettings() {
   }
 }
 
-// Splits a basket into subtotal + platform service fee + delivery fee.
-// Delivery is the cheaper local rate only inside the store's local state; everywhere
-// else in Nigeria (and abroad) uses the nationwide rate. A pickup order is charged by
-// the station's state exactly like a doorstep delivery to that state.
+// Splits a basket into the amount known at checkout. Shipping stays blank until an
+// administrator sets it on the order; the customer is notified with the final
+// subtotal + service fee + shipping breakdown at that point.
 export function checkoutFees(subtotal, delivery, fees = DEFAULT_FEES) {
   const items = Math.round(Number(subtotal) || 0);
   const serviceFee = Math.max(0, Math.round(Number(fees.serviceFee) || 0));
-  const picked = delivery?.method === "pickup";
-  const country = PICKUP_COUNTRY;
   const state = String(delivery?.state || "").trim();
-  const localState = String(fees.localState || DEFAULT_FEES.localState).trim();
-  const local = !!state && state === localState;
-  const deliveryFee = Math.max(0, Math.round(Number(local ? fees.deliveryLocal : fees.deliveryNigeria) || 0));
-  const deliveryLabel = local
-    ? `Pickup · ${localState}`
-    : (state ? `Pickup · ${state}` : "Pickup at a station");
   return {
     subtotal: items,
     serviceFee,
-    deliveryFee,
-    deliveryLabel,
-    // Whether the cheaper local pickup rate applies (shown in the cart summary).
-    deliveryLocal: local,
-    total: items + serviceFee + deliveryFee
+    shippingFee: null,
+    shippingLabel: state ? `Shipping · ${state} · Set by store` : "Shipping fee · Set by store",
+    total: items + serviceFee
   };
 }
 
@@ -246,6 +233,65 @@ export function watchNotifications(callback, onError = noop, max = 10) {
     (snap) => callback(rows(snap)), onError);
 }
 
+// Private account notifications are used for order-specific updates. They are separate
+// from the public recommended-product feed so a customer's shipping amount is never
+// exposed to another signed-in user.
+export function watchMyNotifications(uid, callback, onError = noop, max = 10) {
+  return onSnapshot(
+    query(collection(db, "users", uid, "notifications"), orderBy("createdAt", "desc"), limit(max)),
+    (snap) => callback(rows(snap)), onError
+  );
+}
+
+export function shippingBreakdown(data) {
+  const orderId = String(data?.orderId || "");
+  const reference = orderId ? orderId.slice(-8).toUpperCase() : "—";
+  const subtotal = naira(data?.subtotal || 0);
+  const serviceFee = naira(data?.serviceFee || 0);
+  const shippingFee = naira(data?.shippingFee || 0);
+  const total = naira(data?.total || 0);
+  const due = Number(data?.amountDue || 0);
+  return `Order ${reference}: items ${subtotal} + service ${serviceFee} + shipping ${shippingFee} = total ${total}${due > 0 ? `. Pay ${naira(due)} shipping from your wallet to complete payment.` : ". No amount is due."}`;
+}
+
+const CUSTOMER_SHIPPING_SEEN_PREFIX = "korastore-shipping-seen-";
+let customerShippingAlertsStarted = false;
+
+// Watches private shipping updates on every storefront page. Firestore listeners make
+// the alert live while the customer is online; the timestamp stored in localStorage also
+// lets the next visit catch up on a fee that was set while the browser was closed.
+export function startCustomerShippingAlerts() {
+  if (customerShippingAlertsStarted) return;
+  customerShippingAlertsStarted = true;
+  let stop = null;
+  onAuthStateChanged(auth, (user) => {
+    if (stop) { stop(); stop = null; }
+    if (!user) return;
+    const seenKey = `${CUSTOMER_SHIPPING_SEEN_PREFIX}${user.uid}`;
+    let lastSeen = Number(localStorage.getItem(seenKey) || 0);
+    stop = watchMyNotifications(user.uid, (items) => {
+      const shipping = items
+        .filter((item) => item.type === "shipping_fee")
+        .map((item) => ({ ...item, time: toDate(item.updatedAt || item.createdAt)?.getTime() || 0 }))
+        .filter((item) => item.time > lastSeen)
+        .sort((a, b) => a.time - b.time);
+      if (!shipping.length) return;
+      lastSeen = shipping.reduce((max, item) => Math.max(max, item.time), lastSeen);
+      localStorage.setItem(seenKey, String(lastSeen));
+      for (const item of shipping.slice(-5)) {
+        const body = shippingBreakdown(item);
+        showToast("Shipping fee set", body);
+        showBrowserNotification({
+          title: "KORASTORE · Shipping fee set",
+          body,
+          tag: `shipping-${item.orderId}`,
+          link: new URL("orders.html", location.href).href
+        });
+      }
+    }, noop);
+  });
+}
+
 // ---------- Customer data ----------
 export function watchMyOrders(uid, callback, onError = noop) {
   return onSnapshot(query(collection(db, "orders"), where("uid", "==", uid)), (snap) => {
@@ -294,7 +340,7 @@ export function watchAllUsers(callback, onError = noop) {
 // picks their state, then the station closest to them. The catalogue lives in Firestore
 // — pickupStations/{stationId}, seeded from data/jumia-pickup-stations.json by
 // Admin → Pickup stations — so the security rules can pin an order to a real station
-// (and to the station's own state, which decides the delivery fee).
+// (and the admin can review the station before setting that order's shipping fee).
 export const PICKUP_COUNTRY = "Nigeria";
 const PICKUP_META = ["settings", "pickupStations"];
 
@@ -650,9 +696,9 @@ export function mountPickupPicker(host, { selectedId = "", onSelect = noop } = {
 export const MAX_CART_LINES = 5;
 const ID_PATTERN = /^[A-Za-z0-9_-]+$/;
 const PICKUP_ID_PATTERN = /^[A-Za-z0-9_-]{2,40}$/;
-// Checks the pickup station the order delivers to. The station's own document decides the
-// name, state and address on the order (and the state decides the delivery fee); the
-// security rules read the same document again, so an order can only carry a real station.
+// Checks the pickup station the order uses. The station's own document decides the
+// name, state and address on the order; the security rules read the same document again,
+// so an order can only carry a real station for the admin to review.
 async function validatePickupStation(pickup) {
   const id = String(pickup?.stationId || "").trim();
   if (!PICKUP_ID_PATTERN.test(id)) {
@@ -674,9 +720,10 @@ async function validatePickupStation(pickup) {
   };
 }
 
-// Places an order: debits the wallet (items + service fee + delivery fee), decrements stock
-// and writes the order, all in one transaction. Retrying with the same requestId returns
-// the original order instead of charging twice.
+// Places an order: debits the wallet for the amount known now (items + service fee),
+// leaves shipping blank for the admin, decrements stock and writes the order in one
+// transaction. Retrying with the same requestId returns the original order instead of
+// charging twice. Shipping is collected separately after the admin sets the fee.
 export async function placeOrder(requestId, items) {
   const user = auth.currentUser;
   if (!user) throw new Error("Sign in to continue.");
@@ -785,8 +832,15 @@ export async function placeOrder(requestId, items) {
     }
     tx.set(orderRef, {
       uid, requestId, items: lines,
-      subtotal: feeParts.subtotal, serviceFee: feeParts.serviceFee, deliveryFee: feeParts.deliveryFee,
-      total, status: "paid", delivery,
+      subtotal: feeParts.subtotal,
+      serviceFee: feeParts.serviceFee,
+      shippingFee: null,
+      total,
+      amountPaid: total,
+      amountDue: 0,
+      shippingStatus: "pending",
+      status: "paid",
+      delivery,
       createdAt: serverTimestamp(), updatedAt: serverTimestamp()
     });
     tx.set(doc(db, "users", uid, "transactions", `purchase_${orderId}`), {
@@ -799,8 +853,15 @@ export async function placeOrder(requestId, items) {
     });
     return {
       orderId, status: "paid",
-      subtotal: feeParts.subtotal, serviceFee: feeParts.serviceFee, deliveryFee: feeParts.deliveryFee,
-      total, balance: newBalance, duplicate: false
+      subtotal: feeParts.subtotal,
+      serviceFee: feeParts.serviceFee,
+      shippingFee: null,
+      total,
+      amountPaid: total,
+      amountDue: 0,
+      shippingStatus: "pending",
+      balance: newBalance,
+      duplicate: false
     };
   });
 }
@@ -898,6 +959,7 @@ export function mountHeader(active) {
   window.addEventListener("storage", paint);
   // Every storefront page listens for new recommended products and notifies the user.
   if (!alertsStarted) { alertsStarted = true; watchRecommendedAlerts(); }
+  startCustomerShippingAlerts();
   mountWhatsAppChannel();
   startOneSignal();
   countVisit();
@@ -1303,7 +1365,121 @@ const ORDER_TRANSITIONS = {
   cancelled: []
 };
 
-// Moves an order forward. Cancelling also refunds the total to the wallet and restocks every line.
+const MAX_SHIPPING_FEE = 5000000;
+
+// The admin decides shipping after the customer has placed the order. This updates the
+// order's final total and creates a private notification in the customer's account. The
+// shipping amount is not debited here: the customer pays the newly disclosed amount from
+// their wallet after receiving the notification.
+export async function setOrderShippingFee(orderId, shippingFee) {
+  const fee = Math.round(Number(shippingFee));
+  if (!Number.isSafeInteger(fee) || fee < 0 || fee > MAX_SHIPPING_FEE) {
+    throw new Error("Shipping fee must be a whole amount between ₦0 and ₦5,000,000.");
+  }
+  const admin = auth.currentUser?.email || "admin";
+  const orderRef = doc(db, "orders", orderId);
+
+  return runTransaction(db, async (tx) => {
+    const orderSnap = await tx.get(orderRef);
+    if (!orderSnap.exists()) throw new Error("Order not found.");
+    const order = orderSnap.data();
+    if (order.status === "cancelled") throw new Error("A cancelled order cannot receive a shipping fee.");
+    if (!("shippingStatus" in order)) {
+      throw new Error("This order predates per-order shipping fees and cannot be changed here.");
+    }
+    const subtotal = Number(order.subtotal || 0);
+    const serviceFee = Number(order.serviceFee || 0);
+    const baseTotal = subtotal + serviceFee;
+    if (order.shippingStatus === "paid" && Number(order.amountPaid || 0) > baseTotal) {
+      throw new Error("Shipping has already been paid for this order.");
+    }
+
+    const amountPaid = Number(order.amountPaid ?? baseTotal);
+    if (!Number.isSafeInteger(amountPaid) || amountPaid !== baseTotal) {
+      throw new Error("This order has an invalid amount paid.");
+    }
+    const total = baseTotal + fee;
+    const amountDue = total - amountPaid;
+    const shippingStatus = amountDue > 0 ? "due" : "paid";
+
+    tx.update(orderRef, {
+      shippingFee: fee,
+      total,
+      amountDue,
+      shippingStatus,
+      shippingFeeSetAt: serverTimestamp(),
+      shippingFeeSetBy: admin,
+      updatedAt: serverTimestamp()
+    });
+    tx.set(doc(db, "users", order.uid, "notifications", `shipping_${orderId}`), {
+      type: "shipping_fee",
+      orderId,
+      subtotal,
+      serviceFee,
+      shippingFee: fee,
+      total,
+      amountDue,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+    return { orderId, shippingFee: fee, total, amountDue, shippingStatus };
+  });
+}
+
+// The customer pays the shipping amount after the admin has disclosed it. The wallet,
+// order and wallet history are changed in the same transaction, so the amount cannot be
+// charged twice by a retry.
+export async function payShippingFee(orderId) {
+  const user = auth.currentUser;
+  if (!user) throw new Error("Sign in to pay the shipping fee.");
+  const orderRef = doc(db, "orders", orderId);
+  const userRef = doc(db, "users", user.uid);
+
+  return runTransaction(db, async (tx) => {
+    const orderSnap = await tx.get(orderRef);
+    if (!orderSnap.exists()) throw new Error("Order not found.");
+    const order = orderSnap.data();
+    if (order.uid !== user.uid) throw new Error("You cannot pay another customer's order.");
+    const amountDue = Number(order.amountDue || 0);
+    const shippingFee = Number(order.shippingFee);
+    if (order.status === "cancelled") throw new Error("A cancelled order has no shipping payment due.");
+    if (order.shippingStatus !== "due" || !Number.isSafeInteger(amountDue) || amountDue <= 0
+        || !Number.isSafeInteger(shippingFee) || shippingFee < 0) {
+      throw new Error("There is no shipping payment due for this order.");
+    }
+
+    const profileSnap = await tx.get(userRef);
+    if (!profileSnap.exists()) throw new Error("Your profile is not ready yet. Sign out and back in.");
+    const profile = profileSnap.data();
+    const balance = Number(profile.balance || 0);
+    if (balance < amountDue) {
+      throw new Error(`Your wallet has ${naira(balance)} but shipping costs ${naira(amountDue)}. Fund your wallet first.`);
+    }
+    const newBalance = balance - amountDue;
+    const amountPaid = Number(order.amountPaid || 0) + amountDue;
+
+    tx.update(userRef, { balance: newBalance, lastShippingOrderId: orderId, updatedAt: serverTimestamp() });
+    tx.update(orderRef, {
+      amountPaid,
+      amountDue: 0,
+      shippingStatus: "paid",
+      shippingPaidAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+    tx.set(doc(db, "users", user.uid, "transactions", `shipping_${orderId}`), {
+      type: "shipping", title: `Shipping · Order ${orderId.slice(-6).toUpperCase()}`,
+      amount: -amountDue, status: "paid", orderId, balanceAfter: newBalance, createdAt: serverTimestamp()
+    });
+    tx.set(doc(db, "ledger", `shipping_${orderId}`), {
+      type: "shipping", uid: user.uid, amount: -amountDue, balanceAfter: newBalance,
+      reference: orderId, actor: user.uid, createdAt: serverTimestamp()
+    });
+    return { orderId, shippingFee, amountPaid, balance: newBalance };
+  });
+}
+
+// Moves an order forward. Cancelling refunds only what the customer has actually paid
+// (including shipping when it was paid) and restocks every line.
 export async function setOrderStatus(orderId, status) {
   if (!["processing", "shipped", "delivered", "cancelled"].includes(status)) {
     throw new Error("Status must be processing, shipped, delivered or cancelled.");
@@ -1318,13 +1494,16 @@ export async function setOrderStatus(orderId, status) {
     if (!ORDER_TRANSITIONS[order.status]?.includes(status)) {
       throw new Error(`An order that is ${order.status} cannot be changed to ${status}.`);
     }
+    if (status !== "cancelled" && Number(order.amountDue || 0) > 0) {
+      throw new Error("Set and collect the shipping fee before fulfilment can begin.");
+    }
 
     if (status !== "cancelled") {
       tx.update(orderRef, { status, updatedAt: serverTimestamp() });
       return { orderId, status };
     }
 
-    const refund = Number(order.total || 0);
+    const refund = Number(order.amountPaid ?? order.total ?? 0);
     const userRef = doc(db, "users", order.uid);
     const profileSnap = await tx.get(userRef);
     if (!profileSnap.exists()) throw new Error("The customer profile for this order does not exist.");
@@ -1338,7 +1517,12 @@ export async function setOrderStatus(orderId, status) {
     }
 
     tx.update(userRef, { balance: newBalance, updatedAt: serverTimestamp() });
-    tx.update(orderRef, { status: "cancelled", cancelledAt: serverTimestamp(), updatedAt: serverTimestamp() });
+    const cancellation = { status: "cancelled", cancelledAt: serverTimestamp(), updatedAt: serverTimestamp() };
+    if ("shippingStatus" in order || "amountPaid" in order) {
+      cancellation.amountDue = 0;
+      cancellation.shippingStatus = "cancelled";
+    }
+    tx.update(orderRef, cancellation);
     for (const change of restock) {
       tx.update(change.ref, {
         stock: Number(change.product.stock || 0) + change.quantity,
