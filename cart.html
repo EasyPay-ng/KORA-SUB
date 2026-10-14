@@ -9,7 +9,7 @@
 <body>
 <div id="site-header"></div>
 <main class="wrap page">
-  <div class="page-head"><div><span class="eyebrow">Checkout</span><h1>Your cart</h1><p>Prices and stock are confirmed again by the store when you pay. Checkout adds a platform service fee and delivery to your pickup station.</p></div></div>
+  <div class="page-head"><div><span class="eyebrow">Checkout</span><h1>Your cart</h1><p>Prices and stock are confirmed again by the store when you pay. Shipping is left blank at checkout; the admin sets it for this order and sends you the final total breakdown.</p></div></div>
   <div id="notice"></div>
   <div class="cart-layout">
     <section class="card"><div class="card-head"><div><h2>Items</h2><small id="item-count">Loading…</small></div><a class="link small" href="shop.html">Keep shopping →</a></div><div id="lines"><div class="empty"><b>Loading…</b></div></div></section>
@@ -17,7 +17,7 @@
   </div>
   <section class="card" id="pickup-card" style="margin-top:20px">
     <div class="card-head"><div><h2>Pickup station</h2><small>Pick it up at the station closest to you</small></div></div>
-    <p class="small muted" style="margin:-6px 0 14px">Choose your state, then select the station you will collect your order from. Delivery is charged by the station's state.</p>
+    <p class="small muted" style="margin:-6px 0 14px">Choose your state, then select the station you will collect your order from. The admin reviews this destination before setting shipping for the order.</p>
     <div id="pickup-picker"></div>
   </section>
 </main>
@@ -105,8 +105,9 @@
       <div class="summary-row"><span>Items</span><span>${t.count}</span></div>
       <div class="summary-row"><span>Items subtotal</span><span>${naira(t.subtotal)}</span></div>
       <div class="summary-row"><span>Platform service fee</span><span>${naira(t.serviceFee)}</span></div>
-      <div class="summary-row"><span>${esc(t.deliveryLabel)}</span><span>${naira(t.deliveryFee)}</span></div>
-      <div class="summary-row total"><span>Total</span><span>${naira(t.total)}</span></div>
+      <div class="summary-row"><span>Shipping fee</span><span class="muted">${esc(t.shippingLabel)}</span></div>
+      <div class="summary-row total"><span>Pay now</span><span>${naira(t.total)}</span></div>
+      <p class="small muted" style="margin:12px 0 0">The amount above covers the items and platform service fee. The admin will set shipping for your pickup station, then notify you of the final total.</p>
       <div style="margin-top:14px">${action}</div>
       ${t.problem ? '<p class="small" style="color:var(--bad);margin:12px 0 0">Some items are unavailable or exceed stock. Adjust your cart.</p>' : ''}`;
   }

@@ -62,7 +62,7 @@
   watchMyOrders(user.uid, (rows) => {
     document.querySelector('#recent-orders').innerHTML = rows.length ? rows.slice(0, 3).map(o => `
       <div class="feed-row"><div class="txt"><b>${esc((o.items || []).map(i => i.name).join(', ') || 'Order')}</b><small>${esc(formatDate(o.createdAt))} · <span class="badge ${statusClass(o.status)}">${esc(STATUS_LABEL[o.status] || o.status)}</span></small></div>
-      <span class="amt">${naira(o.total)}</span></div>`).join('')
+      <span class="amt">${naira(o.amountPaid ?? o.total)}${Number(o.amountDue || 0) > 0 ? ` <small class="muted">+ ${naira(o.amountDue)} due</small>` : ''}</span></div>`).join('')
       : '<div class="empty"><b>No orders yet</b>Your purchases appear here.<br><a class="btn btn-gold btn-sm" href="shop.html" style="margin-top:12px">Shop the catalogue</a></div>';
   });
 </script>

@@ -102,7 +102,7 @@
 
     $('#s-orders').textContent = live.length;
     $('#s-boosts').textContent = `${liveBoost.length} boost order${liveBoost.length === 1 ? '' : 's'} included`;
-    $('#s-revenue').textContent = naira(live.reduce((s, o) => s + Number(o.total || 0), 0));
+    $('#s-revenue').textContent = naira(live.reduce((s, o) => s + Number(o.amountPaid ?? o.total ?? 0), 0));
     $('#s-revenue-boost').textContent = `${naira(liveBoost.reduce((s, o) => s + Number(o.total || 0), 0))} from boosting`;
     $('#s-approved').textContent = naira(approved.reduce((s, r) => s + Number(r.amount || 0), 0));
     $('#s-approved-count').textContent = plural(approved.length, 'request');

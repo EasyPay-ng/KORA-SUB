@@ -238,9 +238,15 @@ h1, h2, h3, h4 { font-family: 'Sora', sans-serif; letter-spacing: -.02em; line-h
 .track-labels .now { color: var(--navy); }
 .order-items { margin: 12px 0 0; padding: 0; list-style: none; color: var(--muted); font-size: 14px; }
 .order-items li { display: flex; justify-content: space-between; padding: 4px 0; }
+.order-items li.order-total { margin-top: 7px; padding-top: 10px; border-top: 1px solid var(--line); color: var(--navy); font-weight: 800; }
+.notice small { display: block; margin-top: 3px; }
+.ok-text { color: var(--ok) !important; }
+.shipping-form { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-width: 170px; }
+.shipping-form .input { width: 105px; min-height: 34px; padding: 0 9px; }
+.shipping-form small { flex-basis: 100%; }
 
 .table-wrap { overflow-x: auto; }
-.table { width: 100%; border-collapse: collapse; min-width: 640px; }
+.table { width: 100%; border-collapse: collapse; min-width: 820px; }
 .table th { text-align: left; padding: 11px 12px; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); background: #f7f9fc; }
 .table td { padding: 13px 12px; border-top: 1px solid var(--line); vertical-align: middle; font-size: 14px; }
 .table td b { color: var(--navy); }
