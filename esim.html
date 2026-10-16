@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>eSIM data plans — KORASTORE</title>
-  <meta name="description" content="Explore the KORASTORE travel eSIM preview. Live plans and purchases are coming soon.">
+  <meta name="description" content="Buy travel eSIM data plans for your destination on KORASTORE. Pick a country or region, choose your allowance and pay from your wallet.">
   <link rel="stylesheet" href="store.css"><link rel="stylesheet" href="esim.css">
   <link rel="icon" href="assets/favicon.ico" sizes="any"><meta name="theme-color" content="#0b2545">
 </head>
@@ -11,23 +11,25 @@
 <div id="site-header"></div>
 <main class="wrap page esim-page">
   <div class="page-head">
-    <div><span class="eyebrow">Travel light. Stay connected.</span><h1>eSIM data plans</h1><p>A little less roaming. A lot more exploring.<br>Find a destination and explore how travel data will work.</p></div>
-    <span class="badge">Coming soon · Preview only</span>
+    <div><span class="eyebrow">Travel light. Stay connected.</span><h1>eSIM data plans</h1><p>A little less roaming. A lot more exploring.<br>Find a destination, pick your data and pay from your wallet.</p></div>
+    <span class="badge">Paid from your wallet</span>
   </div>
   <details class="esim-guide">
     <summary>New to eSIM? What it is and how to use it</summary>
     <div class="esim-guide-body">
-      <p>An eSIM is a digital SIM you install on a compatible phone, without swapping your physical SIM card. Travel eSIMs typically provide mobile data; calls and texts depend on the plan.</p>
-      <ol><li><b>Check your device.</b> Confirm your exact phone model supports eSIM and is network-unlocked. Some regional models do not support it.</li><li><b>Choose your destination.</b> When live plans launch, review coverage, data allowance, validity and activation rules before paying.</li><li><b>Install over Wi-Fi.</b> Follow the provider’s QR code or manual setup instructions. Turn on the eSIM for mobile data and enable data roaming if instructed.</li></ol>
-      <p class="small muted">Do not delete an installed eSIM unless the provider tells you to. Reinstallation may not be supported.</p>
+      <p>An eSIM is a digital SIM you install on a compatible phone, without swapping your physical SIM card. Travel eSIMs provide mobile data; calls and texts depend on the plan.</p>
+      <ol><li><b>Check your device.</b> Confirm your exact phone model supports eSIM and is network-unlocked. Some regional models do not support it.</li><li><b>Choose your destination.</b> Review coverage, data allowance, validity and the activation notes on each plan before paying.</li><li><b>Install over Wi-Fi.</b> Follow the QR code or manual setup instructions we send you. Turn on the eSIM for mobile data and enable data roaming if instructed.</li></ol>
+      <p class="small muted">Do not delete an installed eSIM unless the instructions tell you to. Reinstallation may not be supported.</p>
     </div>
   </details>
   <div class="esim-layout">
-    <section class="card esim-browser" aria-label="Explore eSIMs">
+    <section class="card esim-browser" aria-label="Buy an eSIM">
       <div class="esim-tabs" role="tablist" aria-label="eSIM section">
         <button id="buy-tab" role="tab" type="button" aria-selected="true" aria-controls="buy-panel" tabindex="0">Buy eSIM</button>
         <button id="my-tab" role="tab" type="button" aria-selected="false" aria-controls="my-panel" tabindex="-1">My eSIMs</button>
       </div>
+      <!-- Outside the tab panels, so a purchase message stays visible on either tab. -->
+      <div id="esim-notice"></div>
       <div id="buy-panel" role="tabpanel" aria-labelledby="buy-tab">
         <div id="destinations-view">
           <label class="field" for="esim-search">Where are you going?</label>
@@ -37,43 +39,96 @@
             <button class="chip" type="button" data-filter="country" aria-pressed="false">Countries</button>
             <button class="chip" type="button" data-filter="region" aria-pressed="false">Regions</button>
           </div>
-          <p class="small muted" id="catalogue-note">Sample destinations and plans — not a live coverage list.</p>
+          <p class="small muted" id="catalogue-note">Only destinations we currently sell data for are listed. Ask us if yours is missing.</p>
           <p class="small muted" id="destination-count" role="status"></p>
-          <div id="destination-list" class="esim-destinations"></div>
+          <div id="destination-list" class="esim-destinations"><div class="empty"><b>Loading plans…</b></div></div>
         </div>
         <div id="plans-view" hidden>
           <button class="btn btn-ghost btn-sm" type="button" id="back-destinations">← All destinations</button>
-          <div class="esim-plan-heading"><span id="destination-flag" class="esim-flag" aria-hidden="true"></span><div><span class="eyebrow">Sample plans</span><h2 id="destination-title" tabindex="-1"></h2></div></div>
-          <p class="muted small">Illustrative data allowances only. Coverage, networks, prices and activation terms will be confirmed when our provider is connected.</p>
+          <div class="esim-plan-heading"><span id="destination-flag" class="esim-flag" aria-hidden="true"></span><div><span class="eyebrow">Data plans</span><h2 id="destination-title" tabindex="-1"></h2></div></div>
+          <p class="muted small">Prices are per eSIM and include no calls or texts unless the plan says so. Validity starts when the eSIM connects to a network, unless the notes say otherwise.</p>
           <div id="plan-list" class="esim-plans"></div>
-          <p class="small muted">Purchases are disabled. No wallet funds will be taken.</p>
+          <div id="buy-box" class="esim-buy" hidden>
+            <div class="esim-buy-head"><b id="buy-plan-title"></b><span class="mono" id="buy-plan-price"></span></div>
+            <div id="buy-signed-out" hidden>
+              <p class="small muted">Sign in to pay from your KORASTORE wallet.</p>
+              <button class="btn btn-gold btn-sm" type="button" id="buy-signin">Sign in to buy</button>
+            </div>
+            <div id="buy-signed-in" hidden>
+              <label class="field" for="buy-quantity">How many eSIMs? <small>up to 10 on one order</small></label>
+              <input class="input esim-qty" id="buy-quantity" type="number" min="1" max="10" step="1" value="1" inputmode="numeric">
+              <p class="small muted">Wallet balance: <b id="buy-balance" style="color:var(--navy)">…</b> · <a class="link" href="wallet.html">Fund wallet</a></p>
+              <p class="small esim-short" id="buy-short" role="status"></p>
+              <div id="buy-error" class="error-text" role="alert"></div>
+              <button class="btn btn-gold btn-block" type="button" id="buy-pay">Pay from wallet</button>
+            </div>
+          </div>
+          <p class="small muted">Paying debits your wallet immediately. If we cancel an order before delivery, the full amount is refunded.</p>
         </div>
       </div>
       <div id="my-panel" role="tabpanel" aria-labelledby="my-tab" hidden>
-        <div class="esim-coming">
-          <span class="esim-empty-icon" aria-hidden="true">▣</span><h2>Your next connection starts here</h2>
-          <p>eSIM purchases haven’t launched yet. Once live, this area will hold your purchased eSIMs, installation instructions and status.</p>
-          <p class="small muted">No eSIM account records are being loaded in this preview.</p>
-          <button class="btn btn-gold" type="button" id="explore-destinations">Explore destinations →</button>
-        </div>
+        <div id="esim-orders"><div class="empty"><b>Loading your eSIMs…</b></div></div>
       </div>
-      <noscript><p>Enable JavaScript to search sample destinations and browse plans. eSIM purchases are not available yet.</p></noscript>
+      <noscript><p>Enable JavaScript to browse destinations and buy an eSIM.</p></noscript>
     </section>
     <aside class="stack">
       <section class="card esim-rules"><span class="eyebrow">Before you travel</span><h2>Good to know</h2>
-        <ul><li>You’ll need an eSIM-compatible, network-unlocked device.</li><li>Coverage, validity and when a plan starts depend on the provider and destination.</li><li>Refund eligibility will be shown on each live plan before payment. Do not assume an installed or unused eSIM is refundable.</li></ul>
-        <div class="esim-launch-note"><b>We’re getting connected.</b><p>This is a preview, not a live offer. Prices, purchases, QR codes and refunds will be available only after provider integration.</p></div>
+        <ul><li>You’ll need an eSIM-compatible, network-unlocked device.</li><li>Coverage, validity and when a plan starts depend on the destination — read each plan’s notes.</li><li>We deliver your QR code or activation details after payment, usually within a few hours. They appear under <b>My eSIMs</b> and are sent to your account email.</li><li>If we cancel an order before delivery, the full amount goes back to your wallet. Tell us straight away if delivered details do not work.</li></ul>
+        <div class="esim-launch-note"><b>Install before you fly.</b><p>Add the eSIM over Wi-Fi at home, keep your home SIM for calls, and switch mobile data to the eSIM when you land.</p></div>
       </section>
-      <section class="card esim-help"><h2>Not sure where to start?</h2><p class="muted small">Check your phone manufacturer’s eSIM compatibility guide, or ask us before choosing a plan.</p><a class="link small" href="mailto:beniwealth70@gmail.com?subject=eSIM%20enquiry">Contact KORASTORE →</a></section>
+      <section class="card esim-help"><h2>Not sure which plan?</h2><p class="muted small">Check your phone manufacturer’s eSIM compatibility guide, or ask us before choosing a plan.</p><a class="link small" href="mailto:beniwealth70@gmail.com?subject=eSIM%20enquiry">Contact KORASTORE →</a></section>
     </aside>
   </div>
 </main>
 <div id="site-footer"></div>
-<script type="module" src="esim.js"></script>
 <script type="module">
-  import { mountHeader, mountFooter } from './store.js';
+  import { mountHeader, mountFooter, watchEsimPlans, watchMyEsimOrders, watchProfile, placeEsimOrder, newRequestId, auth, onAuthStateChanged, naira, formatDateTime, STATUS_LABEL, statusClass, esimOrderLabel, showToast } from './store.js';
+  import { createEsimPage } from './esim.js';
   mountHeader('esim.html');
   mountFooter();
+
+  const page = createEsimPage({
+    naira,
+    formatDateTime,
+    statusLabel: (status) => STATUS_LABEL[status] || status,
+    statusClass,
+    orderLabel: esimOrderLabel,
+    onSignIn: () => { location.href = `login.html?next=${encodeURIComponent('esim.html')}`; },
+    onRetry: () => location.reload(),
+    onBuy: async (planId, quantity) => {
+      // Reuse the same request ID for retries of the same purchase, so a lost response
+      // never charges the wallet twice.
+      const signature = JSON.stringify({ planId, quantity });
+      const pendingKey = 'korastore-esim-pending';
+      let pending = null;
+      try { pending = JSON.parse(sessionStorage.getItem(pendingKey) || 'null'); } catch { pending = null; }
+      const requestId = pending && pending.signature === signature ? pending.requestId : newRequestId();
+      sessionStorage.setItem(pendingKey, JSON.stringify({ requestId, signature }));
+      try {
+        const result = await placeEsimOrder(requestId, { planId, quantity });
+        sessionStorage.removeItem(pendingKey);
+        showToast('eSIM ordered', `${result.destinationName} · ${result.data}`);
+        return result;
+      } catch (problem) {
+        sessionStorage.removeItem(pendingKey);
+        throw problem;
+      }
+    }
+  });
+
+  watchEsimPlans(
+    (rows) => page.setPlans(rows),
+    (problem) => page.setPlansError(problem.message)
+  );
+
+  onAuthStateChanged(auth, (user) => {
+    if (!user) { page.setViewer(null); page.setOrders([]); return; }
+    page.setViewer({ signedIn: true, balance: 0 });
+    watchProfile(user.uid, (profile) => page.setViewer({ signedIn: true, balance: Number(profile.balance || 0) }));
+    watchMyEsimOrders(user.uid,
+      (rows) => page.setOrders(rows),
+      (problem) => page.setOrdersError(problem.message));
+  });
 </script>
 </body>
 </html>

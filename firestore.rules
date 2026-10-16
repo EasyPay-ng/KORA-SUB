@@ -16,6 +16,9 @@ rules_version = '2';
 //  - Boost orders are paid the same way: the plan's rate per 1,000 × quantity / 1,000.
 //    The rate must be ₦500–₦50,000 per 1,000 units; totals are rounded to whole naira
 //    (never below ₦1) because the wallet holds no kobo.
+//  - eSIM plans are typed in by hand by the admin (there is no supplier feed) and are
+//    bought like a boost: total = the plan's price × quantity (1–10), paid from the
+//    wallet. The plan as it is now decides the price and the details on the order.
 //  - Checkout uses the admin-edited platform service fee in /settings/fees. Shipping is
 //    set per order after checkout, then the customer receives a private notification.
 //  - Product documents use the admin-chosen product ID as their id (3–40 of A–Z a–z 0–9 _ -).
@@ -197,6 +200,18 @@ service cloud.firestore {
         && getAfter(/databases/$(database)/documents/boostOrders/$(request.resource.data.lastBoostOrderId)).data.total
              == resource.data.get('balance', 0) - request.resource.data.balance;
 
+      // eSIM purchase debit: the wallet goes down, and only for the eSIM order
+      // created in this batch.
+      allow update: if isOwner(uid)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['balance', 'lastEsimOrderId', 'updatedAt'])
+        && request.resource.data.balance is int
+        && request.resource.data.balance >= 0
+        && request.resource.data.balance < resource.data.get('balance', 0)
+        && request.resource.data.lastEsimOrderId is string
+        && getAfter(/databases/$(database)/documents/esimOrders/$(request.resource.data.lastEsimOrderId)).data.uid == uid
+        && getAfter(/databases/$(database)/documents/esimOrders/$(request.resource.data.lastEsimOrderId)).data.total
+             == resource.data.get('balance', 0) - request.resource.data.balance;
+
       // Admin: funding credits, refunds and corrections.
       allow update: if isAdmin();
 
@@ -214,6 +229,10 @@ service cloud.firestore {
           && request.resource.data.type == 'boost'
           && getAfter(/databases/$(database)/documents/boostOrders/$(request.resource.data.orderId)).data.uid == uid
           && request.resource.data.amount == -getAfter(/databases/$(database)/documents/boostOrders/$(request.resource.data.orderId)).data.total;
+        allow create: if isOwner(uid)
+          && request.resource.data.type == 'esim'
+          && getAfter(/databases/$(database)/documents/esimOrders/$(request.resource.data.orderId)).data.uid == uid
+          && request.resource.data.amount == -getAfter(/databases/$(database)/documents/esimOrders/$(request.resource.data.orderId)).data.total;
         allow create: if isOwner(uid)
           && request.resource.data.type == 'shipping'
           && getAfter(/databases/$(database)/documents/orders/$(request.resource.data.orderId)).data.uid == uid
@@ -621,6 +640,135 @@ service cloud.firestore {
     }
 
     // ---------------------------------------------------------------
+    // Travel eSIM plans: /esimPlans/{planId} — the document id IS the admin-chosen plan
+    // ID. Every plan is typed in by hand; there is no supplier feed, so nothing can be
+    // bought that an admin did not write here. Prices are whole naira (₦1–₦5,000,000)
+    // and validity is 1–3,650 days.
+    // ---------------------------------------------------------------
+    match /esimPlans/{planId} {
+      allow read: if resource.data.active == true || isAdmin();
+
+      allow create: if isAdmin()
+        && planId.matches('^[A-Za-z0-9_-]{3,40}$')
+        && isText(request.resource.data.destinationId, 40)
+        && request.resource.data.destinationId.matches('^[A-Za-z0-9_-]{2,40}$')
+        && isText(request.resource.data.destinationName, 80)
+        && request.resource.data.destinationType in ['country', 'region']
+        && isText(request.resource.data.data, 40)
+        && request.resource.data.validityDays is int
+        && request.resource.data.validityDays >= 1
+        && request.resource.data.validityDays <= 3650
+        && request.resource.data.price is int
+        && request.resource.data.price >= 1
+        && request.resource.data.price <= 5000000
+        && (!('compareAtPrice' in request.resource.data)
+          || (request.resource.data.compareAtPrice is int
+            && (request.resource.data.compareAtPrice == 0
+              || request.resource.data.compareAtPrice >= request.resource.data.price)))
+        && request.resource.data.notes is string
+        && request.resource.data.notes.size() <= 2000
+        && request.resource.data.active is bool
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.updatedAt is timestamp;
+
+      allow update: if isAdmin()
+        && isText(request.resource.data.destinationId, 40)
+        && isText(request.resource.data.destinationName, 80)
+        && request.resource.data.destinationType in ['country', 'region']
+        && isText(request.resource.data.data, 40)
+        && request.resource.data.validityDays is int
+        && request.resource.data.validityDays >= 1
+        && request.resource.data.validityDays <= 3650
+        && request.resource.data.price is int
+        && request.resource.data.price >= 1
+        && request.resource.data.price <= 5000000
+        && (!('compareAtPrice' in request.resource.data)
+          || (request.resource.data.compareAtPrice is int
+            && (request.resource.data.compareAtPrice == 0
+              || request.resource.data.compareAtPrice >= request.resource.data.price)))
+        && request.resource.data.notes is string
+        && request.resource.data.notes.size() <= 2000;
+
+      // A customer's purchase moves the plan's "sold" counter, and only by the quantity
+      // in the order created in this batch (named in lastOrderId).
+      allow update: if signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['sold', 'lastOrderId', 'updatedAt'])
+        && request.resource.data.sold is int
+        && request.resource.data.lastOrderId is string
+        && getAfter(/databases/$(database)/documents/esimOrders/$(request.resource.data.lastOrderId)).data.uid == request.auth.uid
+        && getAfter(/databases/$(database)/documents/esimOrders/$(request.resource.data.lastOrderId)).data.status == 'paid'
+        && request.resource.data.sold
+             == resource.data.get('sold', 0)
+                + getAfter(/databases/$(database)/documents/esimOrders/$(request.resource.data.lastOrderId)).data.quantity;
+
+      allow delete: if isAdmin();
+    }
+
+    // ---------------------------------------------------------------
+    // eSIM orders: /esimOrders/{uid}_{requestId} — one plan, paid from the wallet. No
+    // delivery or checkout fees: total = plan price × quantity (1–10 eSIMs). The id is
+    // "<uid>_<requestId>" so a retried checkout returns the original order.
+    // ---------------------------------------------------------------
+    match /esimOrders/{orderId} {
+      allow read: if (signedIn() && resource.data.uid == request.auth.uid) || isAdmin();
+
+      allow create: if signedIn()
+        && orderId == request.auth.uid + '_' + request.resource.data.requestId
+        && request.resource.data.keys().hasOnly([
+          'uid', 'requestId', 'planId', 'destinationId', 'destinationName', 'destinationType',
+          'data', 'validityDays', 'unitPrice', 'quantity', 'total', 'email', 'status',
+          'createdAt', 'updatedAt'
+        ])
+        && request.resource.data.uid == request.auth.uid
+        && isText(request.resource.data.requestId, 80)
+        && request.resource.data.requestId.size() >= 8
+        && request.resource.data.status == 'paid'
+        && request.resource.data.planId.matches('^[A-Za-z0-9_-]{3,40}$')
+        && isText(request.resource.data.destinationId, 40)
+        && isText(request.resource.data.destinationName, 80)
+        && request.resource.data.destinationType in ['country', 'region']
+        && isText(request.resource.data.data, 40)
+        && request.resource.data.validityDays is int
+        && request.resource.data.validityDays >= 1
+        && request.resource.data.validityDays <= 3650
+        && request.resource.data.email is string
+        && request.resource.data.email.size() <= 160
+        && request.resource.data.quantity is int
+        && request.resource.data.quantity >= 1
+        && request.resource.data.quantity <= 10
+        && request.resource.data.unitPrice is int
+        && request.resource.data.unitPrice >= 1
+        && request.resource.data.unitPrice <= 5000000
+        && request.resource.data.total is int
+        && request.resource.data.total == request.resource.data.unitPrice * request.resource.data.quantity
+        // The catalogue as it is now decides the price and the details on the order.
+        && get(/databases/$(database)/documents/esimPlans/$(request.resource.data.planId)).data.active == true
+        && get(/databases/$(database)/documents/esimPlans/$(request.resource.data.planId)).data.price == request.resource.data.unitPrice
+        && get(/databases/$(database)/documents/esimPlans/$(request.resource.data.planId)).data.destinationId == request.resource.data.destinationId
+        && get(/databases/$(database)/documents/esimPlans/$(request.resource.data.planId)).data.destinationName == request.resource.data.destinationName
+        && get(/databases/$(database)/documents/esimPlans/$(request.resource.data.planId)).data.data == request.resource.data.data
+        && get(/databases/$(database)/documents/esimPlans/$(request.resource.data.planId)).data.validityDays == request.resource.data.validityDays
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.updatedAt is timestamp
+        && getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.balance
+             == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('balance', 0) - request.resource.data.total
+        && getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.balance >= 0;
+
+      // Admin delivers the eSIM — recording in `instructions` what was sent, which the
+      // customer reads under My eSIMs — or cancels and refunds (the client does the
+      // wallet refund in the same batch).
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt', 'cancelledAt', 'instructions'])
+        && (!('instructions' in request.resource.data)
+          || (request.resource.data.instructions is string
+            && request.resource.data.instructions.size() <= 2000))
+        && ((resource.data.status == 'paid' && request.resource.data.status in ['processing', 'cancelled'])
+          || (resource.data.status == 'processing' && request.resource.data.status in ['delivered', 'cancelled']));
+
+      allow delete: if false;
+    }
+
+    // ---------------------------------------------------------------
     // Funding requests: /fundingRequests/{requestId}
     // ---------------------------------------------------------------
     match /fundingRequests/{requestId} {
@@ -676,6 +824,11 @@ service cloud.firestore {
         && request.resource.data.uid == request.auth.uid
         && getAfter(/databases/$(database)/documents/boostOrders/$(request.resource.data.reference)).data.uid == request.auth.uid
         && request.resource.data.amount == -getAfter(/databases/$(database)/documents/boostOrders/$(request.resource.data.reference)).data.total;
+      allow create: if signedIn()
+        && request.resource.data.type == 'esim'
+        && request.resource.data.uid == request.auth.uid
+        && getAfter(/databases/$(database)/documents/esimOrders/$(request.resource.data.reference)).data.uid == request.auth.uid
+        && request.resource.data.amount == -getAfter(/databases/$(database)/documents/esimOrders/$(request.resource.data.reference)).data.total;
       allow create: if signedIn()
         && request.resource.data.type == 'shipping'
         && request.resource.data.uid == request.auth.uid

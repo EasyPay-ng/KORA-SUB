@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>eSIM plans — KORASTORE Admin</title>
+  <link rel="stylesheet" href="store.css">
+  <link rel="icon" href="assets/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png"><meta name="theme-color" content="#0b2545">
+</head>
+<body>
+<div id="gate" class="gate"><div class="gate-card"><span class="gate-mark">K</span><h2>Checking admin access…</h2><p>Verifying your account before any store data loads.</p></div></div>
+<div class="admin-shell" id="admin-content" hidden>
+  <aside class="admin-side" id="admin-sidebar"></aside>
+  <main class="admin-main">
+    <div class="page-head"><div><span class="eyebrow">Catalogue</span><h1>Travel eSIM plans</h1><p>Add each plan by hand: destination, data allowance, validity, price and the activation notes travellers see. Listed plans appear on <a class="link" href="esim.html">esim.html</a> straight away and are paid from the customer's wallet — there is no supplier feed, so only what you type here can be bought.</p></div><button class="btn btn-gold" id="new">+ New plan</button></div>
+    <div id="notice"></div>
+    <div class="admin-grid">
+      <section class="card">
+        <div class="card-head"><div><h2>All plans</h2><small id="count">Loading…</small></div></div>
+        <div class="toolbar" style="margin-bottom:14px">
+          <input id="plan-search" class="input" type="search" placeholder="Search by Plan ID, destination or data…" aria-label="Search eSIM plans" autocomplete="off" style="max-width:340px">
+          <button class="btn btn-sm btn-ghost" type="button" id="clear-search" hidden>Clear</button>
+        </div>
+        <div class="table-wrap"><table class="table"><thead><tr><th>Plan ID</th><th>Destination</th><th>Data</th><th>Validity</th><th>Price</th><th>Sold</th><th>Status</th><th></th></tr></thead><tbody id="rows"><tr><td colspan="8">Loading…</td></tr></tbody></table></div>
+      </section>
+      <section class="card">
+        <div class="card-head"><div><h2 id="form-title">New plan</h2><small>Travellers see changes immediately</small></div></div>
+        <form id="form" class="panel-form" novalidate>
+          <input type="hidden" id="id">
+          <div class="field-row">
+            <label class="field">Plan ID <small>3–40 letters, numbers, – or _ · cannot change later</small><input class="input" id="planId" maxlength="40" placeholder="e.g. NG-5GB-30D" required></label>
+            <label class="field">Destination <small>pick one, or type a new destination</small><input class="input" id="destinationName" maxlength="80" placeholder="e.g. Nigeria" list="destination-list" required><datalist id="destination-list"></datalist></label>
+            <label class="field">Destination type<select class="select" id="destinationType"><option value="country">Country</option><option value="region">Region (multi-country)</option></select></label>
+          </div>
+          <div class="field-row">
+            <label class="field">Data allowance <small>shown as the plan's headline</small><input class="input" id="data" maxlength="40" placeholder="e.g. 5 GB" required></label>
+            <label class="field">Validity <small>days the plan lasts once activated</small><input class="input" id="validityDays" type="number" min="1" max="3650" step="1" placeholder="e.g. 30" required></label>
+          </div>
+          <div class="field-row">
+            <label class="field">Selling price (₦) <small>what the traveller pays from their wallet</small><input class="input" id="price" type="number" min="1" max="5000000" step="1" required></label>
+            <label class="field">Original price (₦) <small>slashed through on the plan · optional</small><input class="input" id="compareAtPrice" type="number" min="0" step="1" placeholder="e.g. 12000"></label>
+          </div>
+          <label class="field">Activation notes <small>coverage, when validity starts, refund terms — shown on the plan card</small><textarea class="textarea" id="notes" maxlength="2000" placeholder="e.g. Data only, no calls or texts. Validity starts on first network connection. Install over Wi-Fi."></textarea></label>
+          <label class="toggle"><input type="checkbox" id="active" checked> Listed on the eSIM page</label>
+          <div id="error" class="error-text" role="alert" style="margin-top:12px"></div>
+          <div class="row" style="margin-top:12px"><button class="btn btn-gold" type="submit" id="save">Save plan</button><button class="btn btn-ghost" type="button" id="reset">Clear</button></div>
+        </form>
+      </section>
+    </div>
+
+    <section class="card" style="margin-top:20px">
+      <div class="card-head"><div><h2>eSIM orders</h2><small id="order-count">Loading…</small></div>
+        <select id="order-filter" class="select" style="max-width:200px"><option value="open">Open orders</option><option value="all">All orders</option><option value="paid">Paid</option><option value="processing">Processing</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select>
+      </div>
+      <p class="small muted" style="margin:-6px 0 14px">Send the traveller their QR code or activation details, then mark the order delivered — whatever you record as delivery instructions is shown to them under <b>My eSIMs</b>. Cancelling refunds the full amount to their wallet.</p>
+      <div class="table-wrap"><table class="table"><thead><tr><th>Order</th><th>Customer</th><th>Plan</th><th>Qty</th><th>Total</th><th>Status</th><th></th></tr></thead><tbody id="order-rows"><tr><td colspan="7">Loading…</td></tr></tbody></table></div>
+    </section>
+  </main>
+</div>
+<script type="module">
+  import { mountAdminSidebar, requireAdmin, watchEsimPlans, saveEsimPlan, watchAllEsimOrders, watchAllUsers, setEsimOrderStatus, esimOrderLabel, naira, esc, formatDateTime, STATUS_LABEL, statusClass, NEXT_ESIM_ACTIONS } from './store.js';
+  import { validatePlanDraft, destinationOptions, validityLabel, planDestination } from './esim-catalogue.mjs';
+  mountAdminSidebar('admin-esim.html');
+  const $ = (id) => document.querySelector(id);
+  let plans = [], orders = [], users = [], planSearch = '';
+
+  function setNotice(kind, title, detail) {
+    $('#notice').innerHTML = `<div class="notice ${kind}"><span class="notice-icon">${kind === 'ok' ? '✓' : '!'}</span><div><b>${esc(title)}</b>${detail ? `<small>${esc(detail)}</small>` : ''}</div></div>`;
+  }
+
+  function renderDestinationOptions() {
+    $('#destination-list').replaceChildren(...destinationOptions(plans).map(destination => {
+      const option = document.createElement('option');
+      option.value = destination.name;
+      option.label = `${destination.flag || ''} ${destination.name} · ${destination.type}`;
+      return option;
+    }));
+  }
+
+  function fill(plan) {
+    $('#form-title').textContent = plan ? `Edit: ${plan.id}` : 'New plan';
+    $('#id').value = plan?.id || '';
+    $('#planId').value = plan?.id || '';
+    $('#planId').disabled = Boolean(plan);
+    $('#destinationName').value = plan?.destinationName || '';
+    $('#destinationType').value = plan?.destinationType === 'region' ? 'region' : 'country';
+    $('#data').value = plan?.data || '';
+    $('#validityDays').value = plan?.validityDays ?? '';
+    $('#price').value = plan?.price ?? '';
+    $('#compareAtPrice').value = plan?.compareAtPrice || '';
+    $('#notes').value = plan?.notes || '';
+    $('#active').checked = plan ? plan.active === true : true;
+    $('#error').textContent = '';
+  }
+
+  function filteredPlans() {
+    const term = planSearch.trim().toLowerCase();
+    if (!term) return [...plans];
+    return plans.filter(plan => [plan.id, plan.destinationName, plan.destinationId, plan.data]
+      .some(value => String(value || '').toLowerCase().includes(term)));
+  }
+
+  function render() {
+    const term = planSearch.trim();
+    const list = filteredPlans();
+    const listed = plans.filter(plan => plan.active).length;
+    $('#count').textContent = term
+      ? `${list.length} of ${plans.length} plan${plans.length === 1 ? '' : 's'} · ${listed} listed`
+      : `${plans.length} plan${plans.length === 1 ? '' : 's'} · ${listed} listed`;
+    $('#clear-search').hidden = !term;
+    if (!list.length) {
+      $('#rows').innerHTML = `<tr><td colspan="8">${plans.length
+        ? `No plans match “${esc(term)}”.`
+        : 'No plans yet. Add your first one — travellers cannot buy anything until you do.'}</td></tr>`;
+      return;
+    }
+    $('#rows').innerHTML = [...list]
+      .sort((a, b) => String(a.destinationName).localeCompare(String(b.destinationName)) || Number(a.price) - Number(b.price))
+      .map(plan => `<tr>
+        <td class="mono"><b>${esc(plan.id)}</b></td>
+        <td><b>${esc(planDestination(plan).flag)} ${esc(plan.destinationName)}</b><small>${esc(plan.destinationType === 'region' ? 'Region' : 'Country')}${plan.destinationId ? ` · ${esc(plan.destinationId)}` : ''}</small></td>
+        <td><b>${esc(plan.data)}</b></td>
+        <td class="mono">${esc(validityLabel(plan.validityDays))}</td>
+        <td class="mono"><b>${naira(plan.price)}</b>${Number(plan.compareAtPrice) > Number(plan.price) ? `<small class="muted">${naira(plan.compareAtPrice)}</small>` : ''}</td>
+        <td class="mono">${Number(plan.sold || 0)}</td>
+        <td><span class="badge ${plan.active ? 'ok' : ''}">${plan.active ? 'Listed' : 'Hidden'}</span></td>
+        <td><div class="table-actions"><button class="btn btn-sm btn-ghost" data-edit="${esc(plan.id)}">Edit</button><button class="btn btn-sm btn-ghost" data-toggle="${esc(plan.id)}">${plan.active ? 'Hide' : 'List'}</button></div></td>
+      </tr>`).join('');
+  }
+
+  function renderOrders() {
+    const filter = $('#order-filter').value;
+    const list = orders.filter(order => filter === 'all'
+      || (filter === 'open' ? !['delivered', 'cancelled'].includes(order.status) : order.status === filter));
+    $('#order-count').textContent = `${list.length} of ${orders.length} order${orders.length === 1 ? '' : 's'}`;
+    $('#order-rows').innerHTML = list.length ? list.map(order => {
+      const customer = users.find(user => user.id === order.uid);
+      return `<tr>
+        <td><b class="mono">${esc(order.id.slice(-8).toUpperCase())}</b><small>${esc(formatDateTime(order.createdAt))}</small></td>
+        <td><b>${esc(customer?.name || 'Customer')}</b><small>${esc(order.email || customer?.email || '—')}</small></td>
+        <td><b>${esc(esimOrderLabel(order))}</b><small class="mono">${esc(order.planId)}</small></td>
+        <td class="mono">${Number(order.quantity || 1)}</td>
+        <td class="mono"><b>${naira(order.total)}</b><small>${naira(order.unitPrice)} each</small></td>
+        <td><span class="badge ${statusClass(order.status)}">${esc(STATUS_LABEL[order.status] || order.status)}</span>${order.instructions ? `<small class="muted">${esc(String(order.instructions).slice(0, 90))}</small>` : ''}</td>
+        <td><div class="table-actions">${(NEXT_ESIM_ACTIONS[order.status] || []).map(([next, label]) =>
+          `<button class="btn btn-sm ${next === 'cancelled' ? 'btn-danger' : 'btn-ghost'}" data-order="${esc(order.id)}" data-next="${next}">${esc(label)}</button>`).join('') || '<small class="muted">Closed</small>'}</div></td>
+      </tr>`;
+    }).join('') : '<tr><td colspan="7">No eSIM orders match this filter.</td></tr>';
+  }
+
+  $('#rows').addEventListener('click', async (event) => {
+    const edit = event.target.closest('[data-edit]');
+    const toggle = event.target.closest('[data-toggle]');
+    if (edit) fill(plans.find(plan => plan.id === edit.dataset.edit));
+    if (toggle) {
+      const plan = plans.find(item => item.id === toggle.dataset.toggle);
+      try {
+        await saveEsimPlan(plan.id, { ...plan, active: !plan.active });
+        setNotice('ok', plan.active ? 'Plan hidden' : 'Plan listed', `${plan.destinationName} · ${plan.data}`);
+      } catch (problem) {
+        setNotice('error', 'Could not update the plan', problem.message);
+      }
+    }
+  });
+  $('#new').addEventListener('click', () => { fill(null); $('#planId').focus(); });
+  $('#reset').addEventListener('click', () => fill(null));
+  $('#plan-search').addEventListener('input', (event) => { planSearch = event.target.value; render(); });
+  $('#clear-search').addEventListener('click', () => {
+    planSearch = '';
+    $('#plan-search').value = '';
+    render();
+    $('#plan-search').focus();
+  });
+
+  $('#form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const error = $('#error');
+    error.textContent = '';
+    const isNew = !$('#id').value;
+    const draft = {
+      planId: $('#planId').value.trim(),
+      destinationName: $('#destinationName').value,
+      destinationType: $('#destinationType').value,
+      data: $('#data').value,
+      validityDays: $('#validityDays').value,
+      price: $('#price').value,
+      compareAtPrice: $('#compareAtPrice').value,
+      notes: $('#notes').value,
+      active: $('#active').checked
+    };
+    // Same validation the write itself runs, so the admin sees the reason before saving.
+    const check = validatePlanDraft(draft, { plans, editingId: isNew ? null : draft.planId });
+    if (!check.ok) return error.textContent = check.error;
+
+    const save = $('#save');
+    save.disabled = true;
+    save.textContent = 'Saving…';
+    try {
+      await saveEsimPlan(draft.planId, draft, { isNew });
+      setNotice('ok', isNew ? 'Plan added' : 'Plan updated',
+        `${check.plan.destinationName} · ${check.plan.data} · ${validityLabel(check.plan.validityDays)} · ${naira(check.plan.price)}${check.plan.active ? '' : ' (hidden)'}`);
+      fill(null);
+    } catch (problem) {
+      error.textContent = problem.message || 'Could not save the plan.';
+    } finally {
+      save.disabled = false;
+      save.textContent = 'Save plan';
+    }
+  });
+
+  $('#order-filter').addEventListener('change', renderOrders);
+  $('#order-rows').addEventListener('click', async (event) => {
+    const button = event.target.closest('[data-order][data-next]');
+    if (!button) return;
+    const next = button.dataset.next;
+    let instructions = '';
+    if (next === 'delivered') {
+      instructions = prompt('What did you send the customer? (QR code, activation code, or where it was sent)\nThe traveller sees this under My eSIMs.', '');
+      if (instructions === null) return;
+    }
+    if (next === 'cancelled' && !confirm('Cancel this eSIM order and refund the full amount to the customer wallet?')) return;
+    button.disabled = true;
+    try {
+      const result = await setEsimOrderStatus(button.dataset.order, next, { instructions });
+      setNotice('ok', next === 'cancelled' ? 'Order cancelled and refunded' : 'Order updated',
+        next === 'cancelled' ? `${naira(result.refunded)} returned to the customer wallet.` : `${button.dataset.order.slice(-8).toUpperCase()} is now ${next}.`);
+    } catch (problem) {
+      setNotice('error', 'Could not update the order', problem.message || 'Check your connection and try again.');
+      button.disabled = false;
+    }
+  });
+
+  if (await requireAdmin('admin-esim.html')) {
+    watchEsimPlans((rows) => { plans = rows; render(); renderDestinationOptions(); },
+      (problem) => { $('#rows').innerHTML = `<tr><td colspan="8">${esc(problem.message)}</td></tr>`; },
+      { includeInactive: true });
+    watchAllEsimOrders((rows) => { orders = rows; renderOrders(); },
+      (problem) => { $('#order-rows').innerHTML = `<tr><td colspan="7">${esc(problem.message)}</td></tr>`; });
+    watchAllUsers((rows) => { users = rows; renderOrders(); });
+    fill(null);
+  }
+</script>
+</body>
+</html>
