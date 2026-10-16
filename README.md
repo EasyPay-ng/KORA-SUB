@@ -34,6 +34,17 @@ The catalogue is a snapshot of **GSUBZ's "Socials Media Market"** (`data/gsubz-s
 
 Shoppers pick a category and plan, enter the link/username to boost and a quantity within the plan's GSUBZ Min–Max, then pay **from their KORASTORE wallet**. The order total is **rate per 1,000 × quantity ÷ 1,000**, calculated in kobo and rounded to the nearest whole naira (minimum ₦1), because the wallet only holds whole naira. For example, ₦1,500 per 1,000 units costs ₦750 for 500 units. There are no checkout fees or delivery charges on boosts. The order transaction re-reads the plan at purchase time and verifies its rate, source limits and names; Firestore rules independently check the rate basis, quantity limits, total and wallet debit. The admin moves orders through **paid → processing → delivered**; cancelling refunds the wallet in one transaction. Boost orders appear on `orders.html` next to product orders.
 
+## Travel eSIMs (preview only)
+
+`esim.html` adds a responsive travel-eSIM browser, linked from the main navigation, footer, account navigation and dashboard. Visitors can search 41 **sample** countries/regions, filter by destination type, inspect illustrative data plans, read the device/setup guide and switch to the “My eSIMs” coming-soon panel. Prices and purchases are deliberately unavailable. These are not GSUBZ inventory or verified coverage; the screenshots only supplied the layout reference. No GSUBZ refund promise (including its 180-day policy) is adopted.
+
+- `esim-catalogue.mjs` holds clearly marked sample destinations and allowances, not supplier product IDs or prices.
+- `esim.js` handles browsing locally without needing Firebase/auth. The shared header/footer still use the existing Firebase client. No eSIM records are queried or saved, and no wallet balance changes are made.
+- `esim.css` extends the existing navy/gold theme, with stacked layouts on smaller screens and keyboard-accessible tabs.
+- Run `npm ci` then `npm test` for catalogue and DOM-interaction checks. These do not require Firebase or provider credentials. For a local preview run `python3 -m http.server 8000 --bind 0.0.0.0` and open `/esim.html`.
+
+**Before enabling sales:** choose a supplier and obtain their API documentation, confirmed catalogue, pricing/currency, coverage, activation and refund terms. Put provider credentials only in a trusted backend/secret store, never in these static files or chat. Implement authenticated, server-validated quotes and idempotent wallet debits/fulfilment, with recovery for provider failures; store installation credentials in owner-only records and process verified supplier status/refund events. Add the corresponding Firestore rules and security tests. Only then replace the samples and enable checkout and the real “My eSIMs” account view. The current site is static-hosted and has no eSIM provider backend.
+
 ## Pickup stations
 
 Customers do not enter a doorstep address: every order is collected at a **pickup station**. Checkout (and the account page) lists them like a classic SMM/checkout panel:

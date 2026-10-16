@@ -911,6 +911,7 @@ let alertsStarted = false;
 const NAV = [
   ["shop.html", "Shop"],
   ["boost.html", "Boost"],
+  ["esim.html", "eSIM"],
   ["cart.html", "Cart"],
   ["dashboard.html", "Account"]
 ];
@@ -972,7 +973,7 @@ export function mountFooter() {
     <footer class="footer">
       <div class="wrap footer-inner">
         <div><b>KORASTORE</b><p>Find it. Fund it. Own it.</p></div>
-        <div class="footer-links"><a href="shop.html" data-track="footer-shop">Shop</a><a href="boost.html" data-track="footer-boost">Boost</a><a href="wallet.html" data-track="footer-wallet">Fund wallet</a><a href="orders.html" data-track="footer-orders">Orders</a><a href="${WHATSAPP_CHANNEL_URL}" target="_blank" rel="noopener noreferrer" data-track="footer-whatsapp-channel">WhatsApp channel</a><a href="mailto:beniwealth70@gmail.com" data-track="footer-contact">Contact</a></div>
+        <div class="footer-links"><a href="shop.html" data-track="footer-shop">Shop</a><a href="boost.html" data-track="footer-boost">Boost</a><a href="esim.html" data-track="footer-esim">eSIM</a><a href="wallet.html" data-track="footer-wallet">Fund wallet</a><a href="orders.html" data-track="footer-orders">Orders</a><a href="${WHATSAPP_CHANNEL_URL}" target="_blank" rel="noopener noreferrer" data-track="footer-whatsapp-channel">WhatsApp channel</a><a href="mailto:beniwealth70@gmail.com" data-track="footer-contact">Contact</a></div>
         <small>© ${new Date().getFullYear()} KORASTORE</small>
       </div>
     </footer>`;
@@ -982,6 +983,7 @@ const ACCOUNT_TABS = [
   ["dashboard.html", "Overview"],
   ["wallet.html", "Fund wallet"],
   ["orders.html", "Orders"],
+  ["esim.html", "eSIMs"],
   ["profile.html", "Delivery location"]
 ];
 

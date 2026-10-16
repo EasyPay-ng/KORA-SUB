@@ -1,0 +1,59 @@
+/* eSIM preview, using the storefront's shared navy/gold design tokens. */
+.esim-page { padding-left: 24px; padding-right: 24px; }
+.esim-guide { border: 1px solid #dce5f3; background: #eef4fc; border-radius: 14px; margin-bottom: 28px; }
+.esim-guide summary { padding: 18px 22px; color: var(--navy-3); cursor: pointer; font-weight: 700; }
+.esim-guide-body { padding: 0 22px 14px; max-width: 850px; }
+.esim-guide-body li { margin-bottom: 10px; }
+.esim-layout { display: grid; grid-template-columns: minmax(0, 1.85fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+.esim-browser, .esim-rules { border-top: 4px solid var(--navy); }
+.esim-browser { padding: 10px 26px 26px; min-width: 0; }
+.esim-tabs { display: flex; gap: 6px; border-bottom: 1px solid var(--line); margin-bottom: 24px; }
+.esim-tabs button { border: 0; border-bottom: 3px solid transparent; background: transparent; padding: 18px 16px; cursor: pointer; font-weight: 700; color: var(--muted); }
+.esim-tabs button[aria-selected="true"] { border-bottom-color: var(--gold); color: var(--navy); }
+.esim-browser .field { margin-bottom: 8px; font-weight: 700; }
+.esim-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.esim-filters .chip { margin: 0; }
+.esim-destinations { display: grid; gap: 10px; }
+.esim-destination { display: flex; align-items: center; gap: 12px; text-align: left; width: 100%; padding: 16px; background: #fff; border: 1px solid var(--line); border-radius: 12px; cursor: pointer; transition: border-color .15s, background .15s; }
+.esim-destination:hover { border-color: var(--navy-3); background: #f7f9fd; }
+.esim-destination b { font-size: 15px; overflow-wrap: anywhere; }
+.esim-flag { font-size: 25px; flex: 0 0 32px; line-height: 1.2; }
+.esim-count { margin-left: auto; white-space: nowrap; font-size: 12px; color: var(--muted); }
+.esim-chevron { color: var(--faint); font-size: 25px; line-height: 1; }
+.esim-rules h2, .esim-help h2 { font-size: 18px; }
+.esim-rules ul { color: var(--muted); padding-left: 20px; margin: 18px 0; }
+.esim-rules li { margin-bottom: 12px; }
+.esim-launch-note { border-radius: 10px; padding: 16px; background: var(--gold-soft); font-size: 13px; color: var(--navy); }
+.esim-launch-note p { margin: 6px 0 0; }
+.esim-plan-heading { display: flex; align-items: center; gap: 14px; margin: 24px 0 16px; }
+.esim-plan-heading .esim-flag { font-size: 36px; }
+.esim-plan-heading .eyebrow { margin-bottom: 4px; }
+.esim-plan-heading h2 { font-size: 25px; }
+.esim-plans { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 24px 0 12px; }
+.esim-plan { border: 1px solid var(--line); border-radius: 14px; padding: 16px; background: #f9fbfe; }
+.esim-plan .badge { white-space: normal; font-size: 10px; }
+.esim-plan h3 { font-size: 28px; margin-top: 18px; color: var(--navy); }
+.esim-plan p, .esim-plan small { font-size: 12px; color: var(--muted); }
+.esim-plan hr { border: 0; border-top: 1px solid var(--line); margin: 20px 0; }
+.esim-plan b { font-size: 13px; }
+.esim-plan small { display: block; margin: 8px 0 16px; }
+.esim-plan .btn { padding: 8px; font-size: 12px; }
+.esim-coming { text-align: center; max-width: 440px; margin: 50px auto; }
+.esim-coming h2 { font-size: 23px; }
+.esim-coming p { color: var(--muted); }
+.esim-empty-icon { display: inline-grid; place-items: center; width: 70px; height: 70px; border-radius: 22px; background: var(--gold-soft); color: var(--navy); font-size: 38px; margin-bottom: 20px; }
+.esim-page button:focus-visible, .esim-page summary:focus-visible { outline: 3px solid var(--navy-3); outline-offset: 3px; }
+@media (max-width: 1000px) {
+  .esim-layout { grid-template-columns: minmax(0, 1fr); }
+  .esim-layout > aside { grid-template-columns: 1fr 1fr; align-items: start; }
+}
+@media (max-width: 600px) {
+  .esim-page { padding-left: 16px; padding-right: 16px; }
+  .esim-browser { padding: 8px 16px 20px; }
+  .esim-layout > aside, .esim-plans { grid-template-columns: 1fr; }
+  .esim-destination { gap: 8px; padding: 14px 10px; flex-wrap: wrap; }
+  .esim-destination b { flex: 1; font-size: 14px; }
+  .esim-count { font-size: 11px; }
+  .esim-flag { flex-basis: 28px; font-size: 22px; }
+  .esim-filters .chip { font-size: 11px; padding: 7px 10px; }
+}
