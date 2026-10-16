@@ -28,8 +28,8 @@
     </section>
 
     <section class="stats" aria-label="Sales" style="margin-top:16px">
-      <div class="stat"><small>Orders (not cancelled)</small><strong id="s-orders">0</strong><em id="s-boosts">0 boost orders included</em></div>
-      <div class="stat"><small>Revenue (not cancelled)</small><strong id="s-revenue">₦0</strong><em id="s-revenue-boost">₦0 from boosting</em></div>
+      <div class="stat"><small>Orders (not cancelled)</small><strong id="s-orders">0</strong><em id="s-boosts">0 boost · 0 eSIM orders included</em></div>
+      <div class="stat"><small>Revenue (not cancelled)</small><strong id="s-revenue">₦0</strong><em id="s-revenue-boost">₦0 boosting · ₦0 eSIMs</em></div>
       <div class="stat"><small>Approved funding</small><strong id="s-approved">₦0</strong><em id="s-approved-count">0 requests</em></div>
       <div class="stat"><small>Wallet balances</small><strong id="s-balances">₦0</strong><em>Total held by customers</em></div>
     </section>
@@ -55,11 +55,11 @@
   </main>
 </div>
 <script type="module">
-  import { mountAdminSidebar, requireAdmin, watchAllUsers, watchAllOrders, watchAllBoostOrders, watchAllFunding, watchAnalyticsDays, watchAnalyticsLinks, isAdminEmail, dayKey, naira, esc, formatDate, toDate } from './store.js';
+  import { mountAdminSidebar, requireAdmin, watchAllUsers, watchAllOrders, watchAllBoostOrders, watchAllEsimOrders, watchAllFunding, watchAnalyticsDays, watchAnalyticsLinks, isAdminEmail, dayKey, naira, esc, formatDate, toDate } from './store.js';
   mountAdminSidebar('admin-analytics.html');
 
   const DAY = 86400000;
-  let users = [], orders = [], boosts = [], funding = [], days = [], links = [];
+  let users = [], orders = [], boosts = [], esims = [], funding = [], days = [], links = [];
   const $ = (id) => document.querySelector(id);
   const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
   // Keys for the last n days, newest first, e.g. ['2026-10-13', '2026-10-12', …].
@@ -69,7 +69,7 @@
 
   function render() {
     const customers = users.filter(u => !isAdminEmail(u));
-    const buyers = new Set([...orders, ...boosts].map(o => o.uid));
+    const buyers = new Set([...orders, ...boosts, ...esims].map(o => o.uid));
     const leads = customers.filter(u => !buyers.has(u.id));
     const joinedSince = Date.now() - 7 * DAY;
     const joinedWeek = customers.filter(u => (toDate(u.createdAt)?.getTime() || 0) >= joinedSince).length;
@@ -78,8 +78,9 @@
     const today = dayKey();
     const week = lastDays(7);
     const month = lastDays(30);
-    const live = [...orders, ...boosts].filter(o => o.status !== 'cancelled');
+    const live = [...orders, ...boosts, ...esims].filter(o => o.status !== 'cancelled');
     const liveBoost = boosts.filter(o => o.status !== 'cancelled');
+    const liveEsim = esims.filter(o => o.status !== 'cancelled');
     const pending = funding.filter(r => r.status === 'pending');
     const approved = funding.filter(r => r.status === 'approved');
 
@@ -101,9 +102,9 @@
     $('#s-links-all').textContent = `${sumAll('linkClicks')} all time`;
 
     $('#s-orders').textContent = live.length;
-    $('#s-boosts').textContent = `${liveBoost.length} boost order${liveBoost.length === 1 ? '' : 's'} included`;
+    $('#s-boosts').textContent = `${liveBoost.length} boost · ${liveEsim.length} eSIM order${liveBoost.length + liveEsim.length === 1 ? '' : 's'} included`;
     $('#s-revenue').textContent = naira(live.reduce((s, o) => s + Number(o.amountPaid ?? o.total ?? 0), 0));
-    $('#s-revenue-boost').textContent = `${naira(liveBoost.reduce((s, o) => s + Number(o.total || 0), 0))} from boosting`;
+    $('#s-revenue-boost').textContent = `${naira(liveBoost.reduce((s, o) => s + Number(o.total || 0), 0))} boosting · ${naira(liveEsim.reduce((s, o) => s + Number(o.total || 0), 0))} eSIMs`;
     $('#s-approved').textContent = naira(approved.reduce((s, r) => s + Number(r.amount || 0), 0));
     $('#s-approved-count').textContent = plural(approved.length, 'request');
     $('#s-balances').textContent = naira(customers.reduce((s, u) => s + Number(u.balance || 0), 0));
@@ -139,6 +140,7 @@
     watchAllUsers(rows => { users = rows; render(); });
     watchAllOrders(rows => { orders = rows; render(); });
     watchAllBoostOrders(rows => { boosts = rows; render(); });
+    watchAllEsimOrders(rows => { esims = rows; render(); });
     watchAllFunding(rows => { funding = rows; render(); });
     watchAnalyticsDays(rows => { days = rows; render(); });
     watchAnalyticsLinks(rows => { links = rows; render(); });

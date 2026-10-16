@@ -10,6 +10,9 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { firebaseConfig, ADMIN_EMAILS } from "./firebase-config.js";
 import { ONESIGNAL_APP_ID } from "./push-config.js";
+import {
+  ESIM_PLAN_ID_PATTERN, ESIM_MAX_QUANTITY, esimOrderTotal, validatePlanDraft, validityLabel
+} from "./esim-catalogue.mjs";
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
@@ -1105,6 +1108,7 @@ const ADMIN_LINKS = [
   ["admin-analytics.html", "Analytics", "◔"],
   ["admin-products.html", "Products", "▣"],
   ["admin-boost.html", "Boosting", "↗"],
+  ["admin-esim.html", "eSIM plans", "◉"],
   ["admin-pickup.html", "Pickup stations", "⌖"],
   ["admin-funding.html", "Funding", "＋"],
   ["admin-orders.html", "Orders", "▤"],
@@ -2114,6 +2118,194 @@ export function watchAllBoostOrders(callback, onError = noop) {
     callback(rows(snap).sort((a, b) => (toDate(b.createdAt)?.getTime() || 0) - (toDate(a.createdAt)?.getTime() || 0)));
   }, onError);
 }
+
+// ---------- Travel eSIMs ----------
+// Admins type each plan in by hand under Admin → eSIM plans: destination, allowance,
+// validity, price and activation notes. Customers buy a plan on esim.html and pay from
+// their wallet, exactly like a boost order — one digital item, no shipping, no service
+// fee. Plans, validation and limits come from esim-catalogue.mjs, which firestore.rules
+// mirrors, so the browser and the rules cannot disagree about a price.
+export function watchEsimPlans(callback, onError = noop, { includeInactive = false } = {}) {
+  const ref = includeInactive ? collection(db, "esimPlans") : query(collection(db, "esimPlans"), where("active", "==", true));
+  return onSnapshot(ref, (snap) => callback(rows(snap)), onError);
+}
+
+// The admin-chosen plan id is the Firestore document id, so a plan keeps a stable id.
+export function saveEsimPlan(planId, data, { isNew = false } = {}) {
+  const { ok, error, plan } = validatePlanDraft({ ...data, planId }, { editingId: isNew ? null : planId });
+  if (!ok) throw new Error(error);
+  const payload = { ...plan, updatedAt: serverTimestamp() };
+  if (isNew) return setDoc(doc(db, "esimPlans", planId), { ...payload, sold: 0, createdAt: serverTimestamp() });
+  return updateDoc(doc(db, "esimPlans", planId), payload);
+}
+
+// Buys one plan (or a few for a group) from the wallet. The order id is
+// "<uid>_<requestId>", so a retried checkout returns the original order instead of
+// charging twice. The plan is re-read inside the transaction, so its live price and
+// details are what the customer pays and what the order records.
+export async function placeEsimOrder(requestId, { planId, quantity = 1 } = {}) {
+  const user = auth.currentUser;
+  if (!user) throw new Error("Sign in to continue.");
+  if (typeof requestId !== "string" || requestId.length < 8 || requestId.length > 80 || !ID_PATTERN.test(requestId)) {
+    throw new Error("Request ID is invalid.");
+  }
+  const amount = Math.round(Number(quantity));
+  if (!Number.isSafeInteger(amount) || amount < 1 || amount > ESIM_MAX_QUANTITY) {
+    throw new Error(`Choose between 1 and ${ESIM_MAX_QUANTITY} eSIMs per order.`);
+  }
+  if (typeof planId !== "string" || !ESIM_PLAN_ID_PATTERN.test(planId)) throw new Error("Choose a plan to continue.");
+
+  const uid = user.uid;
+  const orderId = `${uid}_${requestId}`;
+  const orderRef = doc(db, "esimOrders", orderId);
+  const userRef = doc(db, "users", uid);
+  const planRef = doc(db, "esimPlans", planId);
+
+  return runTransaction(db, async (tx) => {
+    const existing = await tx.get(orderRef);
+    if (existing.exists()) {
+      const order = existing.data();
+      return { orderId, status: order.status, total: order.total, duplicate: true };
+    }
+
+    const planSnap = await tx.get(planRef);
+    const plan = planSnap.exists() ? planSnap.data() : null;
+    if (!plan || plan.active !== true) throw new Error("This plan is not available right now.");
+    // Re-validate the stored plan with the same validator the admin form uses, so the
+    // order can never carry details the security rules would refuse (which a shopper
+    // would otherwise see as "insufficient permissions").
+    const { ok, plan: stored } = validatePlanDraft({ ...plan, planId: planSnap.id }, { editingId: planSnap.id });
+    // The rules compare the order against the plan document field by field, so the
+    // normalised copy must be exactly what is stored; anything else would be refused
+    // server-side and shown to the shopper as a permission error.
+    const usable = ok
+      && stored.price === Number(plan.price)
+      && stored.validityDays === Number(plan.validityDays)
+      && stored.destinationId === String(plan.destinationId)
+      && stored.destinationName === String(plan.destinationName)
+      && stored.data === String(plan.data);
+    if (!usable) throw new Error("This plan's details are incomplete. Tell us and we will fix it.");
+    const unitPrice = stored.price;
+    const total = esimOrderTotal(unitPrice, amount);
+    if (!total) throw new Error("This plan's price is outside the allowed range.");
+
+    const profileSnap = await tx.get(userRef);
+    if (!profileSnap.exists()) throw new Error("Your profile is not ready yet. Sign out and back in.");
+    const balance = Number(profileSnap.data().balance || 0);
+    if (balance < total) {
+      throw new Error(`Your wallet has ${naira(balance)} but this order costs ${naira(total)}. Fund your wallet first.`);
+    }
+    const newBalance = balance - total;
+    const { destinationId, destinationName, destinationType, data, validityDays } = stored;
+
+    tx.update(userRef, { balance: newBalance, lastEsimOrderId: orderId, updatedAt: serverTimestamp() });
+    tx.set(orderRef, {
+      uid, requestId,
+      planId: planSnap.id,
+      destinationId,
+      destinationName,
+      destinationType,
+      data,
+      validityDays,
+      unitPrice, quantity: amount, total,
+      // Where the store sends the QR/activation details for this order.
+      email: String(user.email || profileSnap.data().email || "").slice(0, 160),
+      status: "paid",
+      createdAt: serverTimestamp(), updatedAt: serverTimestamp()
+    });
+    // The plan's "sold" counter moves only with the order created in this same batch.
+    tx.update(planRef, { sold: increment(amount), lastOrderId: orderId, updatedAt: serverTimestamp() });
+    tx.set(doc(db, "users", uid, "transactions", `esim_${orderId}`), {
+      type: "esim", title: `eSIM · ${destinationName.slice(0, 40)} · ${data.slice(0, 20)}`, amount: -total,
+      status: "paid", orderId, balanceAfter: newBalance, createdAt: serverTimestamp()
+    });
+    tx.set(doc(db, "ledger", `esim_${orderId}`), {
+      type: "esim", uid, amount: -total, balanceAfter: newBalance,
+      reference: orderId, actor: uid, createdAt: serverTimestamp()
+    });
+    return {
+      orderId, status: "paid", destinationName, data, unitPrice, quantity: amount,
+      total, balance: newBalance, duplicate: false
+    };
+  });
+}
+
+const ESIM_ORDER_TRANSITIONS = {
+  paid: ["processing", "cancelled"],
+  processing: ["delivered", "cancelled"],
+  delivered: [],
+  cancelled: []
+};
+export const NEXT_ESIM_ACTIONS = {
+  paid: [["processing", "Start delivery"], ["cancelled", "Cancel & refund"]],
+  processing: [["delivered", "Mark delivered"], ["cancelled", "Cancel & refund"]],
+  delivered: [],
+  cancelled: []
+};
+
+// Admin moves an eSIM order forward — delivering it means the QR code / activation
+// details have been sent, recorded in `instructions` so the customer can read them
+// under My eSIMs — or cancels it, refunding the wallet in the same transaction.
+export async function setEsimOrderStatus(orderId, status, { instructions = "" } = {}) {
+  if (!["processing", "delivered", "cancelled"].includes(status)) {
+    throw new Error("Status must be processing, delivered or cancelled.");
+  }
+  const note = String(instructions || "").trim().slice(0, 2000);
+  const admin = auth.currentUser?.email || "admin";
+  const orderRef = doc(db, "esimOrders", orderId);
+
+  return runTransaction(db, async (tx) => {
+    const orderSnap = await tx.get(orderRef);
+    if (!orderSnap.exists()) throw new Error("eSIM order not found.");
+    const order = orderSnap.data();
+    if (!ESIM_ORDER_TRANSITIONS[order.status]?.includes(status)) {
+      throw new Error(`An eSIM order that is ${order.status} cannot be changed to ${status}.`);
+    }
+
+    if (status !== "cancelled") {
+      const change = { status, updatedAt: serverTimestamp() };
+      if (note) change.instructions = note;
+      tx.update(orderRef, change);
+      return { orderId, status };
+    }
+
+    const refund = Number(order.total || 0);
+    const userRef = doc(db, "users", order.uid);
+    const profileSnap = await tx.get(userRef);
+    if (!profileSnap.exists()) throw new Error("The customer profile for this order does not exist.");
+    const newBalance = Number(profileSnap.data().balance || 0) + refund;
+
+    tx.update(userRef, { balance: newBalance, updatedAt: serverTimestamp() });
+    tx.update(orderRef, { status: "cancelled", cancelledAt: serverTimestamp(), updatedAt: serverTimestamp() });
+    tx.set(doc(db, "users", order.uid, "transactions", `esimrefund_${orderId}`), {
+      type: "refund", title: `Refund · eSIM ${orderId.slice(-6).toUpperCase()}`, amount: refund,
+      status: "refunded", orderId, balanceAfter: newBalance, createdAt: serverTimestamp()
+    });
+    tx.set(doc(db, "ledger", `esimrefund_${orderId}`), {
+      type: "refund", uid: order.uid, amount: refund, balanceAfter: newBalance,
+      reference: orderId, actor: admin, createdAt: serverTimestamp()
+    });
+    return { orderId, status: "cancelled", refunded: refund, balance: newBalance };
+  });
+}
+
+export function watchMyEsimOrders(uid, callback, onError = noop) {
+  return onSnapshot(query(collection(db, "esimOrders"), where("uid", "==", uid)), (snap) => {
+    callback(rows(snap).sort((a, b) => (toDate(b.createdAt)?.getTime() || 0) - (toDate(a.createdAt)?.getTime() || 0)));
+  }, onError);
+}
+
+export function watchAllEsimOrders(callback, onError = noop) {
+  return onSnapshot(collection(db, "esimOrders"), (snap) => {
+    callback(rows(snap).sort((a, b) => (toDate(b.createdAt)?.getTime() || 0) - (toDate(a.createdAt)?.getTime() || 0)));
+  }, onError);
+}
+
+// One line of an eSIM order, for the customer's order history and the admin tables.
+export function esimOrderLabel(order = {}) {
+  return [order.destinationName, order.data, validityLabel(order.validityDays)].filter(Boolean).join(" · ");
+}
+
 
 // ---------- Analytics ----------
 // Anonymous daily counters, with no personal data: a visit is a storefront page view, and

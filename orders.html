@@ -15,10 +15,13 @@
   <div id="orders"><div class="empty">Loading orders…</div></div>
   <h2 style="margin:30px 0 12px">Boosting orders</h2>
   <div id="boost-orders"><div class="empty">Loading boost orders…</div></div>
+  <h2 style="margin:30px 0 12px">eSIM orders</h2>
+  <div id="esim-orders"><div class="empty">Loading eSIM orders…</div></div>
 </main>
 <div id="site-footer"></div>
 <script type="module">
-  import { mountHeader, mountFooter, mountAccountTabs, requireCustomer, watchMyOrders, watchMyBoostOrders, payShippingFee, requestShopperAlerts, notificationState, showToast, naira, esc, formatDateTime, formatDate, readParam, ORDER_STEPS, STATUS_LABEL, statusClass, variantLabel, stationShortName } from './store.js';
+  import { mountHeader, mountFooter, mountAccountTabs, requireCustomer, watchMyOrders, watchMyBoostOrders, watchMyEsimOrders, esimOrderLabel, payShippingFee, requestShopperAlerts, notificationState, showToast, naira, esc, formatDateTime, formatDate, readParam, ORDER_STEPS, STATUS_LABEL, statusClass, variantLabel, stationShortName } from './store.js';
+  import { validityLabel } from './esim-catalogue.mjs';
   mountHeader('orders.html');
   mountFooter();
   mountAccountTabs('orders.html');
@@ -125,6 +128,30 @@
       </article>`).join('');
   }, (error) => {
     document.querySelector('#boost-orders').innerHTML = `<div class="empty"><b>Boost orders unavailable</b>${esc(error.message)}</div>`;
+  });
+
+  watchMyEsimOrders(user.uid, (rows) => {
+    const host = document.querySelector('#esim-orders');
+    if (!rows.length) {
+      host.innerHTML = '<div class="empty"><b>No eSIM orders yet</b>Buy travel data from the <a class="link" href="esim.html">eSIM page</a> and your activation details will appear here.</div>';
+      return;
+    }
+    host.innerHTML = rows.map(o => `
+      <article class="order">
+        <div class="order-head">
+          <div><b>eSIM ${esc(o.id.slice(-8).toUpperCase())}</b><div class="small muted">${esc(formatDateTime(o.createdAt))}</div></div>
+          <div class="row"><span class="badge ${statusClass(o.status)}">${esc(STATUS_LABEL[o.status] || o.status)}</span><b class="mono" style="color:var(--navy)">${naira(o.total)}</b></div>
+        </div>
+        <ul class="order-items">
+          <li><span>${esc(esimOrderLabel(o))} · ${esc(validityLabel(o.validityDays))} × ${Number(o.quantity || 1)}</span><span>${naira(o.total)}</span></li>
+        </ul>
+        ${o.instructions ? `<div class="notice ok" style="margin-top:14px"><span class="notice-icon">✓</span><div><b>Your activation details</b><small>${esc(o.instructions)}</small></div></div>` : ''}
+        <p class="small muted" style="margin:12px 0 0">${o.status === 'cancelled'
+          ? 'Cancelled — the full amount was refunded to your wallet.'
+          : (o.status === 'delivered' ? 'Install over Wi-Fi. Do not delete the eSIM once it is working.' : 'We are preparing your eSIM and will send the activation details to your account email.')}</p>
+      </article>`).join('');
+  }, (error) => {
+    document.querySelector('#esim-orders').innerHTML = `<div class="empty"><b>eSIM orders unavailable</b>${esc(error.message)}</div>`;
   });
 </script>
 </body>

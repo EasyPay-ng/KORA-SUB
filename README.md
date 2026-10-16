@@ -34,16 +34,19 @@ The catalogue is a snapshot of **GSUBZ's "Socials Media Market"** (`data/gsubz-s
 
 Shoppers pick a category and plan, enter the link/username to boost and a quantity within the plan's GSUBZ Min–Max, then pay **from their KORASTORE wallet**. The order total is **rate per 1,000 × quantity ÷ 1,000**, calculated in kobo and rounded to the nearest whole naira (minimum ₦1), because the wallet only holds whole naira. For example, ₦1,500 per 1,000 units costs ₦750 for 500 units. There are no checkout fees or delivery charges on boosts. The order transaction re-reads the plan at purchase time and verifies its rate, source limits and names; Firestore rules independently check the rate basis, quantity limits, total and wallet debit. The admin moves orders through **paid → processing → delivered**; cancelling refunds the wallet in one transaction. Boost orders appear on `orders.html` next to product orders.
 
-## Travel eSIMs (preview only)
+## Travel eSIMs
 
-`esim.html` adds a responsive travel-eSIM browser, linked from the main navigation, footer, account navigation and dashboard. Visitors can search 41 **sample** countries/regions, filter by destination type, inspect illustrative data plans, read the device/setup guide and switch to the “My eSIMs” coming-soon panel. Prices and purchases are deliberately unavailable. These are not GSUBZ inventory or verified coverage; the screenshots only supplied the layout reference. No GSUBZ refund promise (including its 180-day policy) is adopted.
+`esim.html` sells travel data plans, and **Admin → eSIM plans** (`admin-esim.html`) is where the catalogue comes from. Every plan is typed in by hand: **Plan ID** (3–40 letters, numbers, `-` or `_`), **destination** (picked from the 41 built-in countries/regions, or typed as a new one such as "Kenya & Tanzania"), country or region type, **data allowance**, **validity in days**, **selling price** (₦1–₦5,000,000), an optional slashed original price, activation notes and a listed/hidden switch. There is no supplier feed, so **nothing can be bought that an admin did not write**.
 
-- `esim-catalogue.mjs` holds clearly marked sample destinations and allowances, not supplier product IDs or prices.
-- `esim.js` handles browsing locally without needing Firebase/auth. The shared header/footer still use the existing Firebase client. No eSIM records are queried or saved, and no wallet balance changes are made.
+Travellers search the destinations that have listed plans — each row shows how many plans it has and its cheapest price — open a destination, and buy a plan for 1–10 people on one order. Payment is from the **KORASTORE wallet**, in one transaction that re-reads the plan, so the amount charged is the plan's price at that moment. The order ID is `<uid>_<requestId>`, so a retried payment returns the original order instead of charging twice. There is no service fee and no shipping on an eSIM: `total = price × quantity`.
+
+The admin fulfils the order on the same page: **paid → processing → delivered**, sending the QR code or activation details to the customer's account email and recording what was sent. The traveller reads those instructions under **My eSIMs** (`esim.html`) and on `orders.html`. **Cancelling before delivery refunds the full amount** to the wallet in the same transaction; a delivered order cannot be cancelled. eSIM orders are included in the admin overview and analytics revenue.
+
+- `esim-catalogue.mjs` holds the destination list plus the validation, grouping and pricing logic shared by the storefront, the admin form, `store.js` and — through matching constants — the rules. It is Firebase-free so it runs in Node.
+- `esim.js` renders the browser, the purchase box and My eSIMs. It never touches Firebase: `esim.html` subscribes to the plans, the wallet and the customer's orders and pushes them in, which is also what makes the page testable.
 - `esim.css` extends the existing navy/gold theme, with stacked layouts on smaller screens and keyboard-accessible tabs.
-- Run `npm ci` then `npm test` for catalogue and DOM-interaction checks. These do not require Firebase or provider credentials. For a local preview run `python3 -m http.server 8000 --bind 0.0.0.0` and open `/esim.html`.
 
-**Before enabling sales:** choose a supplier and obtain their API documentation, confirmed catalogue, pricing/currency, coverage, activation and refund terms. Put provider credentials only in a trusted backend/secret store, never in these static files or chat. Implement authenticated, server-validated quotes and idempotent wallet debits/fulfilment, with recovery for provider failures; store installation credentials in owner-only records and process verified supplier status/refund events. Add the corresponding Firestore rules and security tests. Only then replace the samples and enable checkout and the real “My eSIMs” account view. The current site is static-hosted and has no eSIM provider backend.
+**Before scaling this up:** a hand-typed catalogue means the admin owns coverage, pricing and fulfilment, so keep each plan's notes truthful about coverage and when validity starts. When a supplier API is connected, keep its credentials in a trusted backend/secret store (never in these static files or chat), validate quotes server-side, store installation credentials in owner-only records, and process verified supplier status/refund events.
 
 ## Pickup stations
 
@@ -64,6 +67,8 @@ The catalogue is a snapshot of **Jumia's own pickup-station data** (451 stations
 3. **Buy** (`cart.html` → `placeOrder` in `store.js`): the customer picks their pickup station, then one transaction re-reads each product's price, stock and variations, re-reads the station, debits the wallet for **items + platform service fee**, decrements stock, and creates an order with `shippingFee: null`. The order ID is `<uid>_<requestId>`, so a retried checkout returns the original order instead of charging twice.
 4. **Set shipping and notify** (`admin-orders.html`): the admin enters the shipping fee for that order. The order's final total becomes **items + platform service fee + shipping**, and a private account notification triggers an in-page toast plus browser notification. The customer can then pay the disclosed shipping amount from the wallet.
 5. **Track and refund** (`admin-orders.html`, `orders.html`): paid → processing → shipped → delivered. Fulfilment cannot begin while shipping is unpaid. Cancelling refunds only what the customer has paid and restocks the items, in one transaction.
+
+Digital purchases skip delivery: a **boost** (`boost.html`) or an **eSIM** (`esim.html`) is one transaction that re-reads the catalogue item, debits the wallet for the catalogue price and creates an order the admin moves to delivered. No shipping is set and no service fee is added; cancelling before delivery refunds the wallet.
 
 No card or payment gateway is integrated. All deposits are manual bank transfers approved by the admin.
 
@@ -86,6 +91,8 @@ The admin can change the platform service fee under **Admin → Checkout fees** 
 - A pickup order's `delivery` must name a station that exists in `/pickupStations`, is active, and whose **name, state and address** match the station document exactly. The snapshot lets the admin choose an appropriate per-order shipping amount.
 - The `pickup` saved on a customer's profile is checked the same way (station exists, is active, name and state match).
 - A boost order's `total` must be the plan's current rate per 1,000 × quantity ÷ 1,000, rounded to whole naira (minimum ₦1). Firestore also checks the ₦500–₦50,000 rate range, `priceBasis: 1000`, source min/max quantity and exact wallet debit.
+- An eSIM order's `total` must be the plan's **current** price × quantity (1–10), the plan must be active, and the destination, allowance and validity on the order must match the plan exactly. The wallet debit is checked exactly, as with other purchases.
+- eSIM plans can only be created and edited by approved admins (plan ID 3–40 characters, price ₦1–₦5,000,000, validity 1–3,650 days). A customer write may move a plan's `sold` counter only, by the quantity in the order created in the same batch.
 - The platform service fee must equal the admin-edited `settings/fees` amount (default ₦2,000). A new order's `shippingFee` must be null; an admin update must pin the final total to items + service fee + shipping, and the private notification must carry the same breakdown.
 - Stock can **go down only** in the same batch that creates an order containing that product, and only by the ordered quantity.
 - Orders are **create-only**. Customers can't edit or delete them.
@@ -109,10 +116,10 @@ The admin can change the platform service fee under **Admin → Checkout fees** 
 
 ## Pages
 
-- Storefront: `index.html` (home), `shop.html` (catalogue with search, categories and sorting), `product.html`, `boost.html` (boost order form: category → plan → link → quantity → pay), `boost-platform.html` (forwards old platform links to the order form), `cart.html`
+- Storefront: `index.html` (home), `shop.html` (catalogue with search, categories and sorting), `product.html`, `boost.html` (boost order form: category → plan → link → quantity → pay), `boost-platform.html` (forwards old platform links to the order form), `esim.html` (travel eSIM browser, purchase and My eSIMs), `cart.html`
 - Accounts: `login.html`, `register.html`
 - Customer: `dashboard.html` (overview), `wallet.html` (fund), `orders.html`, `profile.html` (pickup station)
-- Admin: `admin.html` (overview), `admin-analytics.html` (visits, clicks, leads, sales), `admin-products.html` (searchable by Product ID), `admin-boost.html` (boosting categories, plans with min/max and average times, orders), `admin-pickup.html` (publish and hide pickup stations), `admin-funding.html`, `admin-orders.html`, `admin-fees.html` (checkout fees), `admin-settings.html` (deposit bank details)
+- Admin: `admin.html` (overview), `admin-analytics.html` (visits, clicks, leads, sales), `admin-products.html` (searchable by Product ID), `admin-boost.html` (boosting categories, plans with min/max and average times, orders), `admin-esim.html` (eSIM plans added by hand, plus eSIM order fulfilment), `admin-pickup.html` (publish and hide pickup stations), `admin-funding.html`, `admin-orders.html`, `admin-fees.html` (checkout fees), `admin-settings.html` (deposit bank details)
 
 Shared client code is in `store.js`, styles in `store.css`. Nigerian states and LGAs are in `data/ng-locations.json` (from the MIT-licensed `nigeria-state-lga-data` package, 37 entries, 777 LGAs). Non-Nigerian addresses use free text for state and area.
 
@@ -130,6 +137,8 @@ Shared client code is in `store.js`, styles in `store.css`. Nigerian states and 
 | `boostCategories/{id}` | admin (category inside a platform) | anyone (active only); admin (all) |
 | `boostSubcategories/{id}` | admin (plan: name, unit, `price` per 1,000, `priceBasis: 1000`, GSUBZ min/max quantity, average time) | anyone (active only); admin (all) |
 | `boostOrders/{uid}_{requestId}` | customer (create once; rate per 1,000, quantity, total); admin (status) | owner, admin |
+| `esimPlans/{planId}` | admin (destination, allowance, validity, price, notes, listing); customer (`sold` on purchase only) | anyone (active only); admin (all) |
+| `esimOrders/{uid}_{requestId}` | customer (create once; price, quantity, total); admin (status and delivery `instructions`) | owner, admin |
 | `settings/payment` | admin | signed-in users |
 | `settings/fees` | admin (platform service fee) | signed-in users |
 | `fundingRequests/{id}` | customer (create); admin (review) | owner, admin |
@@ -139,7 +148,7 @@ Shared client code is in `store.js`, styles in `store.css`. Nigerian states and 
 | `analyticsDaily/{YYYY-MM-DD}` | anyone on the storefront (`visits`, `whatsappClicks`, `linkClicks`, +1 each write) | admin |
 | `analyticsLinks/{label}` | anyone clicking a tracked link (`count` +1, label slug) | admin |
 
-Money is stored as whole naira (integers) — the wallet never holds kobo. A boost plan's `price` is a naira rate per 1,000 units and carries `priceBasis: 1000`; its order `total` is `unitPrice × quantity ÷ 1,000`, rounded to whole naira. Product documents hold the admin-chosen `productId` as their id plus `name`, `category`, `price` (selling), `compareAtPrice` (slashed original, optional), `stock`, `minOrderQuantity`, `sold`, `description`, `keywords[]`, `images[]` (base64), `variations[]` (each `{name, price}` — clothing options with their own prices), `recommended`, `active`. Orders hold `items[]` (with quantity and optional `variant` name and `variantIndex` per line), `subtotal`, `serviceFee`, nullable `shippingFee`, `total`, `amountPaid`, `amountDue`, `shippingStatus` and the `delivery` snapshot. A shipping update also creates `users/{uid}/notifications/shipping_{orderId}` with the same amount breakdown. Boosting: `boostPlatforms` (`name`, `description`, `active` — created automatically from the category form), `boostCategories` (`platformId`, `name`, `description`, `active`), `boostSubcategories` (`categoryId`, `name`, `description`, `unit`, `price` per 1,000, `priceBasis: 1000`, `minQuantity`, `maxQuantity` where 0 means no maximum, `averageTime`, `active`) and `boostOrders` (`uid`, `requestId`, platform/category/service names and ids, `unit`, `unitPrice` per 1,000, `priceBasis: 1000`, `quantity`, `total`, `link`, `status`).
+Money is stored as whole naira (integers) — the wallet never holds kobo. A boost plan's `price` is a naira rate per 1,000 units and carries `priceBasis: 1000`; its order `total` is `unitPrice × quantity ÷ 1,000`, rounded to whole naira. Product documents hold the admin-chosen `productId` as their id plus `name`, `category`, `price` (selling), `compareAtPrice` (slashed original, optional), `stock`, `minOrderQuantity`, `sold`, `description`, `keywords[]`, `images[]` (base64), `variations[]` (each `{name, price}` — clothing options with their own prices), `recommended`, `active`. Orders hold `items[]` (with quantity and optional `variant` name and `variantIndex` per line), `subtotal`, `serviceFee`, nullable `shippingFee`, `total`, `amountPaid`, `amountDue`, `shippingStatus` and the `delivery` snapshot. A shipping update also creates `users/{uid}/notifications/shipping_{orderId}` with the same amount breakdown. Boosting: `boostPlatforms` (`name`, `description`, `active` — created automatically from the category form), `boostCategories` (`platformId`, `name`, `description`, `active`), `boostSubcategories` (`categoryId`, `name`, `description`, `unit`, `price` per 1,000, `priceBasis: 1000`, `minQuantity`, `maxQuantity` where 0 means no maximum, `averageTime`, `active`) and `boostOrders` (`uid`, `requestId`, platform/category/service names and ids, `unit`, `unitPrice` per 1,000, `priceBasis: 1000`, `quantity`, `total`, `link`, `status`). eSIMs: `esimPlans` (the admin-chosen `planId` as the id, plus `destinationId`, `destinationName`, `destinationType`, `data`, `validityDays`, `price`, `compareAtPrice`, `notes`, `active`, `sold`) and `esimOrders` (`uid`, `requestId`, `planId`, a snapshot of the destination/allowance/validity, `unitPrice`, `quantity`, `total`, `email`, `status`, and `instructions` written by the admin when delivering).
 
 ## WhatsApp channel, funding alerts and analytics
 
@@ -198,6 +207,11 @@ Sending from the admin page automatically would need a small server-side functio
 
 ## Tests
 
-There is no automated test suite in this repo. Use the Rules Playground and a manual purchase/refund run (step 3 above).
+`npm ci` then `npm test` runs the Node suite — no Firebase project, credentials or browser binaries needed:
 
-Note: Firestore rules that call `getAfter()` and `get()` need to be tested against the live project or the Firestore emulator before go-live.
+- `tests/esim.test.mjs` — catalogue logic: destination search, grouping, custom destination IDs, plan validation and order totals.
+- `tests/esim-ui.test.mjs` — drives the real `esim.html` in jsdom with sample plans: browsing, filters, the purchase box, wallet shortfalls, My eSIMs, and the empty/error states.
+- `tests/esim-orders.test.mjs` — runs the **real** `store.js` against an in-memory Firestore stand-in (`tests/helpers/`): purchases, retry safety, refused orders, refunds and admin plan writes.
+- `tests/esim-rules.test.mjs` — checks `firestore.rules` is still well formed and that its eSIM limits match the constants the client uses.
+
+The Firestore emulator needs a JVM, so the rules themselves are **not executed** by this suite. Before go-live, exercise them in the console's Rules Playground or against the emulator with a real purchase, a retry and a refund (money flow step 3).
