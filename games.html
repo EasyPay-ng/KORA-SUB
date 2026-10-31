@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Free browser games — KORASTORE</title>
+  <meta name="description" content="Take a break with free browser games on KORASTORE. Discover puzzles, racing, sports and arcade games from GameMonetize.">
+  <link rel="stylesheet" href="store.css"><link rel="stylesheet" href="games.css">
+  <link rel="icon" href="assets/favicon.ico" sizes="any"><meta name="theme-color" content="#0b2545">
+</head>
+<body>
+<div id="site-header">
+  <!-- A usable navigation fallback if the shared Firebase shell cannot load. -->
+  <header class="topbar"><div class="wrap topbar-inner">
+    <a class="brand" href="index.html" aria-label="KORASTORE home"><img src="assets/logo.png" alt="" width="40" height="40"><span class="brand-text"><b>KORASTORE</b><small>Find it. Fund it. Own it.</small></span></a>
+    <nav class="nav" aria-label="Main"><a href="shop.html">Shop</a><a class="on" href="games.html" aria-current="page">Games</a><a href="boost.html">Boost</a><a href="esim.html">eSIM</a><a href="cart.html">Cart</a><a href="dashboard.html">Account</a></nav>
+  </div></header>
+</div>
+<main>
+  <section class="arcade-hero">
+    <div class="wrap arcade-hero-inner">
+      <div class="arcade-hero-copy">
+        <span class="arcade-kicker"><span></span> THE KORASTORE ARCADE</span>
+        <h1>A little break.<br><em>A lot of play.</em></h1>
+        <p>Your next favourite game is a click away. Find something fun and play right here in your browser.</p>
+        <div class="arcade-hero-actions"><a class="btn btn-gold btn-lg" href="#discover">Explore games <span aria-hidden="true">↗</span></a><span class="arcade-hero-note"><span aria-hidden="true">✦</span> Free to play · No download</span></div>
+      </div>
+      <div class="arcade-art" aria-hidden="true">
+        <div class="arcade-orbit arcade-orbit-one"></div><div class="arcade-orbit arcade-orbit-two"></div>
+        <span class="arcade-star arcade-star-one">✦</span><span class="arcade-star arcade-star-two">✳</span>
+        <div class="arcade-art-card arcade-art-card-back"><span>01</span><b>READY?</b><small>YOUR BREAK STARTS HERE</small></div>
+        <div class="arcade-controller"><div class="controller-top"><i></i><i></i><i></i></div><div class="controller-pad"></div><div class="controller-middle"><i></i><i></i></div><div class="controller-buttons"><i></i><i></i><i></i><i></i></div></div>
+        <div class="arcade-art-label"><span>✦</span><div><b>GOOD TIMES</b><small>ONE GAME AT A TIME</small></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="discover" class="wrap arcade-catalog" aria-labelledby="discover-title">
+    <div class="arcade-section-head">
+      <div><span class="eyebrow">YOUR NEXT FAVOURITE</span><h2 id="discover-title">Find your game.</h2><p>A little something for every kind of player.</p></div>
+      <div class="arcade-provider">POWERED BY <a href="https://gamemonetize.com/" target="_blank" rel="noopener noreferrer">GAMEMONETIZE ↗</a></div>
+    </div>
+    <div class="arcade-search-wrap">
+      <label for="games-search">Search games</label>
+      <div class="arcade-search"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="m15.5 15.5 4.2 4.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><input id="games-search" type="search" placeholder="Search games, genres and more" autocomplete="off"></div>
+    </div>
+    <div id="games-categories" class="game-categories" role="group" aria-label="Game categories"></div>
+    <div class="game-list-heading"><p id="games-count" role="status" aria-live="polite">Loading games…</p><span>CHOOSE YOUR NEXT ADVENTURE <span aria-hidden="true">↘</span></span></div>
+    <div id="games-message" class="game-message" role="status" hidden></div>
+    <div id="games-grid" class="game-grid" aria-busy="true"></div>
+    <div class="games-more"><button id="games-more" class="btn btn-ghost" type="button" hidden>Show more games <span aria-hidden="true">↓</span></button></div>
+    <noscript><div class="empty"><b>JavaScript is needed to browse games.</b>Please enable it and reload this page.</div></noscript>
+  </section>
+
+  <section class="wrap arcade-outro"><div><span>✦</span><div><b>Take your break, your way.</b><p>Games are provided by GameMonetize and may contain ads. No KORASTORE wallet or sign-in is needed to play.</p></div></div><a href="shop.html">Back to shopping <span aria-hidden="true">↗</span></a></section>
+</main>
+<div id="site-footer"><footer class="footer"><div class="wrap footer-inner"><div><b>KORASTORE</b><p>Find it. Fund it. Own it.</p></div><div class="footer-links"><a href="shop.html">Shop</a><a href="games.html">Games</a><a href="boost.html">Boost</a><a href="esim.html">eSIM</a><a href="wallet.html">Fund wallet</a></div></div></footer></div>
+<script type="module">
+  import { mountHeader, mountFooter } from './store.js';
+  mountHeader('games.html');
+  mountFooter();
+</script>
+<script type="module">
+  import { createGamesPage } from './games.mjs';
+  createGamesPage().load();
+</script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Play a game — KORASTORE</title>
+  <meta name="description" content="Play a free browser game from GameMonetize on KORASTORE.">
+  <link rel="stylesheet" href="store.css"><link rel="stylesheet" href="games.css">
+  <link rel="icon" href="assets/favicon.ico" sizes="any"><meta name="theme-color" content="#0b2545">
+</head>
+<body>
+<div id="site-header">
+  <header class="topbar"><div class="wrap topbar-inner">
+    <a class="brand" href="index.html" aria-label="KORASTORE home"><img src="assets/logo.png" alt="" width="40" height="40"><span class="brand-text"><b>KORASTORE</b><small>Find it. Fund it. Own it.</small></span></a>
+    <nav class="nav" aria-label="Main"><a href="shop.html">Shop</a><a class="on" href="games.html" aria-current="page">Games</a><a href="boost.html">Boost</a><a href="esim.html">eSIM</a><a href="cart.html">Cart</a><a href="dashboard.html">Account</a></nav>
+  </div></header>
+</div>
+<main class="wrap game-page">
+  <a href="games.html" class="game-back">← <span>All games</span></a>
+  <div id="player-message" class="game-message" role="status"><b>Getting your game ready…</b></div>
+  <article id="game-content" hidden>
+    <div class="game-page-heading">
+      <div><span class="eyebrow" id="game-category"></span><h1 id="game-title" tabindex="-1"></h1><p>Ready when you are. <span>Provided by GameMonetize.</span></p></div>
+      <div class="game-actions"><button id="game-restart" class="btn btn-ghost btn-sm" type="button" hidden>↻ Restart</button><button id="game-stop" class="btn btn-ghost btn-sm" type="button" hidden>■ Stop</button><button id="game-fullscreen" class="btn btn-ghost btn-sm" type="button" hidden>⛶ Fullscreen</button></div>
+    </div>
+    <div class="game-player-shell">
+      <div id="game-stage" class="game-stage">
+        <div id="game-cover" class="game-cover">
+          <img id="game-cover-image" alt="" hidden>
+          <div class="game-cover-content"><span class="cover-kicker">READY TO PLAY?</span><b id="game-cover-title"></b><button id="game-play" class="btn btn-gold btn-lg" type="button"><span aria-hidden="true">▶</span> Play game</button><small>Free to play · May contain ads</small></div>
+        </div>
+        <div id="game-frame-host" class="game-frame-host" hidden></div>
+      </div>
+    </div>
+    <div class="game-player-foot"><p id="game-player-note">Games load from GameMonetize and may take a moment to start.</p><a id="game-external" target="_blank" rel="noopener" referrerpolicy="strict-origin-when-cross-origin">Game not loading? Open in a new tab ↗</a></div>
+    <div class="game-info-grid">
+      <section class="game-info"><span class="eyebrow">THE DETAILS</span><h2>About this game</h2><p id="game-description"></p></section>
+      <section id="game-instructions-section" class="game-info game-how"><span class="eyebrow">HOW TO PLAY</span><h2>Ready, set, go.</h2><p id="game-instructions"></p></section>
+    </div>
+    <section id="related-section" class="related-games" aria-labelledby="related-title" hidden>
+      <div class="arcade-section-head"><div><span class="eyebrow">KEEP THE GOOD TIMES GOING</span><h2 id="related-title">More to explore.</h2></div><a class="link small" href="games.html">See all games →</a></div>
+      <div id="related-grid" class="game-grid"></div>
+    </section>
+  </article>
+  <noscript><div class="empty"><b>JavaScript is needed to play.</b>Please enable it and reload this page.</div></noscript>
+</main>
+<div id="site-footer"><footer class="footer"><div class="wrap footer-inner"><div><b>KORASTORE</b><p>Find it. Fund it. Own it.</p></div><div class="footer-links"><a href="shop.html">Shop</a><a href="games.html">Games</a><a href="boost.html">Boost</a><a href="esim.html">eSIM</a><a href="wallet.html">Fund wallet</a></div></div></footer></div>
+<script type="module">
+  import { mountHeader, mountFooter } from './store.js';
+  mountHeader('games.html');
+  mountFooter();
+</script>
+<script type="module">
+  import { createGamePage } from './games.mjs';
+  createGamePage().load();
+</script>
+</body>
+</html>

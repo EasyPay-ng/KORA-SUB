@@ -913,6 +913,7 @@ export function addToCart(productId, quantity = 1, variantName = "") {
 let alertsStarted = false;
 const NAV = [
   ["shop.html", "Shop"],
+  ["games.html", "Games"],
   ["boost.html", "Boost"],
   ["esim.html", "eSIM"],
   ["cart.html", "Cart"],
@@ -949,14 +950,21 @@ export function mountHeader(active) {
           <span class="brand-text"><b>KORASTORE</b><small>Find it. Fund it. Own it.</small></span>
         </a>
         <nav class="nav" aria-label="Main">
-          ${NAV.map(([href, label]) => `<a href="${href}" data-track="nav-${href.replace(".html", "")}" class="${active === href ? "on" : ""}">${label}${href === "cart.html" ? ` <span class="cart-count" id="cart-count">0</span>` : ""}</a>`).join("")}
+          ${NAV.map(([href, label]) => `<a href="${href}" data-track="nav-${href.replace(".html", "")}" class="${active === href ? "on" : ""}"${active === href ? ' aria-current="page"' : ""}>${label}${href === "cart.html" ? ` <span class="cart-count" id="cart-count">0</span>` : ""}</a>`).join("")}
         </nav>
       </div>
     </header>`;
+  const nav = host.querySelector(".nav");
+  const currentLink = nav?.querySelector("a.on");
   const paint = () => {
     const count = getCart().reduce((sum, i) => sum + i.quantity, 0);
     const el = document.querySelector("#cart-count");
     if (el) { el.textContent = count; el.hidden = count === 0; }
+    // On narrow screens the navigation can scroll; keep the active page visible.
+    if (nav && currentLink) {
+      const overflow = currentLink.getBoundingClientRect().right - nav.getBoundingClientRect().right;
+      if (overflow > 0) nav.scrollLeft += overflow + 4;
+    }
   };
   paint();
   window.addEventListener("korastore:cart", paint);
@@ -976,7 +984,7 @@ export function mountFooter() {
     <footer class="footer">
       <div class="wrap footer-inner">
         <div><b>KORASTORE</b><p>Find it. Fund it. Own it.</p></div>
-        <div class="footer-links"><a href="shop.html" data-track="footer-shop">Shop</a><a href="boost.html" data-track="footer-boost">Boost</a><a href="esim.html" data-track="footer-esim">eSIM</a><a href="wallet.html" data-track="footer-wallet">Fund wallet</a><a href="orders.html" data-track="footer-orders">Orders</a><a href="${WHATSAPP_CHANNEL_URL}" target="_blank" rel="noopener noreferrer" data-track="footer-whatsapp-channel">WhatsApp channel</a><a href="mailto:beniwealth70@gmail.com" data-track="footer-contact">Contact</a></div>
+        <div class="footer-links"><a href="shop.html" data-track="footer-shop">Shop</a><a href="games.html" data-track="footer-games">Games</a><a href="boost.html" data-track="footer-boost">Boost</a><a href="esim.html" data-track="footer-esim">eSIM</a><a href="wallet.html" data-track="footer-wallet">Fund wallet</a><a href="orders.html" data-track="footer-orders">Orders</a><a href="${WHATSAPP_CHANNEL_URL}" target="_blank" rel="noopener noreferrer" data-track="footer-whatsapp-channel">WhatsApp channel</a><a href="mailto:beniwealth70@gmail.com" data-track="footer-contact">Contact</a></div>
         <small>© ${new Date().getFullYear()} KORASTORE</small>
       </div>
     </footer>`;
