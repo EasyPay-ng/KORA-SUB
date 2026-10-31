@@ -48,6 +48,21 @@ The admin fulfils the order on the same page: **paid → processing → delivere
 
 **Before scaling this up:** a hand-typed catalogue means the admin owns coverage, pricing and fulfilment, so keep each plan's notes truthful about coverage and when validity starts. When a supplier API is connected, keep its credentials in a trusted backend/secret store (never in these static files or chat), validate quotes server-side, store installation credentials in owner-only records, and process verified supplier status/refund events.
 
+## Browser games
+
+**Games** (`games.html`) gives visitors a searchable, category-filtered GameMonetize arcade. The initial catalogue contains 32 games selected from GameMonetize's public JSON feed on 31 October 2026. Each card opens a shareable `game.html?id=<game-id>` page with the provider's artwork, description and controls. The game iframe is created only after the visitor presses **Play game**; they can stop, restart or use fullscreen. Games are free to play without a KORASTORE account or wallet and may contain third-party ads. The game, its content and its availability remain under GameMonetize's control; not every game necessarily supports every device.
+
+This is still a static site. The browser reads the bundled `data/gamemonetize-games.json` rather than depending on GameMonetize's feed allowing cross-origin requests. Thumbnails and games themselves load from GameMonetize. The player accepts only HTTPS embed URLs on the GameMonetize hosts and matching GameMonetize thumbnail URLs; descriptions are rendered as text, not HTML. The cross-origin iframe allows normal game controls and ad click-throughs but blocks automatic top-level navigation. If a specific game or ad is incompatible with these restrictions, check it with GameMonetize before changing the permissions.
+
+### Publisher setup and catalogue updates
+
+1. In your GameMonetize account, add the live site domain (`korastore.name.ng`) under **My Websites** and complete any verification or approval they require. The preview hostname is different from the live domain, and approval, impressions and revenue are controlled by GameMonetize—not by this code. Confirm that they accept your domain; their published guidance notes restrictions on some subdomain-based sites.
+2. Follow any current `ads.txt` instructions in your GameMonetize dashboard. The site already has an `ads.txt`: **append** any records they require without deleting its existing records. Do not invent a publisher ID or put account passwords/API secrets in the repository. See the [publisher information](https://gamemonetize.com/publishers) and [GameMonetize's domain/ads guidance](https://gamemonetize.com/blog/zero-ad-impressions-a-guide-for-publishers-on-gamemonetize-com).
+3. Refresh the snapshot on a computer with Node 22+ and access to GameMonetize: run `npm run sync:games`. To use a public JSON feed downloaded from their [RSS builder](https://gamemonetize.com/rss-builder), run `npm run sync:games -- path/to/feed.json`. Alternatively set `GAMEMONETIZE_FEED_URL` to a public builder URL before running the command. New games are placed first and existing games are kept by default so old links continue to work; `npm run sync:games -- --replace` replaces the list instead. The importer refuses to overwrite the catalogue with an empty or invalid feed.
+4. Review `data/gamemonetize-games.json` before publishing: remove unsuitable or retired titles, check the game and ads on the **approved live domain**, and deploy the updated static files. The catalogue does not refresh automatically. The starter list is curated, but future feeds are not age-rated or moderated by KORASTORE.
+
+`games-catalogue.mjs` validates and normalizes the provider feed; `games.mjs`, `games.html`, `game.html` and `games.css` implement the catalogue and player. No GameMonetize account credentials or database changes are required for embedding.
+
 ## Pickup stations
 
 Customers do not enter a doorstep address: every order is collected at a **pickup station**. Checkout (and the account page) lists them like a classic SMM/checkout panel:
@@ -211,6 +226,7 @@ Sending from the admin page automatically would need a small server-side functio
 
 - `tests/esim.test.mjs` — catalogue logic: destination search, grouping, custom destination IDs, plan validation and order totals.
 - `tests/esim-ui.test.mjs` — drives the real `esim.html` in jsdom with sample plans: browsing, filters, the purchase box, wallet shortfalls, My eSIMs, and the empty/error states.
+- `tests/games.test.mjs` and `tests/games-ui.test.mjs` — feed URL validation, catalogue search, gallery and player behavior, loading and error states. These tests do not contact GameMonetize; verify real embeds and ad delivery separately on the approved domain.
 - `tests/esim-orders.test.mjs` — runs the **real** `store.js` against an in-memory Firestore stand-in (`tests/helpers/`): purchases, retry safety, refused orders, refunds and admin plan writes.
 - `tests/esim-rules.test.mjs` — checks `firestore.rules` is still well formed and that its eSIM limits match the constants the client uses.
 
